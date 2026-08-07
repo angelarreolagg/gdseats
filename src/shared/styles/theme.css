@@ -1,0 +1,113 @@
+/*
+ * Design tokens.
+ *
+ * The brand green #a0f700 measures 1.33:1 on white — invisible as text or a thin
+ * line in light mode. It is a dark-mode-native accent, so the accent is *stepped
+ * per mode along the same hue*: the brand green stays the fill (behind dark ink,
+ * 14.33:1), while a darker step of the same hue carries text and chart marks in
+ * light mode. Every value below was measured against the surface it renders on.
+ *
+ * Status colours are never used alone: brand green vs amber measures CVD ΔE 7.0
+ * (deuteranopia), so an emoji + text label always accompanies them. See
+ * StatusBadge.tsx, which makes that structural.
+ */
+
+/* Tailwind v4 defaults dark: to a media query; we drive it from a class. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  color-scheme: light;
+
+  --psl-page: #fbfbfa;
+  --psl-surface: #ffffff;
+  --psl-border: rgba(15, 17, 5, 0.1);
+
+  --psl-ink: #0f1105; /* 19.04 on surface */
+  --psl-muted: #5c5c5c; /*  6.69 */
+
+  --psl-accent: #a0f700; /* fill only — 1.33 on white, never text */
+  --psl-on-accent: #0f1105; /* 14.33 on the accent fill */
+  --psl-accent-ink: #4f7d00; /*  4.92 — text, thin lines */
+  --psl-accent-mark: #5c8f00; /*  3.90 — chart marks */
+
+  --psl-good: #4f7d00; /*  4.92 */
+  --psl-fair: #b26a00; /*  4.24 */
+  --psl-over: #c22b2b; /*  5.72 */
+  --psl-info: #2a78d6; /*  4.42 — time-sensitivity tags only */
+
+  --psl-grid: #ebebe7;
+  --psl-track: #f1f1ee;
+
+  /* Seat map. The field is deliberately low-chroma: it is context, and a
+     saturated pitch green would compete with the brand accent used for the
+     selected section — the one thing on the map that must read as active. */
+  --psl-field: #d5e5c6;
+  --psl-field-line: #ffffff;
+  --psl-seat: #dcdcd6;
+
+  --psl-shadow-sm: 0 1px 2px rgba(15, 17, 5, 0.05);
+  --psl-shadow-md: 0 4px 16px -4px rgba(15, 17, 5, 0.08);
+  --psl-shadow-lg: 0 12px 32px -8px rgba(15, 17, 5, 0.12);
+}
+
+.dark {
+  color-scheme: dark;
+
+  --psl-page: #1c1c1c;
+  --psl-surface: #252525;
+  --psl-border: rgba(255, 255, 255, 0.11);
+
+  --psl-ink: #f5f5f5; /* 14.06 on surface */
+  --psl-muted: #9a9a9a; /*  5.45 */
+
+  --psl-accent: #a0f700; /* 11.53 — usable directly in dark */
+  --psl-on-accent: #0f1105;
+  --psl-accent-ink: #a0f700;
+  --psl-accent-mark: #a0f700;
+
+  --psl-good: #a0f700; /* 11.53 */
+  --psl-fair: #fab219; /*  8.36 */
+  --psl-over: #ef7676; /*  5.49 */
+  --psl-info: #3987e5; /*  4.21 */
+
+  --psl-grid: #343434;
+  --psl-track: #2f2f2f;
+
+  --psl-field: #2c4423;
+  --psl-field-line: #6f8f61;
+  --psl-seat: #3f3f3f;
+
+  --psl-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --psl-shadow-md: 0 4px 16px -4px rgba(0, 0, 0, 0.5);
+  --psl-shadow-lg: 0 12px 32px -8px rgba(0, 0, 0, 0.6);
+}
+
+/* `inline` keeps the var() reference in the generated utility, so the .dark
+   swap above takes effect at runtime instead of being resolved at build time. */
+@theme inline {
+  --color-page: var(--psl-page);
+  --color-surface: var(--psl-surface);
+  --color-border-hairline: var(--psl-border);
+
+  --color-ink: var(--psl-ink);
+  --color-muted: var(--psl-muted);
+
+  --color-accent: var(--psl-accent);
+  --color-on-accent: var(--psl-on-accent);
+  --color-accent-ink: var(--psl-accent-ink);
+  --color-accent-mark: var(--psl-accent-mark);
+
+  --color-good: var(--psl-good);
+  --color-fair: var(--psl-fair);
+  --color-over: var(--psl-over);
+  --color-info: var(--psl-info);
+
+  --color-grid: var(--psl-grid);
+  --color-track: var(--psl-track);
+
+  --shadow-card: var(--psl-shadow-sm);
+  --shadow-raised: var(--psl-shadow-md);
+  --shadow-hero: var(--psl-shadow-lg);
+
+  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
