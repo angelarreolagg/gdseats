@@ -1,5 +1,6 @@
 import { createRandom } from '@/shared/utils/seededRandom'
 import type { Team } from '@/domains/teams/types/team.types'
+import { getListingCountForTeam } from '@/domains/teams/data/teams'
 import type { Listing, ListingTag, PriceHistoryEntry } from '../types/listing.types'
 import { ALL_SECTIONS, getRingForSection, getSidelineMultiplier } from '../data/venueLayout'
 
@@ -7,26 +8,15 @@ const ID_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789'
 const MONTHS = ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug']
 
 const AMENITY_TAGS: ListingTag[] = [
-  { id: 'parking', label: 'Parking', tone: 'neutral', icon: '🅿️' },
-  { id: 'aisle', label: 'Aisle', tone: 'neutral', icon: '🚻' },
-  { id: 'covered', label: 'Covered', tone: 'neutral', icon: '☂' },
-  { id: 'accessible', label: 'Accessible', tone: 'neutral', icon: '♿' },
+  { id: 'parking', label: 'Parking', tone: 'neutral', iconName: 'parking' },
+  { id: 'aisle', label: 'Aisle', tone: 'neutral', iconName: 'aisle' },
+  { id: 'covered', label: 'Covered', tone: 'neutral', iconName: 'covered' },
+  { id: 'accessible', label: 'Accessible', tone: 'neutral', iconName: 'accessible' },
+  { id: 'financing', label: 'Financing', tone: 'neutral', iconName: 'financing' },
 ]
 
 function roundTo(value: number, step: number): number {
   return Math.round(value / step) * step
-}
-
-/**
- * How much inventory a team carries. A pure function of the team so the count on
- * the team card and the count in the search toolbar agree by construction rather
- * than by two numbers being kept in sync by hand.
- *
- * Sized so most of the bowl's 72 sections hold at least one listing — a map where
- * half the sections are greyed out reads as broken rather than sparse.
- */
-export function getListingCountForTeam(team: Team): number {
-  return Math.round(90 + team.demandIndex * 90)
 }
 
 /**
@@ -132,10 +122,10 @@ function buildTags(
   const tags: ListingTag[] = []
 
   if (random.chance(0.55)) {
-    tags.push({ id: 'featured', label: 'Featured', tone: 'accent', icon: '★' })
+    tags.push({ id: 'featured', label: 'Featured', tone: 'accent', iconName: 'featured' })
   }
   if (random.chance(0.25)) {
-    tags.push({ id: 'this-week', label: 'This week', tone: 'info', icon: '🗓' })
+    tags.push({ id: 'this-week', label: 'This week', tone: 'info', iconName: 'this-week' })
   }
 
   for (const amenity of AMENITY_TAGS) {
@@ -143,13 +133,16 @@ function buildTags(
   }
 
   // A visible price cut is a signal, not an amenity, so it keeps a semantic colour.
+  // Direction convention: the number went DOWN, so it reads red — the same rule the
+  // price-history Change column follows. The verdict badge beside it is what tells
+  // the buyer whether that is good news.
   const discount = (fairPerSeat - askPerSeat) / fairPerSeat
   if (discount > 0.08) {
     tags.push({
       id: 'price-drop',
       label: `${Math.round(discount * 100)}% off`,
-      tone: 'good',
-      icon: '↘',
+      tone: 'critical',
+      iconName: 'price-drop',
     })
   }
 

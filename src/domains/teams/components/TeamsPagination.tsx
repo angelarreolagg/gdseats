@@ -1,24 +1,10 @@
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { IconButton } from '@/shared/components/IconButton'
 
 interface TeamsPaginationProps {
   page: number
   pageCount: number
   onChange: (page: number) => void
-}
-
-function Chevron({ direction }: { direction: 'left' | 'right' }) {
-  return (
-    <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
-      <path
-        d={direction === 'left' ? 'M12 5l-5 5 5 5' : 'M8 5l5 5-5 5'}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="1.75"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  )
 }
 
 export function TeamsPagination({ page, pageCount, onChange }: TeamsPaginationProps) {
@@ -31,7 +17,7 @@ export function TeamsPagination({ page, pageCount, onChange }: TeamsPaginationPr
         disabled={page === 0}
         onClick={() => onChange(page - 1)}
       >
-        <Chevron direction="left" />
+        <ChevronLeft aria-hidden="true" className="h-4 w-4" />
       </IconButton>
 
       <span className="px-1 text-sm font-medium text-ink tabular-nums">
@@ -45,7 +31,7 @@ export function TeamsPagination({ page, pageCount, onChange }: TeamsPaginationPr
         disabled={page >= pageCount - 1}
         onClick={() => onChange(page + 1)}
       >
-        <Chevron direction="right" />
+        <ChevronRight aria-hidden="true" className="h-4 w-4" />
       </IconButton>
     </div>
   )

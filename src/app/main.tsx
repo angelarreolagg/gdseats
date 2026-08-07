@@ -2,12 +2,12 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import '../styles/globals.css'
 import { App } from './App'
-import { MotionProvider } from './providers/MotionProvider'
+import { AppProviders } from './providers/AppProviders'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <MotionProvider>
+    <AppProviders>
       <App />
-    </MotionProvider>
+    </AppProviders>
   </StrictMode>,
 )

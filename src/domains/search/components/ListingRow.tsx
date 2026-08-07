@@ -9,6 +9,7 @@ import {
   getTotalCost,
   getTotalPrice,
 } from '@/domains/listing/types/listing.types'
+import { TAG_PRESENTATION } from '@/domains/listing/components/tagPresentation'
 
 interface ListingRowProps {
   listing: Listing
@@ -51,11 +52,14 @@ export function ListingRow({ listing, onOpen }: ListingRowProps) {
           status={verdict.status}
           formattedDiff={formatSignedPercent(verdict.percentageDiff)}
         />
-        {listing.tags.map((tag) => (
-          <Tag key={tag.id} tone={tag.tone} icon={tag.icon}>
-            {tag.label}
-          </Tag>
-        ))}
+        {listing.tags.map((tag) => {
+          const { Icon, tooltip } = TAG_PRESENTATION[tag.iconName]
+          return (
+            <Tag key={tag.id} tone={tag.tone} icon={Icon} tooltip={tooltip}>
+              {tag.label}
+            </Tag>
+          )
+        })}
       </div>
     </motion.button>
   )

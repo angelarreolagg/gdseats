@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { motion } from 'motion/react'
+import { Sparkles } from 'lucide-react'
 import { formatCurrency, formatSignedPercent } from '@/shared/utils/formatters'
 import type { ListingSignals } from '../types/deal.types'
 import { evaluateDeal } from '../services/pricing.service'
@@ -16,16 +17,16 @@ interface AIInsightPanelProps {
 }
 
 /**
- * Embeddable verdict widget for a listing detail page.
+ * The verdict block, sitting directly under the seat map in the listing detail.
  *
- * HEIGHT BUDGET — this must not outgrow the host's "Make an offer" card (~330px
- * at ~350px wide). Current spend, at 16px padding:
+ * It used to live in the right-hand column between the summary and "Make an
+ * offer", which put analysis in the middle of the offer flow it was meant to
+ * support. Under the map it reads as part of understanding the seat, and the
+ * right column runs summary → offer uninterrupted.
  *
- *   header 20 · status 32 · metrics 44 · recommendation 32 · insights 54
- *   + 5 gaps @ 12px + 32px padding  ≈  274px
- *
- * That leaves ~55px of headroom. Anything added here spends against it — if a new
- * band is needed, something else has to give.
+ * (An earlier version was budgeted to ~274px so it would not outgrow the offer
+ * card beside it. That constraint died with the move — this is now a full-width
+ * block and spacing is free to breathe.)
  *
  * All arithmetic lives in the services; this component only formats and arranges.
  */
@@ -45,16 +46,10 @@ export function AIInsightPanel({ signals, className = '' }: AIInsightPanelProps)
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
       aria-labelledby="ai-insight-heading"
-      className={`rounded-xl border border-border-hairline bg-surface p-4 shadow-card ${className}`}
+      className={`holo-ring rounded-xl border border-border-hairline bg-surface p-4 shadow-card ${className}`}
     >
       <header className="mb-3 flex items-center gap-2">
-        {/* The brand green appears only as a thin accent here — the host page's
-            Submit button owns the one solid green block. */}
-        <span aria-hidden="true" className="text-accent-ink">
-          <svg viewBox="0 0 16 16" className="h-3.5 w-3.5" fill="currentColor">
-            <path d="M8 0.5l1.6 4.3 4.4 1.6-4.4 1.6L8 12.3 6.4 8 2 6.4l4.4-1.6L8 .5ZM13 10.5l.7 1.8 1.8.7-1.8.7-.7 1.8-.7-1.8-1.8-.7 1.8-.7.7-1.8Z" />
-          </svg>
-        </span>
+        <Sparkles aria-hidden="true" className="h-3.5 w-3.5 text-accent-ink" strokeWidth={2.5} />
         <h2
           id="ai-insight-heading"
           className="text-xs font-semibold tracking-wide text-ink uppercase"

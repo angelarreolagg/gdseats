@@ -1,3 +1,4 @@
+import { ChevronDown } from 'lucide-react'
 import { Button } from '@/shared/components/Button'
 import { ThemeToggle } from '@/shared/components/ThemeToggle'
 
@@ -10,16 +11,7 @@ function NavItem({ label }: { label: string }) {
   return (
     <span className="hidden items-center gap-1 text-sm text-muted lg:inline-flex">
       {label}
-      <svg viewBox="0 0 20 20" aria-hidden="true" className="h-3.5 w-3.5">
-        <path
-          d="M6 8l4 4 4-4"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="1.75"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        />
-      </svg>
+      <ChevronDown aria-hidden="true" className="h-3.5 w-3.5" />
     </span>
   )
 }

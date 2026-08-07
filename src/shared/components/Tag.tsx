@@ -1,11 +1,22 @@
 import type { ReactNode } from 'react'
+import type { LucideIcon } from 'lucide-react'
+import { Tooltip } from './Tooltip'
 
 export type TagTone = 'good' | 'info' | 'accent' | 'critical' | 'neutral'
 
 interface TagProps {
   children: ReactNode
   tone?: TagTone
-  icon?: string
+  icon?: LucideIcon
+  /** Supplementary sentence. The chip's own label must stand without it. */
+  tooltip?: string
+  /**
+   * Give the chip its own tab stop. Off inside a clickable row — a focusable
+   * element nested in a button is invalid and would add a tab stop per chip
+   * across every row. The detail card turns it on, so the copy stays reachable
+   * by keyboard somewhere.
+   */
+  focusable?: boolean
 }
 
 /**
@@ -31,17 +42,32 @@ const TONES: Record<TagTone, string> = {
   neutral: 'bg-ink/8 text-muted',
 }
 
-export function Tag({ children, tone = 'neutral', icon }: TagProps) {
-  return (
+export function Tag({
+  children,
+  tone = 'neutral',
+  icon: Icon,
+  tooltip,
+  focusable = false,
+}: TagProps) {
+  const pill = (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold tracking-wide whitespace-nowrap uppercase ${TONES[tone]}`}
+      className={`inline-flex cursor-default items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold tracking-wide whitespace-nowrap uppercase ${TONES[tone]}`}
     >
-      {icon ? (
-        <span aria-hidden="true" className="text-[10px] leading-none">
-          {icon}
-        </span>
-      ) : null}
+      {Icon ? <Icon aria-hidden="true" className="h-3 w-3 shrink-0" strokeWidth={2.5} /> : null}
       {children}
     </span>
+  )
+
+  if (!tooltip) return pill
+
+  return (
+    <Tooltip content={tooltip}>
+      <span
+        tabIndex={focusable ? 0 : undefined}
+        className="inline-flex rounded-full focus-visible:outline-2"
+      >
+        {pill}
+      </span>
+    </Tooltip>
   )
 }

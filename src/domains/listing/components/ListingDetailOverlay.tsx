@@ -1,5 +1,13 @@
 import { useEffect, useRef } from 'react'
 import { motion } from 'motion/react'
+import {
+  ChartColumn,
+  ChevronLeft,
+  History,
+  MapPin,
+  Share2,
+  type LucideIcon,
+} from 'lucide-react'
 import { AIInsightPanel } from '@/domains/deal-analyzer/components/AIInsightPanel'
 import type { Team } from '@/domains/teams/types/team.types'
 import type { Listing } from '../types/listing.types'
@@ -17,12 +25,10 @@ interface ListingDetailOverlayProps {
   onClose: () => void
 }
 
-function SectionHeading({ icon, children }: { icon: string; children: string }) {
+function SectionHeading({ icon: Icon, children }: { icon: LucideIcon; children: string }) {
   return (
     <h2 className="mb-3 flex items-center gap-2 border-b border-border-hairline pb-3 text-sm font-semibold text-ink">
-      <span aria-hidden="true" className="text-muted">
-        {icon}
-      </span>
+      <Icon aria-hidden="true" className="h-4 w-4 shrink-0 text-muted" />
       {children}
     </h2>
   )
@@ -84,7 +90,7 @@ export function ListingDetailOverlay({
             onClick={onClose}
             className="inline-flex items-center gap-2 rounded-lg border border-border-hairline px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-track"
           >
-            <span aria-hidden="true">‹</span>
+            <ChevronLeft aria-hidden="true" className="h-4 w-4" />
             Back to search
           </button>
 
@@ -99,7 +105,7 @@ export function ListingDetailOverlay({
             type="button"
             className="inline-flex items-center gap-2 rounded-lg border border-border-hairline px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-track"
           >
-            <span aria-hidden="true">⤴</span>
+            <Share2 aria-hidden="true" className="h-4 w-4" />
             Share
           </button>
         </header>
@@ -107,7 +113,7 @@ export function ListingDetailOverlay({
         <div className="grid grid-cols-1 gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:p-6">
           <div className="flex flex-col gap-8">
             <section>
-              <SectionHeading icon="◎">Location</SectionHeading>
+              <SectionHeading icon={MapPin}>Location</SectionHeading>
               <SeatMap
                 className="h-64 w-full"
                 selectedSection={listing.section}
@@ -116,20 +122,23 @@ export function ListingDetailOverlay({
               />
             </section>
 
+            {/* Directly under the map: the verdict belongs with understanding the
+                seat, not in the middle of the offer flow on the right. */}
+            <AIInsightPanel signals={toListingSignals(listing)} />
+
             <section>
-              <SectionHeading icon="◷">Price history</SectionHeading>
+              <SectionHeading icon={History}>Price history</SectionHeading>
               <PriceHistoryTable history={listing.priceHistory} />
             </section>
 
             <section>
-              <SectionHeading icon="◫">Price stats</SectionHeading>
+              <SectionHeading icon={ChartColumn}>Price stats</SectionHeading>
               <PriceStatsChart sectionListings={sectionListings} listing={listing} />
             </section>
           </div>
 
           <aside className="flex flex-col gap-4">
             <ListingSummaryCard listing={listing} team={team} />
-            <AIInsightPanel signals={toListingSignals(listing)} />
             <MakeAnOfferCard listing={listing} />
           </aside>
         </div>

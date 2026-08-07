@@ -29,3 +29,80 @@
     }
   }
 }
+
+/*
+ * Holographic ring.
+ *
+ * The ONLY colour in this app that is purely decorative and encodes nothing — so
+ * it is deliberately exempt from the measured palette. Don't try to validate it,
+ * and don't reuse these hues for anything that carries meaning.
+ *
+ * The gradient is masked to the border box, so the content sits on a solid
+ * surface and every contrast ratio measured for the panel's text still holds.
+ */
+@property --holo-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}
+
+@keyframes holo-spin {
+  to {
+    --holo-angle: 360deg;
+  }
+}
+
+.holo-ring {
+  position: relative;
+  isolation: isolate;
+}
+
+.holo-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--holo-angle),
+    var(--psl-accent),
+    #35e6d0,
+    #7b8cff,
+    #d47bff,
+    var(--psl-accent)
+  );
+  /* Punch out the middle so only the 1px border shows. */
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: holo-spin 9s linear infinite;
+  opacity: 0.75;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* A soft bloom in the top corner, well below the text. */
+.holo-ring::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: radial-gradient(
+    70% 120% at 12% 0%,
+    color-mix(in oklab, var(--psl-accent) 14%, transparent),
+    transparent 62%
+  );
+  pointer-events: none;
+  z-index: -1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holo-ring::before {
+    animation: none;
+  }
+}

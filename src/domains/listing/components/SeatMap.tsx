@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { Minus, Plus, RotateCcw } from 'lucide-react'
 import { IconButton } from '@/shared/components/IconButton'
 import { buildSectionGeometry, CENTER, FIELD, VIEWBOX } from '../data/venueLayout'
 
@@ -138,9 +139,7 @@ export function SeatMap({
             disabled={zoom >= MAX_ZOOM}
             onClick={() => setZoom((current) => Math.min(MAX_ZOOM, current + 0.4))}
           >
-            <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
-              <path d="M10 5v10M5 10h10" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-            </svg>
+            <Plus aria-hidden="true" className="h-4 w-4" />
           </IconButton>
           <IconButton
             label="Zoom out"
@@ -148,21 +147,10 @@ export function SeatMap({
             disabled={zoom <= MIN_ZOOM}
             onClick={() => setZoom((current) => Math.max(MIN_ZOOM, current - 0.4))}
           >
-            <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
-              <path d="M5 10h10" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" />
-            </svg>
+            <Minus aria-hidden="true" className="h-4 w-4" />
           </IconButton>
           <IconButton label="Reset view" size="sm" onClick={() => setZoom(1)}>
-            <svg viewBox="0 0 20 20" aria-hidden="true" className="h-4 w-4">
-              <path
-                d="M4.5 10a5.5 5.5 0 1 0 1.7-4M4.5 4v3.2h3.2"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+            <RotateCcw aria-hidden="true" className="h-4 w-4" />
           </IconButton>
         </div>
       ) : null}

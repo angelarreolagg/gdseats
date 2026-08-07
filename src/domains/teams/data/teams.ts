@@ -39,3 +39,18 @@ export const TEAMS_PER_PAGE = 8
 export function getTeamById(teamId: string): Team | undefined {
   return TEAMS.find((team) => team.id === teamId)
 }
+
+/**
+ * How much inventory a franchise carries.
+ *
+ * Lives here rather than in the generator because it is a property of the team,
+ * not of the listings — and because `teams` must not import from `listing`. It is
+ * the single source both the team card and the generator read, so the count on
+ * the card and the count in the search toolbar agree by construction.
+ *
+ * Sized so most of the bowl's 72 sections hold at least one listing: a seat map
+ * with half its sections greyed out reads as broken rather than sparse.
+ */
+export function getListingCountForTeam(team: Team): number {
+  return Math.round(90 + team.demandIndex * 90)
+}

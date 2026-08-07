@@ -1,3 +1,5 @@
+import { ChevronDown } from 'lucide-react'
+
 interface SelectOption {
   value: string
   label: string
@@ -40,20 +42,10 @@ export function Select({
             </option>
           ))}
         </select>
-        <svg
+        <ChevronDown
           aria-hidden="true"
-          viewBox="0 0 20 20"
           className="pointer-events-none absolute top-1/2 right-3 h-4 w-4 -translate-y-1/2 text-muted"
-        >
-          <path
-            d="M6 8l4 4 4-4"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.75"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          />
-        </svg>
+        />
       </span>
     </label>
   )

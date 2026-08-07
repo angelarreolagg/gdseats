@@ -1,10 +1,25 @@
 import type { TagTone } from '@/shared/components/Tag'
 
+/**
+ * Services name an icon; they never hold one. Keeping this a plain union is what
+ * lets the generator stay pure — the React component is resolved at render time
+ * by `components/tagPresentation.ts`.
+ */
+export type TagIconName =
+  | 'featured'
+  | 'this-week'
+  | 'parking'
+  | 'aisle'
+  | 'covered'
+  | 'accessible'
+  | 'financing'
+  | 'price-drop'
+
 export interface ListingTag {
   id: string
   label: string
   tone: TagTone
-  icon: string
+  iconName: TagIconName
 }
 
 /** Richer than the analyzer's signal shape — this is what the detail table shows. */
