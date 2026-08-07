@@ -26,7 +26,7 @@ pnpm vitest run <pattern> --reporter=verbose   # single suite, with console outp
 Domain-driven, feature-first. Four domains plus a shell:
 
 - `src/app/` — composition root. `useAppNavigation` holds screen state; no business rules.
-- `src/domains/teams/` — franchise catalogue and the team grid.
+- `src/domains/teams/` — franchise catalogue, the team grid, and the market-trend signal.
 - `src/domains/listing/` — **owns the `Listing` entity**, the venue layout, the seat map, the generator, and the detail overlay.
 - `src/domains/search/` — browse: toolbar, list rows, filter/sort.
 - `src/domains/deal-analyzer/` — the AI verdict. Pure services plus `AIInsightPanel` and `DealBadge`.
@@ -64,7 +64,9 @@ Both ±10% boundaries land in `fair`. Negative difference = below market = good 
 
 Everything is generated from a **seeded** PRNG (`shared/utils/seededRandom.ts`), never `Math.random()`. The seat map prints a per-section count next to the list it describes; unseeded data would reshuffle each render and make those two contradict each other.
 
-`getListingCountForTeam(team)` is a pure function used by *both* the team card and the generator, so those counts agree by construction rather than by hand.
+`getListingCountForTeam(team)` lives in `teams/data/teams.ts` and is used by *both* the team card and the listing generator, so those counts agree by construction rather than by hand. It sits in `teams` (not in the generator) because `teams` must not import from `listing` — that edge was a real cycle once.
+
+`teams/services/marketTrend.service.ts` produces the per-franchise trend: 12 seeded months of demand plus a 3-month forecast. Momentum is measured across the **forecast** horizon, since the card answers "what is about to happen". The catalogue currently splits 5 heating / 8 steady / 11 cooling — imbalance is seed luck, not design, but a test pins that all three directions appear so a reseed can't silently flatten the feature.
 
 Generator invariants worth preserving (all covered by tests):
 - The ask multiplier is **centred on 1.0** (`0.78–1.22`). An asymmetric range skews the whole market to one verdict — an earlier version sat at `0.78–1.34` and produced 58% "Overpriced", which undersells the product.
@@ -76,7 +78,19 @@ Generator invariants worth preserving (all covered by tests):
 Tokens live in `src/shared/styles/theme.css`, each annotated with its measured contrast against the surface it renders on. Colour decisions here are computed, not eyeballed — the `dataviz` skill ships `scripts/validate_palette.js`.
 
 1. **Brand green `#a0f700` is 1.33:1 on white.** It is a dark-mode-native accent. In light mode it is only ever a fill behind dark ink (14.33:1); text and marks use darker steps of the same hue (`--psl-accent-ink` `#4f7d00`).
-2. **Status never rides on colour alone.** Green vs amber is CVD ΔE 7.0 (deuteranopia); green vs red is ΔE 1.2 in light mode. Every status and tag pairs an emoji/glyph with a text label. `deal-analyzer/components/statusPresentation.ts` and `shared/components/Tag.tsx` are the single definitions — don't bypass them.
+2. **Status never rides on colour alone.** Green vs amber is CVD ΔE 7.0 (deuteranopia); green vs red is ΔE 1.2 in light mode. Every status and tag pairs an emoji/glyph with a text label. `deal-analyzer/components/statusPresentation.ts`, `shared/components/Tag.tsx`, and `teams/services/marketTrend.service.ts` are the single definitions — don't bypass them.
+
+**Colour does two different jobs here, and they use opposite conventions.** This looks like a bug until you know the split, so don't "harmonise" them:
+
+| Role | Where | Convention |
+|---|---|---|
+| **Direction** — what the number did | `PriceHistoryTable` Change column, discount chips | **Financial**: red = fell, green = rose |
+| **Verdict** — what you should do | `StatusBadge`, `DealBadge`, `Recommendation`, team trend | **Buyer-relative**: green = good buy |
+| **Prose** — supporting evidence | `InsightsList` bullets | **No colour** — icon + muted ink |
+
+So a price cut is **red** in the history table (it went down) and the same listing can be **green** in the verdict badge (it's a bargain). They never collide because the insight bullets between them carry no colour at all.
+
+The buyer-relative half is the counterintuitive one: a **cooling** market is green because that's when seats get cheaper. `marketTrend.service.test.ts` and `PriceHistoryTable.test.tsx` each pin their own side of this.
 3. **Tags use a short tone list on purpose.** The reference UI gives each amenity its own hue; measured, blue vs violet came out at ΔE 1.8 (CVD) and 10.1 (normal vision) — indistinguishable. Tags sit in a row so every pair is adjacent, capping usable hues at ~3. Colour encodes *class* (promoted / time-critical / price signal / neutral), not identity.
 4. **The seat map's field is deliberately low-chroma.** A saturated pitch green would compete with the brand accent, which marks the selected section — the one thing on the map that must read as active.
 
@@ -85,6 +99,18 @@ Dark mode is class-based (`@custom-variant dark` in `theme.css`); Tailwind v4 de
 ## Charts
 
 `PriceStatsChart` is inline SVG, no chart dependency (Recharts was removed). It is an **emphasis** chart: the listing in question takes the accent, every peer recedes to the muted token, because the question is "where does mine land". The price history table above it is the table-view twin, so no value is chart-only.
+
+## Icons and tooltips
+
+Icons come from **lucide-react**; there are no emoji in the UI. Services must stay free of React, so **they emit a semantic icon *name*** (`TagIconName`, `TrendDirection`) and the component layer resolves it — `listing/components/tagPresentation.ts`, `teams/components/trendPresentation.ts`, `deal-analyzer/components/statusPresentation.ts`. Never import a component into a service to shortcut this.
+
+Tooltips wrap **@radix-ui/react-tooltip** in `shared/components/Tooltip.tsx`. Hover tooltips never fire on touch, so **nothing may live only in a tooltip**: chips carry their own visible label, and the Total-cost breakdown repeats figures that `MakeAnOfferCard` shows as visible rows.
+
+`Tag` takes `focusable` (default off). Chips inside `ListingRow` must stay non-focusable — the row is itself a `<button>`, and a focusable element nested in a button is invalid and would add hundreds of tab stops. `ListingSummaryCard` opts in, so the copy is keyboard-reachable somewhere.
+
+Component tests must render via `@/test/utils`, not bare RTL — Radix Tooltip throws without its provider.
+
+The `.holo-ring` class on `AIInsightPanel` is the **only decorative colour in the app**. It encodes nothing, is masked to the border so text contrast is untouched, and is exempt from the palette rules — don't try to validate it.
 
 ## Conventions
 
