@@ -33,6 +33,33 @@ describe('AppHeader', () => {
     expect(screen.queryByRole('button', { name: /demo version/i })).not.toBeInTheDocument()
   })
 
+  /**
+   * Validates: neither of the two controls in the right-hand group declares its
+   * own height — the row does.
+   * Why it matters: they sit side by side, so a height mismatch is visible on
+   * every page load, and it shipped exactly that way: the toggle took a fixed
+   * `h-10` from IconButton while the marker was sized by its own padding and font,
+   * landing ~8px shorter on mobile. Keeping them equal by picking matching values
+   * is the version that drifts again on the next restyle; having one owner is the
+   * version that cannot. jsdom has no layout to measure, so the declaration is the
+   * only thing a test can hold.
+   */
+  it('lets the row own the height of both controls', () => {
+    const { container } = render(<AppHeader onHome={vi.fn()} />)
+
+    const toggle = screen.getByRole('button', { name: /switch to (light|dark) mode/i })
+    const marker = screen.getByText(/demo version/i)
+    const row = container.querySelector('.items-stretch')
+
+    expect(row).toContainElement(toggle)
+    expect(row).toContainElement(marker)
+
+    for (const control of [toggle, marker]) {
+      expect(control.className).not.toMatch(/(^|\s)(sm:)?h-\d/)
+      expect(control.className).not.toMatch(/(^|\s)(sm:)?py-/)
+    }
+  })
+
   it('navigates home from the logo', async () => {
     const onHome = vi.fn()
     render(<AppHeader onHome={onHome} />)

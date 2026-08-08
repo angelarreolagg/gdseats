@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { motion } from 'motion/react'
 import {
   ChartColumn,
@@ -8,6 +8,8 @@ import {
   Share2,
   type LucideIcon,
 } from 'lucide-react'
+import { Button } from '@/shared/components/Button'
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import { showDemoNotice } from '@/shared/utils/demoNotice'
 import { AIInsightPanel } from '@/domains/deal-analyzer/components/AIInsightPanel'
 import type { Team } from '@/domains/teams/types/team.types'
@@ -16,8 +18,17 @@ import { toListingSignals } from '../services/listingSignals.service'
 import { SeatMap } from './SeatMap'
 import { ListingSummaryCard } from './ListingSummaryCard'
 import { MakeAnOfferCard } from './MakeAnOfferCard'
+import { OfferSheet } from './OfferSheet'
 import { PriceHistoryTable } from './PriceHistoryTable'
 import { PriceStatsChart } from './PriceStatsChart'
+
+/**
+ * Where the offer form stops fitting beside the listing and moves into a sheet.
+ *
+ * Matches the `lg:` grid below, and the two must move together — this is the one
+ * breakpoint in the app that JavaScript and CSS both have to agree on.
+ */
+const ASIDE_QUERY = '(min-width: 1024px)'
 
 interface ListingDetailOverlayProps {
   listing: Listing
@@ -42,6 +53,8 @@ export function ListingDetailOverlay({
   onClose,
 }: ListingDetailOverlayProps) {
   const panelRef = useRef<HTMLDivElement>(null)
+  const hasAside = useMediaQuery(ASIDE_QUERY)
+  const [offerOpen, setOfferOpen] = useState(false)
   // Stable identity so the panel's analysis timer keys off the listing, not off a
   // fresh object arriving with every render.
   const signals = useMemo(() => toListingSignals(listing), [listing])
@@ -54,7 +67,17 @@ export function ListingDetailOverlay({
     panelRef.current?.focus({ preventScroll: true })
 
     function onKeyDown(event: KeyboardEvent) {
-      if (event.key === 'Escape') onClose()
+      if (event.key !== 'Escape') return
+
+      // Innermost dialog first. Both this overlay and the offer sheet listen for
+      // Escape, and without the precedence the key would close the whole listing
+      // out from under someone who only meant to dismiss the sheet — losing their
+      // place in a list of ~170 rows to a keystroke that should have cost nothing.
+      if (offerOpen) {
+        setOfferOpen(false)
+        return
+      }
+      onClose()
     }
     document.addEventListener('keydown', onKeyDown)
 
@@ -67,7 +90,7 @@ export function ListingDetailOverlay({
       document.body.style.overflow = previousOverflow
       previouslyFocused?.focus()
     }
-  }, [onClose])
+  }, [onClose, offerOpen])
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
@@ -89,21 +112,38 @@ export function ListingDetailOverlay({
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-        className="relative mx-auto my-6 w-[min(1040px,calc(100%-2rem))] rounded-2xl border border-border-hairline bg-page shadow-hero outline-none"
+        /*
+         * Full-bleed below `sm`, the inset card from `sm` up.
+         *
+         * `min-h-dvh`, not `h-dvh`: the content is taller than the viewport and
+         * has to keep scrolling inside the wrapper above.
+         */
+        className="relative mx-auto min-h-dvh w-full bg-page outline-none sm:my-6 sm:min-h-0 sm:w-[min(1040px,calc(100%-2rem))] sm:rounded-2xl sm:border sm:border-border-hairline sm:shadow-hero"
       >
-        <header className="flex items-center justify-between gap-4 border-b border-border-hairline px-5 py-4">
+        {/*
+         * Sticky, because the panel is four screens tall on a phone and the way
+         * out should not require scrolling back to find it.
+         *
+         * Back and Share keep their `aria-label` at every width while the visible
+         * text appears only from `sm`. Icon-only below that — three full-text
+         * controls in one row is what crushed this header at 390px — but an icon
+         * button with no name is unusable to a screen reader, so the label is the
+         * permanent one and the text is the enhancement.
+         */}
+        <header className="sticky top-0 z-10 flex items-center justify-between gap-3 border-b border-border-hairline bg-page/95 px-4 py-3 backdrop-blur sm:px-5 sm:py-4">
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex items-center gap-2 rounded-lg border border-border-hairline px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-track"
+            aria-label="Back to search"
+            className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-border-hairline px-2.5 py-2 text-sm font-medium text-ink transition-colors hover:bg-track sm:px-3"
           >
             <ChevronLeft aria-hidden="true" className="h-4 w-4" />
-            Back to search
+            <span className="hidden sm:inline">Back to search</span>
           </button>
 
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             <img src="/logo-mark.png" alt="" className="h-5 w-5 shrink-0 object-contain" />
-            <span className="text-xs font-semibold tracking-widest text-muted uppercase">
+            <span className="text-xs font-semibold tracking-widest whitespace-nowrap text-muted uppercase">
               G&amp;D Seats
             </span>
           </div>
@@ -111,10 +151,11 @@ export function ListingDetailOverlay({
           <button
             type="button"
             onClick={showDemoNotice}
-            className="inline-flex items-center gap-2 rounded-lg border border-border-hairline px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-track"
+            aria-label="Share"
+            className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-border-hairline px-2.5 py-2 text-sm font-medium text-ink transition-colors hover:bg-track sm:px-3"
           >
             <Share2 aria-hidden="true" className="h-4 w-4" />
-            Share
+            <span className="hidden sm:inline">Share</span>
           </button>
         </header>
 
@@ -145,12 +186,48 @@ export function ListingDetailOverlay({
             </section>
           </div>
 
+          {/*
+           * The offer form exists in exactly ONE place, which is why this is a
+           * render-time branch and not a `lg:hidden` pair. Two copies would mean
+           * two elements with `id="offer-amount"`, two identically-labelled forms
+           * announced to a screen reader, and a hidden one still in the tab order.
+           */}
           <aside className="flex flex-col gap-4">
             <ListingSummaryCard listing={listing} team={team} />
-            <MakeAnOfferCard listing={listing} />
+            {hasAside ? <MakeAnOfferCard listing={listing} /> : null}
           </aside>
         </div>
+
+        {hasAside ? null : (
+          /*
+           * `sticky`, not `fixed`, and that is load-bearing: this panel is a
+           * `motion.div` animating `y`, and a transformed ancestor becomes the
+           * containing block for `position: fixed` children — a fixed bar would
+           * anchor to the panel and scroll away with it.
+           *
+           * The padding clears the iPhone home indicator, which otherwise sits on
+           * top of the button.
+           */
+          <div className="sticky bottom-0 z-10 border-t border-border-hairline bg-page/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
+            <Button type="button" fullWidth onClick={() => setOfferOpen(true)}>
+              Make an offer
+            </Button>
+          </div>
+        )}
       </motion.div>
+
+      {/*
+       * Outside the panel on purpose — see the note in OfferSheet. The panel's
+       * transform would capture a `position: fixed` sheet and pin it to the panel
+       * instead of the viewport.
+       *
+       * Not rendered at all once the aside exists, rather than merely closed: a
+       * window dragged wider mid-offer would otherwise hold an open sheet and a
+       * new inline form at the same time, and both own `id="offer-amount"`.
+       */}
+      {hasAside ? null : (
+        <OfferSheet listing={listing} open={offerOpen} onClose={() => setOfferOpen(false)} />
+      )}
     </div>
   )
 }

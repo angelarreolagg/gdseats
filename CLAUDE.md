@@ -170,6 +170,31 @@ Our team ids *are* ESPN's abbreviations (`dal`, `sf`, `lv`, `jax`…), so the jo
 
 **`useIsDarkTheme` vs `useTheme`.** `useTheme` *sets* the theme — each instance writes localStorage and toggles the root class, so it is safe with exactly one consumer (`ThemeToggle`). Anything that only needs to *read* the theme uses `shared/hooks/useIsDarkTheme.ts`, which is `useSyncExternalStore` over a single MutationObserver. Don't call `useTheme` from list items.
 
+**`useMediaQuery` is a last resort, not a tool.** `shared/hooks/useMediaQuery.ts` exists for the one case where the viewport has to change *what renders* rather than how it looks — see the listing overlay section. Anything presentational belongs in a `sm:`/`lg:` variant, which costs no JavaScript and can't disagree with the CSS. It's built on `useSyncExternalStore` for the same reason `useIsDarkTheme` is: no effect, so the first render already has the right answer and no frame shows the wrong branch.
+
+**Header control heights are owned by the row, not by the controls.** `AppHeader`'s right-hand group is `flex h-9 items-stretch sm:h-10`, and neither `ThemeToggle` nor `DemoMarker` declares a height — hence `IconButton`'s `size="none"`. They previously took theirs from two independent sources (a fixed `h-10` and the marker's own padding) and disagreed by 8px on mobile. Matching the values keeps them equal until the next restyle; having one owner is what makes them unable to disagree. Passing `h-9` through `className` while the component still emits `h-10` is not a fix: two declarations of one property resolve by CSS source order, not by class-attribute order.
+
+## The listing overlay on mobile
+
+Below `sm` the panel is **full-bleed** — no margin, no radius, `min-h-dvh` (not `h-dvh`, the content is taller than the viewport and still has to scroll in the `fixed inset-0 overflow-y-auto` wrapper). The inset card returns at `sm:`. The header is `sticky top-0`, because the panel is four screens tall on a phone and the way out shouldn't require scrolling back to find it.
+
+**Back and Share keep `aria-label` at every width; only the visible text is `hidden sm:inline`.** Three full-text controls in one row is what crushed this header at 390px, but an icon-only button with no accessible name is unusable — so the label is permanent and the text is the enhancement. `getByRole('button', { name: /back to search/i })` therefore passes at both sizes.
+
+**There is exactly one JS breakpoint in the app, and it is here.** `ASIDE_QUERY = '(min-width: 1024px)'` via `shared/hooks/useMediaQuery.ts`, matching the `lg:` grid — **the two must move together.** It exists because `MakeAnOfferCard` owns `id="offer-amount"`, so an `lg:hidden` pair would put duplicate ids and two identically-labelled forms in one document, with the hidden copy still in the tab order. `inert` fixes the tab order but is an attribute, not a property, so it can't be breakpoint-scoped without JS either. Exactly one instance must exist, which forces a render-time branch. Everything purely presentational stays in Tailwind variants.
+
+**Two positioning rules that look arbitrary and are not.** The panel is a `motion.div` animating `y`, and a transformed ancestor becomes the containing block for `position: fixed` descendants:
+
+- The sticky CTA is `sticky bottom-0`, **never `fixed`** — a fixed bar would anchor to the panel and scroll away with it.
+- `OfferSheet` is rendered **outside the panel**, as a sibling under the untransformed `fixed inset-0 z-50` root. It is also not rendered at all once the aside exists, rather than merely closed: a window dragged wider mid-offer would otherwise hold an open sheet and a new inline form, both owning `id="offer-amount"`.
+
+**Escape is handled in one place, innermost first.** `ListingDetailOverlay`'s handler closes the sheet if it is open and the overlay otherwise. Both are dialogs listening for the same key; without the precedence, dismissing the sheet also throws the buyer back to the results and loses their place in ~170 rows.
+
+`OfferSheet` gives **four ways out** — handle drag, backdrop, close button, Escape. The grab handle is the affordance a thumb reaches for, but drag has no keyboard equivalent and no accessible name, so it is `aria-hidden` and never the only exit.
+
+`MakeAnOfferCard` takes `showHeading` (off in the sheet, which supplies its own titled header — two "Make an offer" headings in one dialog is a duplicate landmark) and `onAfterSubmit` (lets the sheet close so the invitation toast isn't behind it).
+
+**Form inputs are `text-base sm:text-sm`.** iOS Safari zooms the whole viewport when a field under 16px takes focus and does not zoom back out. Invisible on every desktop browser.
+
 ## Icons and tooltips
 
 Icons come from **lucide-react**; there are no emoji in the UI. Services must stay free of React, so **they emit a semantic icon *name*** (`TagIconName`, `TrendDirection`) and the component layer resolves it — `listing/components/tagPresentation.ts`, `teams/components/trendPresentation.ts`, `deal-analyzer/components/statusPresentation.ts`. Never import a component into a service to shortcut this.
@@ -204,3 +229,5 @@ On `DealBadge` the iridescence is on the **border only** — the fill keeps the 
 - `tsconfig.app.json` has `noUnusedLocals`, `noUnusedParameters`, `verbatimModuleSyntax`, `erasableSyntaxOnly` — no enums, no parameter properties, `import type` for types. `baseUrl` is intentionally absent (deprecated in TS 6).
 - Tests are co-located in `domains/*/tests/`. Each carries a comment stating what it validates **and why it matters commercially** — keep that convention.
 - `src/test/setup.ts` forces reduced motion so animations don't hide content from jsdom queries, and stubs `ResizeObserver`.
+- **jsdom has no layout, so the suite picks a viewport: `min-width` queries answer `true`.** Desktop renders the most complete DOM. Flip one test with `setViewport('mobile')` from `@/test/utils`, **before `render`** — the stubbed `MediaQueryList` has a no-op `addEventListener`, so a component that already subscribed won't hear a mid-test change. `setup.ts` restores desktop after every test.
+- **`AnimatePresence` keeps an exiting node mounted until its exit finishes, even under reduced motion.** Assert its removal with `waitFor`, not synchronously — otherwise a passing component reads as a failing one.

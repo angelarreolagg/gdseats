@@ -7,6 +7,17 @@ import { getTotalPrice } from '../types/listing.types'
 
 interface MakeAnOfferCardProps {
   listing: Listing
+  /**
+   * Off inside `OfferSheet`, which supplies its own titled header.
+   *
+   * Two "Make an offer" headings in one dialog is a duplicate landmark to a
+   * screen reader, and it would make `getByRole('heading', { name: /make an
+   * offer/i })` match twice.
+   */
+  showHeading?: boolean
+  /** Lets the sheet close itself once the notice is up. */
+  onAfterSubmit?: () => void
+  className?: string
 }
 
 /** How many digits sit before this offset — the caret's position in digit-space. */
@@ -47,7 +58,12 @@ function FeeRow({ label, value, emphasis = false }: {
   )
 }
 
-export function MakeAnOfferCard({ listing }: MakeAnOfferCardProps) {
+export function MakeAnOfferCard({
+  listing,
+  showHeading = true,
+  onAfterSubmit,
+  className = 'rounded-xl border border-border-hairline bg-surface p-4 shadow-card',
+}: MakeAnOfferCardProps) {
   // Held as the formatted string so the field can show "$23,550" and still be
   // cleared. `type="number"` cannot render a currency symbol or separators at
   // all, which is why this is a text field doing its own formatting.
@@ -80,14 +96,23 @@ export function MakeAnOfferCard({ listing }: MakeAnOfferCardProps) {
   }, [offer])
 
   return (
-    <section className="rounded-xl border border-border-hairline bg-surface p-4 shadow-card">
-      <h2 className="text-sm font-semibold text-ink">
-        Make an offer <span className="text-over">*</span>
-      </h2>
+    <section className={className}>
+      {showHeading ? (
+        <h2 className="mb-3 text-sm font-semibold text-ink">
+          Make an offer <span className="text-over">*</span>
+        </h2>
+      ) : null}
 
       <label className="sr-only" htmlFor="offer-amount">
         Offer amount
       </label>
+      {/*
+       * `text-base` below `sm`, not `text-sm`. iOS Safari zooms the whole viewport
+       * when a field under 16px takes focus, and it does not zoom back out — the
+       * page is left scaled and horizontally scrollable for the rest of the visit.
+       * This is the single most common mobile form bug and it is invisible on
+       * every desktop browser.
+       */}
       <input
         id="offer-amount"
         ref={inputRef}
@@ -97,7 +122,7 @@ export function MakeAnOfferCard({ listing }: MakeAnOfferCardProps) {
         value={offer}
         onChange={handleChange}
         placeholder={formatCurrency(0)}
-        className="mt-3 w-full rounded-lg border border-border-hairline bg-track px-3 py-2.5 text-sm font-medium text-ink tabular-nums transition-colors placeholder:text-muted focus:border-accent-ink focus:outline-none"
+        className="w-full rounded-lg border border-border-hairline bg-track px-3 py-2.5 text-base font-medium text-ink tabular-nums transition-colors placeholder:text-muted focus:border-accent-ink focus:outline-none sm:text-sm"
       />
 
       <div className="mt-3">
@@ -113,7 +138,7 @@ export function MakeAnOfferCard({ listing }: MakeAnOfferCardProps) {
         id="offer-message"
         type="text"
         placeholder="Add a message"
-        className="mt-3 w-full rounded-lg border border-border-hairline bg-track px-3 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent-ink focus:outline-none"
+        className="mt-3 w-full rounded-lg border border-border-hairline bg-track px-3 py-2.5 text-base text-ink transition-colors placeholder:text-muted focus:border-accent-ink focus:outline-none sm:text-sm"
       />
 
       <Button
@@ -121,7 +146,10 @@ export function MakeAnOfferCard({ listing }: MakeAnOfferCardProps) {
         fullWidth
         className="mt-3"
         disabled={amount <= 0}
-        onClick={showOfferNotice}
+        onClick={() => {
+          showOfferNotice()
+          onAfterSubmit?.()
+        }}
       >
         Submit offer for {formatCurrency(amount)}
       </Button>
