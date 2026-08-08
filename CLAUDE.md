@@ -25,7 +25,7 @@ pnpm vitest run <pattern> --reporter=verbose   # single suite, with console outp
 
 Domain-driven, feature-first. Four domains plus a shell:
 
-- `src/app/` — composition root. `useAppNavigation` holds screen state; no business rules.
+- `src/app/` — composition root. `useAppNavigation` holds screen state; no business rules. It also does the one thing a router would have given us free: **`window.scrollTo(0, 0)` on every screen change**, since screens swap in place and otherwise inherit the previous one's offset. The listing overlay is deliberately excluded — closing it must return the buyer to the row they opened.
 - `src/domains/teams/` — franchise catalogue, the team grid, and the market-trend signal.
 - `src/domains/listing/` — **owns the `Listing` entity**, the venue layout, the seat map, the generator, and the detail overlay.
 - `src/domains/search/` — browse: toolbar, list rows, filter/sort.
@@ -120,9 +120,28 @@ Dark mode is class-based (`@custom-variant dark` in `theme.css`); Tailwind v4 de
 `teams/components/TeamsHero.tsx` is the landing band: `public/nflstadiums.mp4` under a scrim, the brand glow, and the bottom fade — one component, because those layers only mean anything together.
 
 - **The green radial is the original hero, not decoration.** Before the video, the scrim and glow *were* the band. Keeping them means it reads as this product while a 6 MB file streams, and there is no flash of bare footage. It looks like a leftover of the old design; it isn't.
-- **The headline is a `children` slot** with the built-in copy as the fallback, so a bespoke title takes over without touching the backdrop.
+- **The headline is a `children` slot** with the built-in copy as the fallback, so a bespoke title takes over without touching the backdrop. The default fills it with `StrokeText`.
+- **The height is `clamp(340px,50svh,520px)`, not a fixed band.** The first row of team cards has to stay fully visible without scrolling — a fixed height clipped it the moment the window got shorter. `svh`, not `vh`, or mobile sizes the hero against a viewport that includes address-bar chrome which then retracts. The real floor is the content (the `<h1>` is a fixed `fontSize × 1.3` = 166px), so `py` is the only lever left on short screens. Below ~800px tall nothing fits header + hero + a 248px card; that is accepted.
+- **The copy under the headline waits for it.** Both lines hold at `opacity 0` until `HEADLINE_SETTLES` (2.6s — when StrokeText's outline and wipe have both landed), then rise in on two beats so they arrive in reading order. The delay collapses to 0 under reduced motion, because StrokeText jumps to its end state there and the value proposition would otherwise sit invisible waiting on an animation that already finished. `MotionConfig reducedMotion="user"` drops the transform by itself but has no opinion about delays.
+- **No bottom border, on purpose.** The fade to `--psl-page` already lands on the same `#040811` the page paints below, so in dark the join is invisible — a hairline border was the only thing drawing a seam. In light the dark band ends on a crisp edge against `#fbfbfa`, which is what the reference does too.
 - **`autoPlay` is gated on `useReducedMotion()` by hand.** `MotionConfig` only governs Motion components and the `prefers-reduced-motion` block in `globals.css` only damps CSS animation — neither stops a looping `<video>`. `src/test/setup.ts` forces reduced motion, so jsdom never tries to play it either.
 - `muted` reflects as a **DOM property**, not an attribute; assert `video.muted`, not `toHaveAttribute('muted')`.
+
+`shared/components/StrokeText.tsx` is **vendored verbatim from React Bits** (TS + Tailwind variant) so it can be re-synced upstream — the only edit is a `type` import for `CSSProperties`, which `verbatimModuleSyntax` requires. Local adjustments go at the call site: `TeamsHero` overrides the component's inline SVG height with `[&>span>svg]:!h-auto`, because the fixed `fontSize × 1.3` box letterboxes the wordmark on a narrow screen instead of scaling it. It draws in the raw brand green — legal here and nowhere else, since the hero is pinned dark. It brings `gsap` (~57 kB gz), the only dependency in the repo added for a single component.
+
+**The wordmark opts out of `--font-sans`, and must.** `system-ui` is SF Pro on macOS, whose heavy glyphs are assembled from *overlapping component contours* — the diagonal of an N, the apex of an A, the middle of an M are separate shapes laid over the stems. Filled, nonzero winding merges them and nothing shows. `StrokeText` **strokes** the outline, so every internal edge is drawn and those diagonals stick out of the stems as loose slivers. The fix is a font with merged outlines (`'Helvetica Neue', Helvetica, Arial, sans-serif`), passed as `style` — `StrokeText` puts `style` on its root span and its `<text>` sets only size/weight/tracking, so `font-family` inherits and the vendored file stays untouched. Any replacement font must be checked the same way: **stroke the string and look at M, N, A, W**, don't trust how it looks filled.
+
+**The wordmark is two-tone, split from outside the component.** `StrokeText` paints one `strokeColor` / `fillColor` for the whole string, so `.hero-wordmark` in `globals.css` retints the first 10 `<tspan>`s — "SOME SEATS" — with `--psl-wordmark-lead`, leaving "MEAN MORE" on the accent. It works without `!important` because the tspans only *inherit* stroke and fill from their `<text>`, and a CSS declaration outranks an inherited presentation attribute. **The count is coupled to the copy and CSS can't read the copy**, so `TeamsHero.test.tsx` asserts the first 10 glyphs still spell "SOME SEATS"; that test is the only thing stopping a rewritten headline from cutting the tint mid-word.
+
+**The headline is SVG glyph outlines, so it is a picture to a screen reader.** `StrokeText` labels itself `role="img"` + `aria-label`, and the `<h1>` takes its accessible name from that. The two lines under it stay real text — they are the value proposition, and they have to be selectable and translatable.
+
+## Toasts
+
+`react-toastify`, hosted by `ToastContainer` in `AppProviders` (not `App`) so tests can assert on toasts without mounting the shell. `theme` reads `useIsDarkTheme`, never `useTheme`. The library's palette is remapped onto our tokens in `globals.css`, so a toast is correct in both modes with no `dark:` rule; the info accent is `--psl-accent-mark`, not the raw brand green, which is 1.33:1 on the toast surface.
+
+`shared/utils/demoNotice.tsx` is the single wording for every control that exists as chrome but leads nowhere, with a fixed `toastId` so repeats collapse into one. It carries two notices: `showDemoNotice` for furniture (footer policy links, Share), and `showOfferNotice` for the offer button — **the one dead control a visitor reaches on purpose**, at the end of the whole flow, so it answers with an invitation and a LinkedIn link rather than an apology. That toast sets `closeOnClick: false` and a long `autoClose`, or the container would dismiss it out from under the pointer before the link resolved. The file is `.tsx` for that link; that is the component layer, not the React-free rule domain services live under.
+
+Renaming a module's extension leaves Vite's dev server holding the old resolution — it will 404 on the vanished path and blank the page until restarted. The build is unaffected. **Dead chrome is a `<button>`, never `<a href="#">`** — a link that doesn't navigate lies to a screen reader about what Enter does. `AppFooter`'s Company column is buttons; its `tel:` / `mailto:` details are genuine anchors, being the only two things on the page that work without a backend. `AppFooter.test.tsx` pins that split.
 
 `TeamSearchCombobox` sits beside `LeagueSwitch`, not in the hero — the reference put its search in the band, but a control there competes with the headline for the one thing that screen has to say. It jumps straight to a franchise's listings via the same `onSelectTeam` the cards use, and deliberately **does not filter the grid**. Hand-rolled rather than added as a dependency (the only Radix package here is the tooltip). Options suppress `mousedown`'s default so the blur-close can't unmount the row mid-click — the classic hand-built-combobox bug, pinned by a test. Venue is searchable alongside the name because a seat licence is bought for a building as much as for a team.
 
@@ -163,7 +182,7 @@ Three classes in `styles/globals.css`, all **purely decorative**. They encode no
 | Class | Where | Note |
 |---|---|---|
 | `.holo-ring` | `AIInsightPanel` | Rotating conic gradient masked to the border, plus a corner bloom. |
-| `.holo-chip` | `DealBadge` | Same ring, faster and dimmer, no bloom. |
+| `.holo-chip` | `DealBadge`, `TrendChip` | Same ring, faster and dimmer, no bloom. Both chips are a machine's read on a market, which is what the iridescence marks. |
 | `.holo-icon` | the `BrainCircuit` mark | `stroke: url(#psl-holo-stroke) currentColor` |
 
 All three are masked or stroked so **the content surface stays solid** — every contrast ratio measured for the text still holds.

@@ -202,3 +202,54 @@
     animation: none;
   }
 }
+
+/*
+ * Toasts, remapped onto the design system.
+ *
+ * react-toastify ships its own palette; left alone, a notice arrives in colours
+ * that belong to no other surface here. Its variables are all it needs to speak
+ * in our tokens instead — the `theme` prop on `ToastContainer` picks the light
+ * or dark class, and these values follow the same custom properties everything
+ * else does, so a toast is correct in both modes without a `dark:` rule.
+ *
+ * The accent is `--psl-accent-mark` (3.90 on white), not the raw brand green:
+ * the info icon is a small mark on the toast surface, and #a0f700 is 1.33 there.
+ */
+:root {
+  --toastify-font-family: var(--font-sans);
+  --toastify-toast-bd-radius: 0.75rem;
+  --toastify-color-light: var(--psl-surface);
+  --toastify-color-dark: var(--psl-surface);
+  --toastify-text-color-light: var(--psl-ink);
+  --toastify-text-color-dark: var(--psl-ink);
+  --toastify-color-info: var(--psl-accent-mark);
+  --toastify-icon-color-info: var(--psl-accent-mark);
+}
+
+.Toastify__toast {
+  border: 1px solid var(--psl-border);
+}
+
+/*
+ * Two-tone hero wordmark.
+ *
+ * StrokeText paints one `strokeColor` and one `fillColor` for the whole string,
+ * so the split is made from outside: it renders one <tspan> per character, in
+ * order, in both the stroke copy and the fill copy. The first N take the lead
+ * colour; everything after keeps the accent the component was given.
+ *
+ * The tspans inherit `stroke`/`fill` from their <text> as presentation
+ * attributes, and a CSS declaration outranks an inherited attribute — so this
+ * wins without `!important` and without touching the vendored component.
+ *
+ * THE COUNT IS TIED TO THE COPY: 10 is "SOME SEATS" in "SOME SEATS MEAN MORE".
+ * Rewrite the headline and this number moves with it — TeamsHero.test.tsx fails
+ * loudly if the two drift apart.
+ */
+.hero-wordmark [data-stroke-char]:nth-child(-n + 10) {
+  stroke: var(--psl-wordmark-lead);
+}
+
+.hero-wordmark [data-fill-char]:nth-child(-n + 10) {
+  fill: var(--psl-wordmark-lead);
+}

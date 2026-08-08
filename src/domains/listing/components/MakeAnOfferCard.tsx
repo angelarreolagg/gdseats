@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef, useState } from 'react'
 import { Button } from '@/shared/components/Button'
 import { formatCurrency, parseCurrencyInput } from '@/shared/utils/formatters'
+import { showOfferNotice } from '@/shared/utils/demoNotice'
 import type { Listing } from '../types/listing.types'
 import { getTotalPrice } from '../types/listing.types'
 
@@ -115,7 +116,13 @@ export function MakeAnOfferCard({ listing }: MakeAnOfferCardProps) {
         className="mt-3 w-full rounded-lg border border-border-hairline bg-track px-3 py-2.5 text-sm text-ink transition-colors placeholder:text-muted focus:border-accent-ink focus:outline-none"
       />
 
-      <Button type="button" fullWidth className="mt-3" disabled={amount <= 0}>
+      <Button
+        type="button"
+        fullWidth
+        className="mt-3"
+        disabled={amount <= 0}
+        onClick={showOfferNotice}
+      >
         Submit offer for {formatCurrency(amount)}
       </Button>
     </section>

@@ -39,9 +39,18 @@ const TONE_INK: Record<TrendTone, string> = {
 export function TrendChip({ trend, focusable = false }: TrendChipProps) {
   const Icon = TREND_ICON[trend.iconName]
 
+  /*
+   * `holo-chip` — the same rotating border DealBadge wears, and for the same
+   * reason: both chips are a machine's read on a market, and the iridescence is
+   * how this product says so. It sits on the 1px border only, so the tone fill
+   * and ink still carry the direction; the rainbow never touches the meaning.
+   *
+   * Cheap here in a way it is not on `ListingRow`: eight cards a page plus the
+   * toolbar, against ~170 rows — no `content-visibility` guard needed.
+   */
   const chip = (
     <span
-      className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold tracking-wide whitespace-nowrap uppercase ${TONE_CHIP[trend.tone]}`}
+      className={`holo-chip inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold tracking-wide whitespace-nowrap uppercase ${TONE_CHIP[trend.tone]}`}
     >
       <Icon aria-hidden="true" className="h-3 w-3 shrink-0" strokeWidth={2.5} />
       {trend.label}

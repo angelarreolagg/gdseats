@@ -104,7 +104,7 @@ export function TeamSearchCombobox({
         onFocus={() => setOpen(true)}
         onBlur={() => setOpen(false)}
         onKeyDown={handleKeyDown}
-        className="w-full rounded-full border border-border-hairline bg-surface py-2.5 pr-9 pl-10 text-sm font-medium text-ink transition-colors placeholder:font-normal placeholder:text-muted hover:border-accent-ink/40 focus:border-accent-ink focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 sm:w-72"
+        className="h-full w-full rounded-full border border-border-hairline bg-surface py-2.5 pr-9 pl-10 text-sm font-medium text-ink transition-colors placeholder:font-normal placeholder:text-muted hover:border-accent-ink/40 focus:border-accent-ink focus:outline-none disabled:cursor-not-allowed disabled:opacity-60 sm:w-80"
       />
       <ChevronsUpDown
         aria-hidden="true"
@@ -116,7 +116,7 @@ export function TeamSearchCombobox({
           id={listboxId}
           role="listbox"
           aria-label="Teams"
-          className="absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-border-hairline bg-surface py-1 shadow-lg sm:w-72"
+          className="absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-border-hairline bg-surface py-1 shadow-lg sm:w-80"
         >
           {matches.length === 0 ? (
             <li className="px-3.5 py-3 text-sm text-muted">No teams match “{query.trim()}”</li>

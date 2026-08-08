@@ -25,7 +25,13 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
 
       <div className="mx-auto max-w-7xl px-5 py-6 sm:px-8">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-3">
+          {/*
+           * `items-stretch`, not `items-center`: LeagueSwitch is the taller
+           * control (its pill sits inside a padded track), and matching the
+           * search field to it by hand would mean a hardcoded height that drifts
+           * the moment either one is restyled. Stretching lets the row settle it.
+           */}
+          <div className="flex flex-wrap items-stretch gap-3">
             <LeagueSwitch
               value={league}
               onChange={(value) => {

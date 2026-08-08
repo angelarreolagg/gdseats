@@ -8,6 +8,7 @@ import {
   Share2,
   type LucideIcon,
 } from 'lucide-react'
+import { showDemoNotice } from '@/shared/utils/demoNotice'
 import { AIInsightPanel } from '@/domains/deal-analyzer/components/AIInsightPanel'
 import type { Team } from '@/domains/teams/types/team.types'
 import type { Listing } from '../types/listing.types'
@@ -109,6 +110,7 @@ export function ListingDetailOverlay({
 
           <button
             type="button"
+            onClick={showDemoNotice}
             className="inline-flex items-center gap-2 rounded-lg border border-border-hairline px-3 py-2 text-sm font-medium text-ink transition-colors hover:bg-track"
           >
             <Share2 aria-hidden="true" className="h-4 w-4" />

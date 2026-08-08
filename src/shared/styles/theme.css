@@ -27,6 +27,10 @@
 
   --psl-accent: #a0f700; /* fill only — 1.33 on white, never text */
   --psl-on-accent: #0f1105; /* 14.33 on the accent fill */
+  /* Display only — the lead half of the hero wordmark, which is dark-pinned in
+     both modes, so this is one value rather than a stepped pair. 15.71 on the
+     hero ground (#040811); it recedes behind the accent without going grey-mud. */
+  --psl-wordmark-lead: #d3d7db;
   --psl-accent-ink: #4f7d00; /*  4.92 — text, thin lines */
   --psl-accent-mark: #5c8f00; /*  3.90 — chart marks */
 
@@ -76,6 +80,7 @@
 
   --psl-accent: #a0f700; /* 11.53 — usable directly in dark */
   --psl-on-accent: #0f1105;
+  --psl-wordmark-lead: #d3d7db; /* same in both modes — see the light block */
   --psl-accent-ink: #a0f700;
   --psl-accent-mark: #a0f700;
 

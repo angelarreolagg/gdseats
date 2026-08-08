@@ -5,6 +5,7 @@ import { TeamsScreen } from '@/domains/teams/components/TeamsScreen'
 import { SearchScreen } from '@/domains/search/components/SearchScreen'
 import { ListingDetailOverlay } from '@/domains/listing/components/ListingDetailOverlay'
 import { generateListingsForTeam } from '@/domains/listing/services/listingGenerator.service'
+import { AppFooter } from './components/AppFooter'
 import { AppHeader } from './components/AppHeader'
 import { useAppNavigation } from './useAppNavigation'
 
@@ -34,6 +35,8 @@ export function App() {
       ) : (
         <SearchScreen team={team} listings={listings} onOpenListing={nav.openListing} />
       )}
+
+      <AppFooter />
 
       <AnimatePresence>
         {openListing && team ? (
