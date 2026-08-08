@@ -25,7 +25,8 @@ function recentMovement(history: PriceHistoryPoint[]): Insight | null {
     id: 'recent-movement',
     // A falling ask is leverage for the buyer; a rising one is pressure.
     tone: dropped ? 'positive' : 'caution',
-    text: `Asking price ${dropped ? 'dropped' : 'rose'} ${formatPercent(change)} since ${previous.date}`,
+    // Observational, not evaluative: "adjusted" reports, "dropped/rose" judges.
+    text: `Price adjusted ${dropped ? 'down' : 'up'} ${formatPercent(change)} since ${previous.date}`,
     weight: Math.abs(change),
   }
 }
@@ -37,7 +38,7 @@ function versusSectionAverage(signals: ListingSignals): Insight | null {
     return {
       id: 'section-average',
       tone: 'neutral',
-      text: `In line with the section ${signals.section} average`,
+      text: `Comparable seats in section ${signals.section} sit at a similar level`,
       weight: 0,
     }
   }
@@ -46,7 +47,11 @@ function versusSectionAverage(signals: ListingSignals): Insight | null {
   return {
     id: 'section-average',
     tone: above ? 'caution' : 'positive',
-    text: `${formatPercent(change)} ${above ? 'above' : 'below'} the section ${signals.section} average`,
+    // The listing stays the subject on purpose. Phrasing it as "comparables trend
+    // x% lower" would attach a figure measured against the section average to a
+    // sentence about the comparables — off by the ratio between the two. "Sits"
+    // keeps it observational without moving the reference point.
+    text: `Sits ${formatPercent(change)} ${above ? 'above' : 'below'} the section ${signals.section} average`,
     weight: Math.abs(change),
   }
 }
@@ -65,7 +70,8 @@ function trendDirection(signals: ListingSignals): Insight | null {
     return {
       id: 'trend',
       tone: 'positive',
-      text: `Down from ${formatCurrency(first.price)} since ${first.date} — ${cuts} price cuts`,
+      // "revisions" rather than "cuts" — the same fact without the pressure.
+      text: `Adjusted from ${formatCurrency(first.price)} since ${first.date} across ${cuts} revisions`,
       weight: Math.abs(relativeChange(first.price, priceHistory[priceHistory.length - 1].price)),
     }
   }
@@ -74,7 +80,7 @@ function trendDirection(signals: ListingSignals): Insight | null {
     return {
       id: 'trend',
       tone: 'caution',
-      text: `Climbing since ${first.date} — seller has room to hold`,
+      text: `Gradual increases observed since ${first.date}`,
       weight: Math.abs(relativeChange(first.price, priceHistory[priceHistory.length - 1].price)),
     }
   }
@@ -82,7 +88,7 @@ function trendDirection(signals: ListingSignals): Insight | null {
   return {
     id: 'trend',
     tone: 'neutral',
-    text: `Price has been flat since ${first.date}`,
+    text: `Pricing has held steady since ${first.date}`,
     weight: 0,
   }
 }

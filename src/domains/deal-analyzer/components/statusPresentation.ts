@@ -1,51 +1,59 @@
-import { Flame, Minus, Scale, TrendingDown, TrendingUp, TriangleAlert, type LucideIcon } from 'lucide-react'
-import type { DealStatus, InsightTone } from '../types/deal.types'
+import { Equal, Gem, Minus, TrendingDown, TrendingUp, type LucideIcon } from 'lucide-react'
+import type { DealStatus, InsightTone, Recommendation } from '../types/deal.types'
 
 interface StatusPresentation {
   Icon: LucideIcon
   label: string
-  /** Tinted pill — deliberately NOT a solid fill. See note below. */
+  /** Soft tinted pill — a tag, not an alert. */
   pill: string
   /** Ink colour for text set on a plain surface. */
   ink: string
 }
 
 /**
- * VERDICT colours — buyer-relative. Green means "good buy", not "the number went
- * up". This is one of two conventions in the app; the other is direction (red =
- * fell), used by the price-history Change column and the discount chips. They do
- * not conflict because they own different regions: verdicts advise, direction
- * badges report.
+ * MARKET CONTEXT, not a warning system.
  *
- * Every status carries an icon AND a text label, not just a colour: the brand
- * green and the amber measure CVD ΔE 7.0 under deuteranopia, inside the band that
- * is only legal with secondary encoding. Centralising it here means no caller can
- * accidentally ship colour alone.
+ * This panel sits beside a five-figure purchase decision. Framed as pass/warn/fail
+ * it stops being useful and starts being an obstacle — a buyer who reads
+ * "Overpriced" in red walks away from a listing that may still be right for them.
+ * So the wording is observational and the palette is deliberately NOT the
+ * good/amber/critical status ramp used elsewhere in the app.
  *
- * All three use a *tinted* pill rather than a solid fill — including undervalued.
- * Inside the listing page the host's "Submit offer" button already owns the one
- * solid green block; a second one makes the widget compete with the page's primary
- * action instead of informing it.
+ * Two constraints still hold and are measured, not assumed:
+ *  - Every status pairs an icon with a text label. Colour alone is never the
+ *    signal (amber↔teal sit at CVD ΔE 10.8 under protanopia).
+ *  - Teal is held away from the brand green — ΔE 16.6 in light, 26.4 in dark — so
+ *    "attractive value" never reads as the green CTA it sits near.
  */
 export const STATUS_PRESENTATION: Record<DealStatus, StatusPresentation> = {
   undervalued: {
-    Icon: Flame,
-    label: 'Undervalued',
-    pill: 'bg-good/12 text-good',
-    ink: 'text-good',
+    Icon: Gem,
+    label: 'Attractive value',
+    pill: 'bg-attractive/12 text-attractive',
+    ink: 'text-attractive',
   },
   fair: {
-    Icon: Scale,
-    label: 'Fair Price',
-    pill: 'bg-fair/12 text-fair',
-    ink: 'text-fair',
+    Icon: Equal,
+    label: 'In line with market',
+    pill: 'bg-aligned/12 text-aligned',
+    ink: 'text-aligned',
   },
   overpriced: {
-    Icon: TriangleAlert,
-    label: 'Overpriced',
-    pill: 'bg-over/12 text-over',
-    ink: 'text-over',
+    Icon: TrendingUp,
+    label: 'Above market range',
+    pill: 'bg-above/12 text-above',
+    ink: 'text-above',
   },
+}
+
+/**
+ * Suggestive, never directive. "Wait" and "Buy now" tell the buyer what to do with
+ * their money; these offer a reading and leave the decision with them.
+ */
+export const RECOMMENDATION_COPY: Record<Recommendation, string> = {
+  opportunity: 'This could be a strong opportunity based on recent trends',
+  aligned: 'This listing is aligned with recent market activity',
+  patience: 'You may find better value by waiting',
 }
 
 /**

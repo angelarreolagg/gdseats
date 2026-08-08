@@ -1,6 +1,11 @@
 export type DealStatus = 'undervalued' | 'fair' | 'overpriced'
 
-export type Recommendation = 'Buy' | 'Neutral' | 'Wait'
+/**
+ * Semantic keys, never displayed. The user-facing sentence lives in
+ * `components/statusPresentation.ts` — this layer must not hold copy, and the
+ * keys stay non-directive so nobody is tempted to render them raw.
+ */
+export type Recommendation = 'opportunity' | 'aligned' | 'patience'
 
 export type Trend = 'up' | 'down' | 'flat'
 

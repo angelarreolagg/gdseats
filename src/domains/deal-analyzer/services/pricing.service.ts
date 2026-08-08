@@ -6,9 +6,9 @@ export const UNDERVALUED_THRESHOLD = -0.1
 export const OVERPRICED_THRESHOLD = 0.1
 
 const RECOMMENDATION_BY_STATUS: Record<DealStatus, Recommendation> = {
-  undervalued: 'Buy',
-  fair: 'Neutral',
-  overpriced: 'Wait',
+  undervalued: 'opportunity',
+  fair: 'aligned',
+  overpriced: 'patience',
 }
 
 /**
@@ -35,7 +35,13 @@ export function getDealStatus(percentageDiff: number): DealStatus {
   return 'fair'
 }
 
-/** The action we put in front of the buyer, one per status. */
+/**
+ * The stance we put in front of the buyer, one per status.
+ *
+ * Returns a key rather than a phrase: this is a marketplace, and the wording is a
+ * conversion-sensitive product decision that belongs in the presentation layer,
+ * not baked into pricing logic.
+ */
 export function getRecommendation(status: DealStatus): Recommendation {
   return RECOMMENDATION_BY_STATUS[status]
 }
