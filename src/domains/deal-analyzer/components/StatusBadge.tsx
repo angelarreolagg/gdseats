@@ -7,14 +7,23 @@ interface StatusBadgeProps {
   formattedDiff: string
 }
 
+/**
+ * Reads as a tag, not an alert: fully rounded, soft tint, medium weight. The
+ * earlier version was a heavy semibold block in status colours, which framed the
+ * verdict as a verdict rather than as context.
+ */
 export function StatusBadge({ status, formattedDiff }: StatusBadgeProps) {
   const { Icon, label, pill } = STATUS_PRESENTATION[status]
 
   return (
-    <div className={`flex items-center gap-2 rounded-lg px-3 py-2 ${pill}`}>
-      <Icon aria-hidden="true" className="h-4 w-4 shrink-0" strokeWidth={2.5} />
-      <span className="text-sm font-semibold tracking-tight">{label}</span>
-      <span className="ml-auto text-sm font-semibold tabular-nums">{formattedDiff}</span>
+    <div className="flex items-center gap-2">
+      <span
+        className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${pill}`}
+      >
+        <Icon aria-hidden="true" className="h-3.5 w-3.5 shrink-0" strokeWidth={2} />
+        {label}
+      </span>
+      <span className="text-xs font-medium text-muted tabular-nums">{formattedDiff} vs market</span>
     </div>
   )
 }
