@@ -96,7 +96,7 @@ export function TrendChip({ trend, focusable = false }: TrendChipProps) {
   )
 
   return (
-    <Tooltip content={panel} variant="panel">
+    <Tooltip content={panel} variant="panel" openOnTap>
       <span
         tabIndex={focusable ? 0 : undefined}
         className="inline-flex cursor-default rounded-full focus-visible:outline-2"

@@ -25,7 +25,14 @@ export function stubMatchMedia(widthQueriesMatch: boolean) {
         ? true
         : /min-width/.test(query)
           ? widthQueriesMatch
-          : false,
+          : // `(hover: none)` is tied to the width, so `setViewport('mobile')`
+            // means a phone in full — narrow *and* touch — rather than a narrow
+            // desktop window that no real user has. Tooltips behave differently
+            // on the two, and testing one while claiming the other is worse than
+            // not testing it.
+            /hover:\s*none/.test(query)
+            ? !widthQueriesMatch
+            : false,
       media: query,
       onchange: null,
       addListener: vi.fn(),

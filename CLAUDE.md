@@ -128,6 +128,9 @@ Dark mode is class-based (`@custom-variant dark` in `theme.css`); Tailwind v4 de
 - **`autoPlay` is gated on `useReducedMotion()` by hand.** `MotionConfig` only governs Motion components and the `prefers-reduced-motion` block in `globals.css` only damps CSS animation — neither stops a looping `<video>`. `src/test/setup.ts` forces reduced motion, so jsdom never tries to play it either.
 - `muted` reflects as a **DOM property**, not an attribute; assert `video.muted`, not `toHaveAttribute('muted')`.
 
+- **The wordmark is one line from `sm` up and two stacked below it, and that is a render branch.** `StrokeText` scales its artwork to the width it is given, so the split cannot be CSS: two half-length lines in a 1216px column would each draw at roughly twice the single line's glyph height and swallow the hero. At 350px the single line is the problem — it renders as a ~32px ribbon adrift inside StrokeText's `fontSize × 1.3` (166px) box. The compact branch adds `[&>span>svg]:!h-auto` so each line follows its own aspect (~64px) instead of being letterboxed. The `<h1>` carries `aria-label={WORDMARK}` so the accessible name is identical either way rather than depending on how two `role="img"` children concatenate.
+- **Only the one-line branch uses the glyph-count tint.** The split branch gives each line its own `strokeColor`/`fillColor`, so `nth-child(-n + 10)` is not involved and cannot cut a rewritten headline mid-word there. `TeamsHero.test.tsx` pins both halves of that.
+
 `shared/components/StrokeText.tsx` is **vendored verbatim from React Bits** (TS + Tailwind variant) so it can be re-synced upstream — the only edit is a `type` import for `CSSProperties`, which `verbatimModuleSyntax` requires. Local adjustments go at the call site: `TeamsHero` overrides the component's inline SVG height with `[&>span>svg]:!h-auto`, because the fixed `fontSize × 1.3` box letterboxes the wordmark on a narrow screen instead of scaling it. It draws in the raw brand green — legal here and nowhere else, since the hero is pinned dark. It brings `gsap` (~57 kB gz), the only dependency in the repo added for a single component.
 
 **The wordmark opts out of `--font-sans`, and must.** `system-ui` is SF Pro on macOS, whose heavy glyphs are assembled from *overlapping component contours* — the diagonal of an N, the apex of an A, the middle of an M are separate shapes laid over the stems. Filled, nonzero winding merges them and nothing shows. `StrokeText` **strokes** the outline, so every internal edge is drawn and those diagonals stick out of the stems as loose slivers. The fix is a font with merged outlines (`'Helvetica Neue', Helvetica, Arial, sans-serif`), passed as `style` — `StrokeText` puts `style` on its root span and its `<text>` sets only size/weight/tracking, so `font-family` inherits and the vendored file stays untouched. Any replacement font must be checked the same way: **stroke the string and look at M, N, A, W**, don't trust how it looks filled.
@@ -156,7 +159,9 @@ Renaming a module's extension leaves Vite's dev server holding the old resolutio
 
 ## Team logos (ESPN)
 
-Real franchise marks come from ESPN. `teams/data/teamLogos.ts` is **generated** — refresh with `pnpm logos:sync`, never hand-edit. The sync script is the only thing in the repo that knows the API exists; the app ships a static import and makes **zero runtime requests** for this, which keeps the first screen as deterministic as the rest of the seeded demo.
+Real franchise marks come from ESPN. `teams/data/teamLogos.ts` is **generated** — refresh with `pnpm logos:sync`, never hand-edit. The sync script is the only thing in the repo that knows the API exists; the app ships a static import and makes **zero runtime requests to ESPN's API**, which keeps the first screen as deterministic as the rest of the seeded demo. (The browser does fetch the *images* from `a.espncdn.com` at runtime — that is the combiner URL below, not the API.)
+
+**Two ESPN hosts, and they belong in different places.** `site.api.espn.com/...` is the team-list endpoint, read only by `scripts/syncTeamLogos.mjs` at author time; it is overridable via `ESPN_TEAMS_ENDPOINT` with a default, and deliberately **not** a `VITE_` var — nothing in the bundle reads it, and there is no secret (the endpoint is public and unauthenticated). `a.espncdn.com/combiner/i` is a runtime image host and stays a constant in `teamLogo.service.ts`: the host is inseparable from the `?img=&w=&h=` contract `getTeamLogoUrl` builds, so making the host alone configurable would be a setting that breaks the feature whenever it is used.
 
 Three things that look like details and are not:
 
@@ -200,6 +205,15 @@ Below `sm` the panel is **full-bleed** — no margin, no radius, `min-h-dvh` (no
 Icons come from **lucide-react**; there are no emoji in the UI. Services must stay free of React, so **they emit a semantic icon *name*** (`TagIconName`, `TrendDirection`) and the component layer resolves it — `listing/components/tagPresentation.ts`, `teams/components/trendPresentation.ts`, `deal-analyzer/components/statusPresentation.ts`. Never import a component into a service to shortcut this.
 
 Tooltips wrap **@radix-ui/react-tooltip** in `shared/components/Tooltip.tsx`. Hover tooltips never fire on touch, so **nothing may live only in a tooltip**: chips carry their own visible label, and the Total-cost breakdown repeats figures that `MakeAnOfferCard` shows as visible rows.
+
+**`openOnTap` opens the tooltip on tap where `(hover: none)` matches** — on `TrendChip` and `Tag`, whose triggers are decorative chips. It is **opt-in and must stay that way**: it swallows the tap, so a trigger that also *does* something loses its action. `AppHeader`'s logo is wrapped in a tooltip and is the button that navigates home. The rule above has not moved either — tap is an enhancement, not a licence to put a value only in a tooltip.
+
+Two things in that implementation look like over-engineering and are not:
+
+- **On touch the open state is fully controlled and Radix gets no `onOpenChange`.** Radix closes a tooltip on the trigger's `pointerdown`, which lands *before* the `click` that would toggle it — share the state and the second tap reads as close-then-open, so the tooltip can never be dismissed by tapping what opened it.
+- **Dismissal is a hand-rolled document listener**, and it ignores pointerdowns inside the trigger. Left to Radix, that outside-tap close and the click-toggle cancel each other out.
+
+`TrendChip` and `Tag` sit inside `TeamCard`'s and `ListingRow`'s `<button>`, so the handler calls `stopPropagation` — without it, reading the forecast also opens the team, and the buyer is on another screen before the sentence renders. `TrendChip.test.tsx` pins that.
 
 `Tag` takes `focusable` (default off). Chips inside `ListingRow` must stay non-focusable — the row is itself a `<button>`, and a focusable element nested in a button is invalid and would add hundreds of tab stops. `ListingSummaryCard` opts in, so the copy is keyboard-reachable somewhere.
 

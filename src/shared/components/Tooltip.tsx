@@ -1,5 +1,9 @@
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 import * as RadixTooltip from '@radix-ui/react-tooltip'
+import { useMediaQuery } from '../hooks/useMediaQuery'
+
+/** A device whose primary pointer cannot hover — where a hover tooltip is dead. */
+const TOUCH_QUERY = '(hover: none)'
 
 interface TooltipProps {
   content: ReactNode
@@ -7,6 +11,15 @@ interface TooltipProps {
   side?: 'top' | 'right' | 'bottom' | 'left'
   /** Structured content (a breakdown table) needs padding the text variant doesn't. */
   variant?: 'text' | 'panel'
+  /**
+   * Open on tap where hover is unavailable.
+   *
+   * **Only for triggers that are decorative** — a chip whose whole job is to carry
+   * this tooltip. It swallows the tap, so a trigger that also *does* something
+   * must leave this off or its action stops firing: `AppHeader`'s logo is wrapped
+   * in a tooltip and is the button that navigates home.
+   */
+  openOnTap?: boolean
 }
 
 /**
@@ -16,15 +29,72 @@ interface TooltipProps {
  * wires `aria-describedby`, opens on keyboard focus, closes on Escape, and
  * collision-flips near the viewport edge.
  *
- * IMPORTANT: hover tooltips never fire on touch. Everything here is supplementary
- * — chips carry their own visible label, and the cost breakdown repeats numbers
- * that `MakeAnOfferCard` already shows as visible rows. Never put a value here
- * that exists nowhere else.
+ * IMPORTANT: a hover tooltip never fires on touch. `openOnTap` closes that gap for
+ * decorative triggers, but the rule behind it has not moved — chips still carry
+ * their own visible label, and the cost breakdown still repeats numbers
+ * `MakeAnOfferCard` shows as rows. Tap is an enhancement, not a licence to put a
+ * value here that exists nowhere else.
+ *
+ * **On touch the open state is fully controlled here, and Radix is given no
+ * `onOpenChange`.** That is deliberate. Radix closes a tooltip on the trigger's
+ * `pointerdown`, which lands before the `click` that would toggle it — so with
+ * Radix sharing the state, a second tap reads as close-then-open and the tooltip
+ * can never be dismissed by tapping the thing that opened it. Owning the state
+ * outright is the only version where both taps behave.
  */
-export function Tooltip({ content, children, side = 'top', variant = 'text' }: TooltipProps) {
+export function Tooltip({
+  content,
+  children,
+  side = 'top',
+  variant = 'text',
+  openOnTap = false,
+}: TooltipProps) {
+  const isTouch = useMediaQuery(TOUCH_QUERY)
+  const tapEnabled = openOnTap && isTouch
+  const [tappedOpen, setTappedOpen] = useState(false)
+  const triggerRef = useRef<HTMLButtonElement>(null)
+
+  useEffect(() => {
+    if (!tapEnabled || !tappedOpen) return
+
+    // Dismissal, hand-rolled for the same reason the open state is: Radix is not
+    // managing this tooltip. A tap on the trigger is ignored here and left to the
+    // click handler below, or the two would fight and cancel out.
+    function onPointerDown(event: PointerEvent) {
+      if (triggerRef.current?.contains(event.target as Node)) return
+      setTappedOpen(false)
+    }
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === 'Escape') setTappedOpen(false)
+    }
+
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [tapEnabled, tappedOpen])
+
   return (
-    <RadixTooltip.Root>
-      <RadixTooltip.Trigger asChild>{children}</RadixTooltip.Trigger>
+    <RadixTooltip.Root open={tapEnabled ? tappedOpen : undefined}>
+      <RadixTooltip.Trigger
+        asChild
+        ref={triggerRef}
+        onClick={
+          tapEnabled
+            ? (event) => {
+                // The chip sits inside `TeamCard`'s and `ListingRow`'s <button>.
+                // Without this, reading the forecast also opens the team.
+                event.preventDefault()
+                event.stopPropagation()
+                setTappedOpen((open) => !open)
+              }
+            : undefined
+        }
+      >
+        {children}
+      </RadixTooltip.Trigger>
       <RadixTooltip.Portal>
         <RadixTooltip.Content
           side={side}

@@ -1,6 +1,56 @@
 import type { ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import StrokeText from '@/shared/components/StrokeText'
+import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
+
+/**
+ * The headline, and the two halves it splits into.
+ *
+ * `WORDMARK` is the accessible name in both layouts, set on the `<h1>` itself
+ * rather than left to the concatenation of two `role="img"` children — the
+ * spacing between them is not something to leave to chance.
+ */
+const WORDMARK = 'SOME SEATS MEAN MORE'
+const WORDMARK_LEAD = 'SOME SEATS'
+const WORDMARK_TAIL = 'MEAN MORE'
+
+/** Literal values of psl-wordmark-lead and psl-accent. The hero is dark-pinned,
+ *  and both are the same in either theme, so there is nothing to resolve. */
+const LEAD_COLOR = '#d3d7db'
+const ACCENT_COLOR = '#a0f700'
+
+/** Below this the wordmark stacks; above it, one line. Matches Tailwind's `sm`. */
+const ONE_LINE_QUERY = '(min-width: 640px)'
+
+const DRAW = {
+  strokeWidth: 1.4,
+  drawDuration: 1.6,
+  fillDelay: 0.2,
+  stagger: 0.05,
+  ease: 'power2.out',
+  trigger: 'mount',
+  fillMode: 'wipe',
+  fontSize: 96,
+  fontWeight: 800,
+  letterSpacing: 0.5,
+} as const
+
+/**
+ * The wordmark opts OUT of `--font-sans`, and has to.
+ *
+ * `system-ui` resolves to SF Pro on macOS, whose heavy glyphs are built from
+ * overlapping component contours — the diagonal of an N, the apex of an A, the
+ * middle of an M are separate shapes laid over the stems. Filled, nonzero winding
+ * merges them and you never see it. StrokeText *strokes* the outline, so every
+ * internal edge gets drawn and those diagonals poke out of the stems as loose
+ * slivers. Verified by rendering the same string across font stacks: every
+ * grotesque with merged outlines is clean, SF Pro is not.
+ *
+ * `style` reaches the glyphs because StrokeText puts it on the root span and its
+ * <text> only sets size/weight/tracking — font-family inherits. So this fixes the
+ * artifact without touching the vendored component.
+ */
+const WORDMARK_FONT = { fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }
 
 /**
  * When the drawn headline finishes, in seconds.
@@ -46,6 +96,7 @@ interface TeamsHeroProps {
  */
 export function TeamsHero({ children }: TeamsHeroProps) {
   const reduceMotion = useReducedMotion()
+  const oneLine = useMediaQuery(ONE_LINE_QUERY)
 
   return (
     <section className="dark relative isolate flex min-h-[clamp(300px,40svh,520px)] overflow-hidden">
@@ -80,40 +131,79 @@ export function TeamsHero({ children }: TeamsHeroProps) {
         {children ?? (
           <>
             {/*
-             * The wordmark opts OUT of `--font-sans`, and has to.
+             * One line from `sm` up, two stacked below it — a render branch, not
+             * a CSS one, because StrokeText scales its artwork to the width it is
+             * given. Two half-length lines in a 1216px column would each render
+             * at roughly twice the glyph height of the single line and swallow
+             * the hero; at 350px they are the only way the wordmark is legible at
+             * all, instead of a 32px ribbon adrift in a 166px box.
              *
-             * `system-ui` resolves to SF Pro on macOS, whose heavy glyphs are
-             * built from overlapping component contours — the diagonal of an N,
-             * the apex of an A, the middle of an M are separate shapes laid over
-             * the stems. Filled, nonzero winding merges them and you never see
-             * it. StrokeText *strokes* the outline, so every internal edge gets
-             * drawn and those diagonals poke out of the stems as loose slivers.
-             * Verified by rendering the same string across font stacks: every
-             * grotesque with merged outlines is clean, SF Pro is not.
-             *
-             * `style` reaches the glyphs because StrokeText puts it on the root
-             * span and its <text> only sets size/weight/tracking — font-family
-             * inherits. So this fixes the artifact without touching the
-             * vendored component.
+             * The accessible name is set here rather than left to the two
+             * `role="img"` children, so it reads identically in both layouts.
              */}
-            {/* `hero-wordmark` tints the first 10 glyphs — see globals.css. */}
-            <h1 className="hero-wordmark w-full">
-              <StrokeText
-                style={{ fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }}
-                text="SOME SEATS MEAN MORE"
-                strokeColor="#a0f700"
-                fillColor="#a0f700"
-                strokeWidth={1.4}
-                drawDuration={1.6}
-                fillDelay={0.2}
-                stagger={0.05}
-                ease="power2.out"
-                trigger="mount"
-                fillMode="wipe"
-                fontSize={128}
-                fontWeight={800}
-                letterSpacing={0.5}
-              />
+            <h1 aria-label={WORDMARK} className={oneLine ? 'hero-wordmark w-full' : 'w-full'}>
+              {oneLine ? (
+                /* One string, so the two-tone split has to come from CSS:
+                   `hero-wordmark` retints the first 10 glyphs — see globals.css. */
+                <StrokeText
+                  {...DRAW}
+                  style={WORDMARK_FONT}
+                  text={WORDMARK}
+                  strokeColor={ACCENT_COLOR}
+                  fillColor={ACCENT_COLOR}
+                />
+              ) : (
+                /*
+                 * Split into two components, so each carries its own colour and
+                 * the `nth-child(-n + 10)` rule is not involved at all — the
+                 * fragile coupling between that count and the copy simply does
+                 * not exist on this branch.
+                 *
+                 * `!h-auto` overrides StrokeText's inline `fontSize × 1.3` box.
+                 * Left alone each line is letterboxed inside that band and the
+                 * pair stands twice as tall as its own artwork.
+                 *
+                 * THE TWO SIZE LEVERS HERE ARE NOT THE ONES YOU EXPECT.
+                 *
+                 * `fontSize` does nothing to the rendered size on this branch. The
+                 * svg is `w-full` with an auto height, so it fills whatever width
+                 * it is given and its height follows the viewBox aspect — and the
+                 * aspect is unchanged by `fontSize`, because the glyph box and the
+                 * padding around it (`max(strokeWidth, fontSize × 0.1)`) scale
+                 * together. `fontSize` is the internal coordinate system, not a
+                 * size. **Width is the only size control.** `w-[85%]` is what makes
+                 * the wordmark 15% smaller.
+                 *
+                 * The gap between the lines is not a gap either — it is that same
+                 * 10%-of-fontSize padding baked into each svg's viewBox, top and
+                 * bottom, so roughly a fifth of a line box sits empty between them
+                 * and no `gap` utility can reach it. `-mt-2` on the second line
+                 * pulls back most of it. Do not push it much past this: the
+                 * padding is also what keeps the stroke from being clipped at the
+                 * viewBox edge.
+                 */
+                <span className="mx-auto block w-[85%] [&>span>svg]:!h-auto">
+                  <StrokeText
+                    {...DRAW}
+                    style={WORDMARK_FONT}
+                    text={WORDMARK_LEAD}
+                    strokeColor={LEAD_COLOR}
+                    fillColor={LEAD_COLOR}
+                  />
+                  {/* The margin goes on StrokeText's own root, not on a wrapper:
+                      the `[&>span>svg]` above matches one level down, and a
+                      wrapper would push this svg out of its reach and leave the
+                      second line letterboxed in its 1.3× box. */}
+                  <StrokeText
+                    {...DRAW}
+                    className="-mt-2"
+                    style={WORDMARK_FONT}
+                    text={WORDMARK_TAIL}
+                    strokeColor={ACCENT_COLOR}
+                    fillColor={ACCENT_COLOR}
+                  />
+                </span>
+              )}
             </h1>
             {/*
              * The copy holds until the headline has finished drawing, then rises

@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 import userEvent from '@testing-library/user-event'
-import { render, screen } from '@/test/utils'
+import { render, screen, setViewport, within } from '@/test/utils'
 import { TrendChip } from '../components/TrendChip'
 import { getMarketTrend } from '../services/marketTrend.service'
 import { getTrendExplanation } from '../components/trendPresentation'
@@ -21,6 +21,57 @@ describe('TrendChip', () => {
 
     expect(screen.getByText(TREND.label)).toBeInTheDocument()
     expect(screen.getByText(formatSignedPercent(TREND.momentum))).toBeInTheDocument()
+  })
+
+  /**
+   * Validates: on a touch device the reasoning opens on tap, and a second tap
+   * closes it.
+   * Why it matters: the forecast sentence is the one thing in this feature that
+   * lives *only* in the tooltip, and a hover tooltip never fires on touch — so on
+   * a phone the Popularity Insight was a chip with no explanation behind it. The
+   * second tap matters as much as the first: Radix closes a tooltip on the
+   * trigger's `pointerdown`, which lands before the `click` that toggles it, so
+   * the obvious implementation opens on every tap and can never be dismissed.
+   */
+  it('opens the explanation on tap where there is no hover', async () => {
+    setViewport('mobile')
+    const { container } = render(<TrendChip trend={TREND} />)
+
+    // Scoped to the container because the open panel repeats the label in its own
+    // header — and it renders through a portal, outside this node. `screen` would
+    // find both and throw on the second tap.
+    const chip = () => within(container).getByText(TREND.label)
+    const { forecast } = getTrendExplanation(TREND)
+
+    expect(screen.queryByText(forecast)).not.toBeInTheDocument()
+
+    await userEvent.click(chip())
+    expect(await screen.findByText(forecast)).toBeInTheDocument()
+
+    await userEvent.click(chip())
+    expect(screen.queryByText(forecast)).not.toBeInTheDocument()
+  })
+
+  /**
+   * Validates: tapping the chip does not activate whatever contains it.
+   * Why it matters: `TeamCard` is a `<button>` and the chip sits inside it. A tap
+   * that both opens the tooltip and navigates to the franchise means the buyer
+   * never gets to read the sentence they tapped for — they are on another screen
+   * before it renders. This is the actual regression risk of the whole change.
+   */
+  it('does not activate its container when tapped', async () => {
+    setViewport('mobile')
+    const onSelect = vi.fn()
+    render(
+      <button type="button" onClick={onSelect}>
+        <TrendChip trend={TREND} />
+      </button>,
+    )
+
+    await userEvent.click(screen.getByText(TREND.label))
+
+    expect(await screen.findByText(getTrendExplanation(TREND).forecast)).toBeInTheDocument()
+    expect(onSelect).not.toHaveBeenCalled()
   })
 
   /**

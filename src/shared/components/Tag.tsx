@@ -61,7 +61,7 @@ export function Tag({
   if (!tooltip) return pill
 
   return (
-    <Tooltip content={tooltip}>
+    <Tooltip content={tooltip} openOnTap>
       <span
         tabIndex={focusable ? 0 : undefined}
         className="inline-flex rounded-full focus-visible:outline-2"

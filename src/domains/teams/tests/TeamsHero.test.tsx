@@ -1,4 +1,4 @@
-import { render, screen } from '@/test/utils'
+import { render, screen, setViewport } from '@/test/utils'
 import { describe, expect, it } from 'vitest'
 import { TeamsHero } from '../components/TeamsHero'
 
@@ -122,6 +122,49 @@ describe('TeamsHero', () => {
 
     // Node.compareDocumentPosition: FOLLOWING means `promise` comes after.
     expect(disclosure.compareDocumentPosition(promise)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+
+  /**
+   * Validates: on a narrow screen the wordmark is two drawn lines, and the
+   * heading still announces the whole phrase.
+   * Why it matters: StrokeText scales its artwork to the width it is given, so at
+   * 350px the single line renders as a ~32px ribbon adrift in a 166px box — the
+   * headline of the landing page, illegible. Splitting it is the fix, and the
+   * accessible name has to survive the split: the `<h1>` is the only `<h1>` on
+   * the page, and it must not start announcing half a sentence.
+   */
+  it('splits the wordmark into two drawn lines on a narrow screen', () => {
+    setViewport('mobile')
+    const { container } = render(<TeamsHero />)
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'SOME SEATS MEAN MORE' }),
+    ).toBeInTheDocument()
+
+    const lines = container.querySelectorAll('h1 [role="img"]')
+    expect(lines).toHaveLength(2)
+    expect(Array.from(lines).map((line) => line.getAttribute('aria-label'))).toEqual([
+      'SOME SEATS',
+      'MEAN MORE',
+    ])
+  })
+
+  /**
+   * Validates: the two-line branch does NOT rely on the `nth-child(-n + 10)`
+   * tint, and the one-line branch still does.
+   * Why it matters: the CSS split counts glyphs, and the count is hard-coded to
+   * the current copy. Carrying that coupling onto a layout that does not need it
+   * would double the number of places a rewritten headline can silently cut the
+   * tint mid-word. Each narrow line paints its own colour from its own component.
+   */
+  it('drops the glyph-count tint on the split layout', () => {
+    setViewport('mobile')
+    const { container: narrow } = render(<TeamsHero />)
+    expect(narrow.querySelector('h1')).not.toHaveClass('hero-wordmark')
+
+    setViewport('desktop')
+    const { container: wide } = render(<TeamsHero />)
+    expect(wide.querySelector('h1')).toHaveClass('hero-wordmark')
   })
 
   /**
