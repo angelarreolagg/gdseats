@@ -14,16 +14,19 @@
  */
 
 /**
- * Absolute origin, no trailing slash.
+ * Absolute origin, no trailing slash. Live and verified.
  *
- * TODO(deploy): replace with the real host before publishing. Every canonical
- * link, `og:url`, `og:image`, sitemap entry, and JSON-LD `@id` is built from it,
- * and Open Graph requires absolute URLs — a relative `og:image` silently yields
- * no preview card on most scrapers.
+ * Every canonical link, `og:url`, `og:image`, sitemap entry and JSON-LD `@id` is
+ * built from it, and Open Graph requires absolute URLs — a relative `og:image`
+ * silently yields no preview card on most scrapers.
  *
- * If this ever ships to a GitHub Pages *subpath* (`…github.io/gdseats/`) rather
- * than its own domain, this is not the only change: `vite.config.ts` needs a
- * matching `base`, and the absolute `/…` paths in `index.html` and
+ * Moving to a custom domain means changing it in **six** places, which is why
+ * `site.config.test.ts` exists: here, `index.html`, `public/robots.txt`,
+ * `public/sitemap.xml`, and the two JSON-LD `@id`s.
+ *
+ * If it ever ships to a GitHub Pages *subpath* (`…github.io/gdseats/`) rather
+ * than its own domain, that is not the only change either: `vite.config.ts` needs
+ * a matching `base`, and the absolute `/…` paths in `index.html` and
  * `site.webmanifest` all need the prefix too.
  */
 export const SITE_URL = 'https://gdseats.vercel.app'
