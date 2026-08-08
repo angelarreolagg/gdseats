@@ -23,15 +23,20 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
     <div>
       <TeamsHero />
 
-      <div className="mx-auto max-w-7xl px-5 py-6 sm:px-8">
-        <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
+      <div className="mx-auto max-w-7xl px-4 py-5 sm:px-8 sm:py-6">
+        {/*
+         * `sm:items-stretch`, not `items-center`: LeagueSwitch is the taller
+         * control (its pill sits inside a padded track), and matching the search
+         * field to it by hand would mean a hardcoded height that drifts the
+         * moment either one is restyled. Stretching lets the row settle it.
+         */}
+        <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:flex-wrap sm:items-stretch sm:gap-4">
           {/*
-           * `items-stretch`, not `items-center`: LeagueSwitch is the taller
-           * control (its pill sits inside a padded track), and matching the
-           * search field to it by hand would mean a hardcoded height that drifts
-           * the moment either one is restyled. Stretching lets the row settle it.
+           * Mobile row 1: the league, full width. It decides what the grid
+           * contains, so it reads before the two controls that only narrow or
+           * page through what it chose.
            */}
-          <div className="flex flex-wrap items-stretch gap-3">
+          <div className="order-1 sm:order-1">
             <LeagueSwitch
               value={league}
               onChange={(value) => {
@@ -39,24 +44,50 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
                 setPage(0)
               }}
             />
+          </div>
+
+          {/*
+           * Mobile row 2: search and pagination side by side.
+           *
+           * `items-stretch` is what settles them to one height — the pagination
+           * box is 46px and the field 42, and left alone they sit on different
+           * baselines with the shorter one floating. Stretching lets the taller
+           * one set the row and the field fill it (`h-full` on its input).
+           *
+           * `sm:contents` dissolves this wrapper at the breakpoint so both become
+           * direct items of the row above, where the field returns to its natural
+           * width beside the league switch and `sm:ml-auto` pushes pagination to
+           * the far right. It regroups elements across a breakpoint without
+           * rendering either control twice.
+           */}
+          <div className="order-2 flex items-stretch gap-3 sm:contents">
             <TeamSearchCombobox
               teams={TEAMS}
               onSelectTeam={onSelectTeam}
               disabled={league === 'mlb'}
+              className="min-w-0 flex-1 sm:order-2 sm:flex-initial"
             />
+            {league === 'nfl' ? (
+              <div className="flex shrink-0 sm:order-3 sm:ml-auto">
+                <TeamsPagination page={page} pageCount={pageCount} onChange={setPage} />
+              </div>
+            ) : null}
           </div>
-          {league === 'nfl' ? (
-            <TeamsPagination page={page} pageCount={pageCount} onChange={setPage} />
-          ) : null}
         </div>
 
+        {/*
+         * Two columns from the smallest screen up. One column put half a card in
+         * the fold and made the catalogue read as a list of two teams; two puts
+         * four franchises in view, which is what makes the grid legible as a
+         * catalogue at all.
+         */}
         {visible.length > 0 ? (
           <motion.div
             key={`${league}-${page}`}
             initial={{ opacity: 0, y: 8 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-            className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+            className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
           >
             {visible.map((team) => (
               <TeamCard key={team.id} team={team} onSelect={onSelectTeam} />

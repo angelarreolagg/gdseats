@@ -28,6 +28,39 @@ describe('TeamsScreen league switch', () => {
   })
 
   /**
+   * Validates: the selected fill exists once and travels, rather than one fill
+   * per option toggling on and off.
+   * Why it matters: the slide between the two halves is the only feedback that
+   * the change came from the user — the grid below re-renders too fast to read as
+   * a response. Motion can only animate the fill from one pill to the other while
+   * it is a single element carrying a `layoutId`. Rendering a background under
+   * both options and switching their opacity looks identical in a static
+   * screenshot, passes every other test here, and silently deletes the animation.
+   */
+  it('renders exactly one travelling fill, under the active league', async () => {
+    render(<TeamsScreen onSelectTeam={vi.fn()} />)
+
+    // The fill is purely decorative — `aria-hidden`, no role, no accessible name
+    // — so no RTL query can reach it and a raw selector is the only handle. It is
+    // scoped to the group because the hero video, its scrims and every team
+    // banner are `aria-hidden` too, and an unscoped query collects all 34.
+    const group = screen.getByRole('group', { name: /league/i })
+    const fills = () => group.querySelectorAll('[aria-hidden="true"]')
+
+    expect(fills()).toHaveLength(1)
+    expect(screen.getByRole('button', { name: /nfl teams/i })).toContainElement(
+      fills()[0] as HTMLElement,
+    )
+
+    await userEvent.click(screen.getByRole('button', { name: /mlb teams/i }))
+
+    expect(fills()).toHaveLength(1)
+    expect(screen.getByRole('button', { name: /mlb teams/i })).toContainElement(
+      fills()[0] as HTMLElement,
+    )
+  })
+
+  /**
    * Validates: MLB is honest about being empty.
    * Why it matters: promoting the league picker from a dropdown to two prominent
    * buttons makes MLB much easier to land on. Without the empty state the user

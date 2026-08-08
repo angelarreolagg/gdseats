@@ -48,7 +48,7 @@ export function TeamsHero({ children }: TeamsHeroProps) {
   const reduceMotion = useReducedMotion()
 
   return (
-    <section className="dark relative isolate flex min-h-[clamp(340px,50svh,520px)] overflow-hidden">
+    <section className="dark relative isolate flex min-h-[clamp(300px,40svh,520px)] overflow-hidden">
       <video
         src="/nflstadiums.mp4"
         autoPlay={!reduceMotion}
@@ -70,7 +70,13 @@ export function TeamsHero({ children }: TeamsHeroProps) {
        */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-page" />
 
-      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center justify-center px-5 py-12 text-center sm:px-8 sm:py-16">
+      {/*
+       * `py` is the only lever left on a short screen — the content is the real
+       * floor, since the wordmark's SVG box is a fixed multiple of its font size.
+       * Mobile takes the tighter value so the first row of team cards clears the
+       * fold, which is the whole reason the height is a clamp and not a number.
+       */}
+      <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center justify-center px-5 py-8 text-center sm:px-8 sm:py-16">
         {children ?? (
           <>
             {/*
@@ -146,7 +152,7 @@ export function TeamsHero({ children }: TeamsHeroProps) {
                 duration: 0.7,
                 ease: [0.22, 1, 0.36, 1],
               }}
-              className="mt-6 inline-flex items-center gap-2 rounded-full border border-ink/15 bg-page/50 px-3.5 py-1.5 text-xs font-medium tracking-wide text-muted backdrop-blur-sm"
+              className="mt-5 inline-flex items-center gap-2 rounded-full border border-ink/15 bg-page/50 px-3 py-1.5 text-[11px] font-medium tracking-wide text-muted backdrop-blur-sm sm:mt-6 sm:px-3.5 sm:text-xs"
             >
               <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-accent" />
               Demo version · all data is mocked
@@ -159,7 +165,7 @@ export function TeamsHero({ children }: TeamsHeroProps) {
                 duration: 0.7,
                 ease: [0.22, 1, 0.36, 1],
               }}
-              className="mt-5 text-2xl font-semibold tracking-tight text-balance text-ink sm:text-3xl"
+              className="mt-4 text-2xl font-semibold tracking-tight text-balance text-ink sm:mt-5 sm:text-3xl"
             >
               Find your team's PSL &amp; Tickets
             </motion.p>

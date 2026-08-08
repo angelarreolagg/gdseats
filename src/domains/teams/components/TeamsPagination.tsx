@@ -9,7 +9,10 @@ interface TeamsPaginationProps {
 
 export function TeamsPagination({ page, pageCount, onChange }: TeamsPaginationProps) {
   return (
-    <div className="flex items-center gap-2 rounded-full border border-border-hairline bg-surface p-1.5">
+    // `h-full` so the row it shares with the search field settles both controls
+    // to one height. Without it this box is 46px against the field's 42 and the
+    // two sit on different baselines.
+    <div className="flex h-full items-center gap-2 rounded-full border border-border-hairline bg-surface p-1.5">
       <IconButton
         label="Previous page"
         size="sm"
@@ -20,7 +23,9 @@ export function TeamsPagination({ page, pageCount, onChange }: TeamsPaginationPr
         <ChevronLeft aria-hidden="true" className="h-4 w-4" />
       </IconButton>
 
-      <span className="px-1 text-sm font-medium text-ink tabular-nums">
+      {/* `whitespace-nowrap`, or a narrow row breaks "1 of 3" over three lines
+          and the control grows taller than the field beside it. */}
+      <span className="px-1 text-sm font-medium whitespace-nowrap text-ink tabular-nums">
         {page + 1} of {pageCount}
       </span>
 

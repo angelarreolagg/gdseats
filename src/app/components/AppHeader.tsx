@@ -18,7 +18,7 @@ function DemoMarker() {
     <Tooltip content="All data is mocked — no real listings or transactions" side="bottom">
       <span
         tabIndex={0}
-        className="inline-flex cursor-default items-center rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold tracking-tight text-on-accent shadow-raised"
+        className="inline-flex cursor-default items-center rounded-xl bg-accent px-3 py-2 text-xs font-semibold tracking-tight text-on-accent shadow-raised sm:px-4 sm:py-2.5 sm:text-sm"
       >
         Demo version
       </span>
@@ -41,7 +41,7 @@ function DemoMarker() {
 export function AppHeader({ onHome }: AppHeaderProps) {
   return (
     <header className="dark sticky top-0 z-30 border-b border-border-hairline bg-page/90 backdrop-blur">
-      <div className="flex items-center gap-6 px-5 py-3 sm:px-6">
+      <div className="flex items-center gap-3 px-4 py-2.5 sm:gap-6 sm:px-6 sm:py-3">
         <Tooltip content="Gridiron &amp; Diamond Seats" side="bottom">
           <button
             type="button"
@@ -54,7 +54,7 @@ export function AppHeader({ onHome }: AppHeaderProps) {
           </button>
         </Tooltip>
 
-        <div className="ml-auto flex items-center gap-3">
+        <div className="ml-auto flex items-center gap-2 sm:gap-3">
           <ThemeToggle />
           <DemoMarker />
         </div>
