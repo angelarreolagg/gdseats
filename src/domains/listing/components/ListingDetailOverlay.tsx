@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 import { motion } from 'motion/react'
 import {
   ChartColumn,
@@ -41,10 +41,16 @@ export function ListingDetailOverlay({
   onClose,
 }: ListingDetailOverlayProps) {
   const panelRef = useRef<HTMLDivElement>(null)
+  // Stable identity so the panel's analysis timer keys off the listing, not off a
+  // fresh object arriving with every render.
+  const signals = useMemo(() => toListingSignals(listing), [listing])
 
   useEffect(() => {
     const previouslyFocused = document.activeElement as HTMLElement | null
-    panelRef.current?.focus()
+    // preventScroll matters: the panel is taller than the viewport, so a plain
+    // focus() scrolls it into view and eats the top margin — the dialog opens
+    // already clipped against the top edge until the user scrolls back up.
+    panelRef.current?.focus({ preventScroll: true })
 
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === 'Escape') onClose()
@@ -95,9 +101,9 @@ export function ListingDetailOverlay({
           </button>
 
           <div className="flex items-center gap-2">
-            <span aria-hidden="true" className="inline-block h-2 w-2 rounded-full bg-accent" />
+            <img src="/logo-mark.png" alt="" className="h-5 w-5 shrink-0 object-contain" />
             <span className="text-xs font-semibold tracking-widest text-muted uppercase">
-              PSL Scout
+              G&amp;D Seats
             </span>
           </div>
 
@@ -124,7 +130,7 @@ export function ListingDetailOverlay({
 
             {/* Directly under the map: the verdict belongs with understanding the
                 seat, not in the middle of the offer flow on the right. */}
-            <AIInsightPanel signals={toListingSignals(listing)} />
+            <AIInsightPanel signals={signals} />
 
             <section>
               <SectionHeading icon={History}>Price history</SectionHeading>

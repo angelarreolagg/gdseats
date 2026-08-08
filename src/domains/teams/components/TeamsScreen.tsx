@@ -1,22 +1,17 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
-import { Select } from '@/shared/components/Select'
 import { TEAMS, TEAMS_PER_PAGE } from '../data/teams'
 import { TeamCard } from './TeamCard'
 import { TeamsPagination } from './TeamsPagination'
+import { LeagueSwitch, type League } from './LeagueSwitch'
 
 interface TeamsScreenProps {
   onSelectTeam: (teamId: string) => void
 }
 
-const LEAGUE_OPTIONS = [
-  { value: 'nfl', label: 'NFL Teams' },
-  { value: 'mlb', label: 'MLB Teams' },
-]
-
 export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
   const [page, setPage] = useState(0)
-  const [league, setLeague] = useState('nfl')
+  const [league, setLeague] = useState<League>('nfl')
 
   const pageCount = Math.ceil(TEAMS.length / TEAMS_PER_PAGE)
   // MLB is chrome only — the demo carries one league's worth of mock data.
@@ -41,12 +36,8 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
 
       <div className="mx-auto max-w-7xl px-5 py-6 sm:px-8">
         <div className="mb-5 flex items-center justify-between gap-4">
-          <Select
-            label="League"
-            hideLabel
-            rounded="full"
+          <LeagueSwitch
             value={league}
-            options={LEAGUE_OPTIONS}
             onChange={(value) => {
               setLeague(value)
               setPage(0)

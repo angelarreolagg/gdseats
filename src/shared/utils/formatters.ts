@@ -20,6 +20,15 @@ export function formatCompactCurrency(value: number): string {
   return compactCurrency.format(value)
 }
 
+/**
+ * "$23,550" → 23550. Strips everything that isn't a digit, so a pasted
+ * "$23,550.00" or a typed "23 550" both land on the same number.
+ */
+export function parseCurrencyInput(raw: string): number {
+  const digits = raw.replace(/\D/g, '')
+  return digits ? Number(digits) : 0
+}
+
 /** 0.087 → "9%". Unsigned; use formatSignedPercent when direction matters. */
 export function formatPercent(fraction: number): string {
   return `${Math.round(Math.abs(fraction) * 100)}%`

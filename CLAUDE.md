@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-`pslscout-demo` is a frontend-only demo of PSL Scout — a secondary market for NFL personal seat licenses, with an AI valuation layer. All data is mocked; there is no backend.
+`pslscout-demo` (the npm package name is historical — the product is **G&D Seats**, expanded to "Gridiron & Diamond Seats" only in the header tooltip) is a frontend-only demo of a secondary market for NFL personal seat licenses, with an AI valuation layer. All data is mocked; there is no backend.
 
 The flow is: **pick a team → browse listings on a seat map → open a listing → read the AI verdict → make an offer.**
 
@@ -85,16 +85,31 @@ Tokens live in `src/shared/styles/theme.css`, each annotated with its measured c
 | Role | Where | Convention |
 |---|---|---|
 | **Direction** — what the number did | `PriceHistoryTable` Change column, discount chips | **Financial**: red = fell, green = rose |
-| **Verdict** — what you should do | `StatusBadge`, `DealBadge`, `Recommendation`, team trend | **Buyer-relative**: green = good buy |
+| **Market context** — where this sits | `StatusBadge`, `DealBadge` | **Verdict palette**: amber / blue / teal |
+| **Buyer-relative** — is now a good time | team trend on `TeamCard` | green = good time to buy |
 | **Prose** — supporting evidence | `InsightsList` bullets | **No colour** — icon + muted ink |
 
-So a price cut is **red** in the history table (it went down) and the same listing can be **green** in the verdict badge (it's a bargain). They never collide because the insight bullets between them carry no colour at all.
+So a price cut is **red** in the history table (it went down) and the same listing reads **teal** as "Attractive value". They never collide because the insight bullets between them carry no colour at all.
 
-The buyer-relative half is the counterintuitive one: a **cooling** market is green because that's when seats get cheaper. `marketTrend.service.test.ts` and `PriceHistoryTable.test.tsx` each pin their own side of this.
+**The verdict palette deliberately avoids green/amber/red.** Those read as pass/warn/fail, which frames a five-figure purchase as a hazard and costs conversion. Tokens are `--psl-above` (amber), `--psl-aligned` (blue), `--psl-attractive` (teal), stepped per mode like every other colour here. Teal is held ≥ ΔE 16 from the brand green so "attractive value" never reads as the CTA — do not "simplify" it back to `--psl-good`.
+
+`marketTrend.service.test.ts` and `PriceHistoryTable.test.tsx` each pin their own side of this. **Known inconsistency:** the team-card trend still uses green/amber (buyer-relative) rather than the verdict palette; it was out of scope for the copy refactor.
+
+## Tone — the panel is context, not a warning
+
+`AIInsightPanel` sells trust, not caution. Labels are "Above market range" / "In line with market" / "Attractive value"; the stance is one suggestive sentence ("You may find better value by waiting"), never an imperative. Bullets are observational — "Price adjusted down 9%", not "dropped"; "revisions", not "cuts".
+
+`getRecommendation()` returns a **semantic key** (`opportunity` / `aligned` / `patience`), never a phrase — the wording is conversion-sensitive product copy and lives in `RECOMMENDATION_COPY`, not in pricing logic. `AIInsightPanel.test.tsx` and `insights.service.test.ts` both assert a banned-words list; treat a failure there as a product regression, not a cosmetic one.
+
+The section-average bullet keeps **the listing as its subject** ("Sits 14% above the section 143 average"). Rephrasing it around the comparables attaches a figure measured against the average to a sentence about something else.
 3. **Tags use a short tone list on purpose.** The reference UI gives each amenity its own hue; measured, blue vs violet came out at ΔE 1.8 (CVD) and 10.1 (normal vision) — indistinguishable. Tags sit in a row so every pair is adjacent, capping usable hues at ~3. Colour encodes *class* (promoted / time-critical / price signal / neutral), not identity.
 4. **The seat map's field is deliberately low-chroma.** A saturated pitch green would compete with the brand accent, which marks the selected section — the one thing on the map that must read as active.
 
 Dark mode is class-based (`@custom-variant dark` in `theme.css`); Tailwind v4 defaults to a media query. The theme swaps entirely through CSS custom properties in `:root` / `.dark` — there are deliberately no `dark:` utilities in components, and SVG marks read `var(--psl-*)` directly so they follow the theme for free. `@theme inline` is required so utilities keep the `var()` reference.
+
+**Dark-mode ratios are measured against the surface (`#0e1728`), not the page (`#040811`).** That pair replaced a neutral grey one in Aug 2026; every token gained contrast and none needed re-stepping, but **re-measure the whole dark column if the surface moves again** — the numbers in the comments are only true for that ground.
+
+**`AppHeader` pins itself to the dark palette in both themes** via a `dark` class on the `<header>`. The brand mark is a fixed bright-green seat, and `#a0f700` is 1.33:1 on white, so a light header would swallow the logo. Because the theme is only custom properties, that one class re-resolves every token inside the subtree — the children need no special-casing. Don't "fix" the header to follow the theme without also shipping a second, dark-ink logo.
 
 ## Charts
 
@@ -110,7 +125,24 @@ Tooltips wrap **@radix-ui/react-tooltip** in `shared/components/Tooltip.tsx`. Ho
 
 Component tests must render via `@/test/utils`, not bare RTL — Radix Tooltip throws without its provider.
 
-The `.holo-ring` class on `AIInsightPanel` is the **only decorative colour in the app**. It encodes nothing, is masked to the border so text contrast is untouched, and is exempt from the palette rules — don't try to validate it.
+## Holographic treatment
+
+Three classes in `styles/globals.css`, all **purely decorative**. They encode nothing and are exempt from the measured palette — don't try to validate their hues.
+
+| Class | Where | Note |
+|---|---|---|
+| `.holo-ring` | `AIInsightPanel` | Rotating conic gradient masked to the border, plus a corner bloom. |
+| `.holo-chip` | `DealBadge` | Same ring, faster and dimmer, no bloom. |
+| `.holo-icon` | the `BrainCircuit` mark | `stroke: url(#psl-holo-stroke) currentColor` |
+
+All three are masked or stroked so **the content surface stays solid** — every contrast ratio measured for the text still holds.
+
+Two things that look odd but are load-bearing:
+
+- **`.holo-icon`'s trailing `currentColor` is the SVG paint fallback.** If the gradient `<defs>` (rendered inside `AIInsightPanel`) ever fails to resolve, the icon falls back to the inherited colour instead of vanishing. Don't drop it.
+- **`ListingRow` sets `content-visibility: auto`.** Roughly 170 rows each carry a `.holo-chip`; without it every one animates off-screen and scrolling stutters. If the effect is ever made heavier, re-check this first.
+
+On `DealBadge` the iridescence is on the **border only** — the fill keeps the verdict tint and the text the verdict ink, so the rainbow never washes out the hue that carries the meaning.
 
 ## Conventions
 

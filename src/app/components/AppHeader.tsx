@@ -1,62 +1,62 @@
-import { ChevronDown } from 'lucide-react'
-import { Button } from '@/shared/components/Button'
 import { ThemeToggle } from '@/shared/components/ThemeToggle'
+import { Tooltip } from '@/shared/components/Tooltip'
 
 interface AppHeaderProps {
   onHome: () => void
 }
 
-/** Nav chrome. Only the logo navigates; the rest sets the scene. */
-function NavItem({ label }: { label: string }) {
+/**
+ * Rendered as a static marker, not a `<button>`.
+ *
+ * It wears the primary button's treatment because that is the visual weight it
+ * needs, but a button that does nothing when clicked is a small lie — and this is
+ * the one element on screen whose entire job is being honest about what the app
+ * is. The tooltip carries the detail; `tabIndex` keeps it keyboard-reachable.
+ */
+function DemoMarker() {
   return (
-    <span className="hidden items-center gap-1 text-sm text-muted lg:inline-flex">
-      {label}
-      <ChevronDown aria-hidden="true" className="h-3.5 w-3.5" />
-    </span>
+    <Tooltip content="All data is mocked — no real listings or transactions" side="bottom">
+      <span
+        tabIndex={0}
+        className="inline-flex cursor-default items-center rounded-xl bg-accent px-4 py-2.5 text-sm font-semibold tracking-tight text-on-accent shadow-raised"
+      >
+        Demo version
+      </span>
+    </Tooltip>
   )
 }
 
+/**
+ * The header keeps the DARK palette in both themes.
+ *
+ * The brand mark is a fixed bright-green seat: `#a0f700` measures 1.33:1 on
+ * white, so on a light header the logo would all but disappear. Rather than ship
+ * a second artwork, the bar holds the dark ground the mark was drawn for.
+ *
+ * The `dark` class is the whole mechanism — the theme is nothing but CSS custom
+ * properties scoped to `.dark`, so every token inside this subtree resolves to
+ * its dark value and the children need no special-casing. In dark mode it is a
+ * no-op.
+ */
 export function AppHeader({ onHome }: AppHeaderProps) {
   return (
-    <header className="sticky top-0 z-30 border-b border-border-hairline bg-page/90 backdrop-blur">
+    <header className="dark sticky top-0 z-30 border-b border-border-hairline bg-page/90 backdrop-blur">
       <div className="flex items-center gap-6 px-5 py-3 sm:px-6">
-        <button
-          type="button"
-          onClick={onHome}
-          className="flex shrink-0 items-center gap-2"
-          aria-label="PSL Scout home"
-        >
-          <svg viewBox="0 0 24 24" aria-hidden="true" className="h-6 w-6 text-accent-ink">
-            <path
-              d="M4 17.5 11 4l2.2 4.4L6.2 21 4 17.5ZM12.5 17.5 19.5 4l2.2 4.4L14.7 21l-2.2-3.5Z"
-              fill="currentColor"
-            />
-          </svg>
-          <span className="text-sm leading-none font-semibold tracking-tight text-ink">
-            psl
-            <br />
-            scout
-          </span>
-        </button>
-
-        <nav className="flex items-center gap-5">
-          <NavItem label="NFL Teams" />
-          <NavItem label="MLB Teams" />
-        </nav>
-
-        <div className="ml-auto flex items-center gap-3">
-          <NavItem label="Buy" />
-          <NavItem label="Sell" />
-          <ThemeToggle />
+        <Tooltip content="Gridiron &amp; Diamond Seats" side="bottom">
           <button
             type="button"
-            className="hidden rounded-xl border border-border-hairline px-4 py-2.5 text-sm font-semibold text-ink transition-colors hover:bg-track sm:inline-flex"
+            onClick={onHome}
+            className="flex shrink-0 items-center gap-2.5 rounded-lg"
+            aria-label="G&D Seats home"
           >
-            Sign in
+            <img src="/logo-mark.png" alt="" className="h-7 w-7 shrink-0 object-contain" />
+            <span className="text-base font-semibold tracking-tight text-ink">G&amp;D Seats</span>
           </button>
-          <Button type="button" className="px-4 py-2.5">
-            Sign up
-          </Button>
+        </Tooltip>
+
+        <div className="ml-auto flex items-center gap-3">
+          <ThemeToggle />
+          <DemoMarker />
         </div>
       </div>
     </header>

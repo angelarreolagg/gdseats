@@ -27,6 +27,10 @@ export function ListingRow({ listing, onOpen }: ListingRowProps) {
       onClick={() => onOpen(listing.id)}
       whileHover={{ x: 2 }}
       transition={{ type: 'spring', stiffness: 400, damping: 32 }}
+      // content-visibility lets the browser skip rendering — and animating — rows
+      // outside the viewport. Without it, ~170 holo chips spin at once and scroll
+      // stutters. contain-intrinsic-size keeps the scrollbar honest meanwhile.
+      style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 116px' }}
       className="w-full border-b border-border-hairline px-5 py-4 text-left transition-colors hover:bg-track"
     >
       <div className="flex items-baseline justify-between gap-4">

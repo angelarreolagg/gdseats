@@ -101,8 +101,83 @@
   z-index: -1;
 }
 
+/*
+ * Chip-scale ring. Same rotating iridescence, but only the border: the chip's
+ * fill keeps the verdict tint (teal / blue / amber) and its text keeps the
+ * verdict ink, so the rainbow never washes out the hue that carries the meaning.
+ * No corner bloom — at 20px tall it would swallow the label.
+ */
+.holo-chip {
+  position: relative;
+  isolation: isolate;
+}
+
+.holo-chip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: conic-gradient(
+    from var(--holo-angle),
+    var(--psl-accent),
+    #35e6d0,
+    #7b8cff,
+    #d47bff,
+    var(--psl-accent)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: holo-spin 6s linear infinite;
+  opacity: 0.55;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/*
+ * Gradient stroke for the AI mark.
+ *
+ * The ring above is masked to a border box, so it cannot paint an icon. Lucide
+ * strokes with `currentColor`, so pointing `stroke` at an SVG gradient is the way
+ * in. The trailing `currentColor` is the SVG paint fallback: if the gradient id
+ * ever fails to resolve, the icon renders in the inherited colour instead of
+ * vanishing.
+ */
+.holo-icon {
+  stroke: url(#psl-holo-stroke) currentColor;
+}
+
+@keyframes holo-stop-a {
+  0%, 100% { stop-color: #a0f700; }
+  33% { stop-color: #35e6d0; }
+  66% { stop-color: #7b8cff; }
+}
+
+@keyframes holo-stop-b {
+  0%, 100% { stop-color: #7b8cff; }
+  33% { stop-color: #d47bff; }
+  66% { stop-color: #a0f700; }
+}
+
+.holo-stop-a {
+  animation: holo-stop-a 6s linear infinite;
+}
+
+.holo-stop-b {
+  animation: holo-stop-b 6s linear infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .holo-ring::before {
+  .holo-ring::before,
+  .holo-chip::before,
+  .holo-stop-a,
+  .holo-stop-b {
     animation: none;
   }
 }

@@ -35,6 +35,15 @@
   --psl-over: #c22b2b; /*  5.72 */
   --psl-info: #2a78d6; /*  4.42 — time-sensitivity tags only */
 
+  /* Verdict palette — market context, deliberately NOT the status palette above.
+     Green/amber/red read as pass/warn/fail, which frames a high-value purchase as
+     a hazard. These are calmer hues that inform without alarming. Teal is held
+     away from the brand green on purpose: ΔE 16.6 apart here, so "attractive
+     value" never reads as the CTA. */
+  --psl-above: #a16207; /*  4.92 */
+  --psl-aligned: #2563eb; /*  5.17 */
+  --psl-attractive: #036672; /*  6.67 */
+
   --psl-grid: #ebebe7;
   --psl-track: #f1f1ee;
 
@@ -53,33 +62,42 @@
 .dark {
   color-scheme: dark;
 
-  --psl-page: #1c1c1c;
-  --psl-surface: #252525;
+  /* Every ratio below is measured against the surface, NOT the page. The surface
+     moved from #252525 to a blue-black in Aug 2026, which raised every one of
+     them — nothing needed re-stepping, but re-measure if it ever moves again. */
+  --psl-page: #040811;
+  --psl-surface: #0e1728; /* 1.12 against the page — the same separation the
+                             previous grey pair had, so cards read as cards
+                             without the border doing all the work. */
   --psl-border: rgba(255, 255, 255, 0.11);
 
-  --psl-ink: #f5f5f5; /* 14.06 on surface */
-  --psl-muted: #9a9a9a; /*  5.45 */
+  --psl-ink: #f5f5f5; /* 16.44 on surface */
+  --psl-muted: #93a1b5; /*  6.83 — tinted to match the blue-black ground */
 
   --psl-accent: #a0f700; /* 11.53 — usable directly in dark */
   --psl-on-accent: #0f1105;
   --psl-accent-ink: #a0f700;
   --psl-accent-mark: #a0f700;
 
-  --psl-good: #a0f700; /* 11.53 */
-  --psl-fair: #fab219; /*  8.36 */
-  --psl-over: #ef7676; /*  5.49 */
-  --psl-info: #3987e5; /*  4.21 */
+  --psl-good: #a0f700; /* 13.48 */
+  --psl-fair: #fab219; /*  9.77 */
+  --psl-over: #ef7676; /*  6.42 */
+  --psl-info: #3987e5; /*  4.92 */
 
-  --psl-grid: #343434;
-  --psl-track: #2f2f2f;
+  --psl-above: #facc15; /* 11.70 */
+  --psl-aligned: #3b82f6; /*  4.87 */
+  --psl-attractive: #14b8a6; /*  7.20 — ΔE 26.4 from the brand green */
 
-  --psl-field: #2c4423;
-  --psl-field-line: #6f8f61;
-  --psl-seat: #3f3f3f;
+  --psl-grid: #1e2c49;
+  --psl-track: #182643;
 
-  --psl-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-  --psl-shadow-md: 0 4px 16px -4px rgba(0, 0, 0, 0.5);
-  --psl-shadow-lg: 0 12px 32px -8px rgba(0, 0, 0, 0.6);
+  --psl-field: #21432a;
+  --psl-field-line: #5f8f6b;
+  --psl-seat: #243352;
+
+  --psl-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.5);
+  --psl-shadow-md: 0 4px 16px -4px rgba(0, 0, 0, 0.6);
+  --psl-shadow-lg: 0 12px 32px -8px rgba(0, 0, 0, 0.7);
 }
 
 /* `inline` keeps the var() reference in the generated utility, so the .dark
@@ -101,6 +119,10 @@
   --color-fair: var(--psl-fair);
   --color-over: var(--psl-over);
   --color-info: var(--psl-info);
+
+  --color-above: var(--psl-above);
+  --color-aligned: var(--psl-aligned);
+  --color-attractive: var(--psl-attractive);
 
   --color-grid: var(--psl-grid);
   --color-track: var(--psl-track);
