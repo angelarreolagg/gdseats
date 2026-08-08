@@ -2,13 +2,105 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!--
+      Everything below is stated a second time in src/shared/config/site.ts.
+      That duplication is deliberate: a social scraper (LinkedIn, Slack, X) fetches
+      this file and never runs the bundle, so the tags have to exist in the markup
+      — and static markup cannot import TypeScript. Change one, change the other.
+
+      `useDocumentMeta` rewrites the title, description, og:title, og:description
+      and canonical at runtime as the user moves between screens. It edits these
+      exact nodes rather than appending new ones, so do not remove them.
+    -->
+    <title>G&amp;D Seats — AI-priced NFL personal seat licenses</title>
+    <meta
+      name="description"
+      content="Browse NFL personal seat licenses on an interactive seat map and see an AI valuation on every listing before you offer. Frontend demo, mock data."
+    />
+    <link rel="canonical" href="https://gdseats.vercel.app/" />
+    <meta name="robots" content="index, follow" />
+
+    <!-- Open Graph. og:image must be absolute — a relative path yields no card. -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="G&amp;D Seats" />
+    <meta property="og:title" content="G&amp;D Seats — AI-priced NFL personal seat licenses" />
+    <meta
+      property="og:description"
+      content="Browse NFL personal seat licenses on an interactive seat map and see an AI valuation on every listing before you offer. Frontend demo, mock data."
+    />
+    <meta property="og:url" content="https://gdseats.vercel.app/" />
+    <meta property="og:image" content="https://gdseats.vercel.app/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="G&amp;D Seats — some seats mean more. A demo marketplace for NFL personal seat licenses."
+    />
+    <meta property="og:locale" content="en_US" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="G&amp;D Seats — AI-priced NFL personal seat licenses" />
+    <meta
+      name="twitter:description"
+      content="Browse NFL personal seat licenses on an interactive seat map and see an AI valuation on every listing before you offer. Frontend demo, mock data."
+    />
+    <meta name="twitter:image" content="https://gdseats.vercel.app/og-image.png" />
+    <meta
+      name="twitter:image:alt"
+      content="G&amp;D Seats — some seats mean more. A demo marketplace for NFL personal seat licenses."
+    />
+
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!--
+      Two theme-colors, not one. A single dark value paints the mobile browser bar
+      #040811 even for a user reading in light mode, which reads as a rendering
+      fault rather than as branding. The values are psl-page from each block of
+      theme.css.
+    -->
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#040811" />
-    <title>G&amp;D Seats — Deal Analyzer</title>
+    <meta name="theme-color" content="#fbfbfa" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#040811" media="(prefers-color-scheme: dark)" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebSite",
+            "@id": "https://gdseats.vercel.app/#website",
+            "url": "https://gdseats.vercel.app/",
+            "name": "G&D Seats",
+            "alternateName": "Gridiron & Diamond Seats",
+            "description": "Browse NFL personal seat licenses on an interactive seat map and see an AI valuation on every listing before you offer. Frontend demo, mock data.",
+            "inLanguage": "en-US"
+          },
+          {
+            "@type": "WebApplication",
+            "@id": "https://gdseats.vercel.app/#app",
+            "name": "G&D Seats",
+            "url": "https://gdseats.vercel.app/",
+            "isPartOf": { "@id": "https://gdseats.vercel.app/#website" },
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Any modern web browser",
+            "browserRequirements": "Requires JavaScript",
+            "image": "https://gdseats.vercel.app/og-image.png",
+            "description": "A demo secondary market for NFL personal seat licenses, with an AI valuation on every listing. All data is generated; there is no backend.",
+            "offers": {
+              "@type": "Offer",
+              "price": "0",
+              "priceCurrency": "USD"
+            }
+          }
+        ]
+      }
+    </script>
+
     <script>
       // Applied before paint so the first frame is already in the right theme.
       try {
@@ -22,6 +114,10 @@
   </head>
   <body>
     <div id="root"></div>
+    <noscript>
+      G&amp;D Seats is a demo marketplace for NFL personal seat licenses, with an AI
+      valuation on every listing. It needs JavaScript to run.
+    </noscript>
     <script type="module" src="/src/app/main.tsx"></script>
   </body>
 </html>

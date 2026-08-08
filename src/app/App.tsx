@@ -5,8 +5,10 @@ import { TeamsScreen } from '@/domains/teams/components/TeamsScreen'
 import { SearchScreen } from '@/domains/search/components/SearchScreen'
 import { ListingDetailOverlay } from '@/domains/listing/components/ListingDetailOverlay'
 import { generateListingsForTeam } from '@/domains/listing/services/listingGenerator.service'
+import { useDocumentMeta } from '@/shared/hooks/useDocumentMeta'
 import { AppFooter } from './components/AppFooter'
 import { AppHeader } from './components/AppHeader'
+import { getDocumentMeta } from './documentMeta'
 import { useAppNavigation } from './useAppNavigation'
 
 export function App() {
@@ -25,6 +27,11 @@ export function App() {
   const sectionListings = openListing
     ? listings.filter((listing) => listing.section === openListing.section)
     : []
+
+  // The one thing a router would have given us for free, again: screens swap in
+  // place, so without this every tab reads "G&D Seats — Deal Analyzer" whether the
+  // visitor is on the grid, a franchise, or one listing.
+  useDocumentMeta(getDocumentMeta(team, openListing))
 
   return (
     <div className="min-h-dvh bg-page">

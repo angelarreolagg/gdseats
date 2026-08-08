@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  One entry, deliberately.
+
+  The app holds its screen in React state rather than in the URL (see
+  `src/app/useAppNavigation.ts`), so `/` is the only address that resolves.
+  Listing a `/team/lv` here would advertise pages that return the same document
+  and get dropped as duplicates — worse than not listing them.
+
+  Keep the host in step with SITE_URL in src/shared/config/site.ts.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://gdseats.vercel.app/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>

@@ -1,0 +1,7 @@
+# G&D Seats — https://gdseats.vercel.app
+# Keep the Sitemap host in step with SITE_URL in src/shared/config/site.ts.
+
+User-agent: *
+Allow: /
+
+Sitemap: https://gdseats.vercel.app/sitemap.xml
