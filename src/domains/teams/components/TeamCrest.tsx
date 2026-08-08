@@ -1,3 +1,5 @@
+import { TeamHelmet } from './TeamHelmet'
+
 interface TeamCrestProps {
   primary: string
   secondary: string
@@ -42,24 +44,7 @@ export function TeamCrest({ primary, secondary, seed, className = '' }: TeamCres
         <rect x="-20" y="112" width="360" height="2" fill={secondary} transform="rotate(-6 160 70)" />
       </g>
 
-      {/* Helmet. */}
-      <g transform="translate(160 78)">
-        <path
-          d="M-46 4c0-26 20-44 46-44 24 0 42 14 46 34 1 6-2 10-8 10h-18l6 14c2 5-1 10-7 10h-38c-16 0-27-10-27-24Z"
-          fill={secondary}
-          opacity="0.9"
-        />
-        <path
-          d="M-46 4c0-26 20-44 46-44 10 0 19 3 26 8-30 2-52 22-52 48 0 5 1 9 3 12h-4c-12-2-19-11-19-24Z"
-          fill="#ffffff"
-          opacity="0.18"
-        />
-        {/* Facemask. */}
-        <g stroke={primary} strokeWidth="3.2" strokeLinecap="round" opacity="0.75" fill="none">
-          <path d="M-14 18h30" />
-          <path d="M-10 26h22" />
-        </g>
-      </g>
+      <TeamHelmet primary={primary} secondary={secondary} />
     </svg>
   )
 }
