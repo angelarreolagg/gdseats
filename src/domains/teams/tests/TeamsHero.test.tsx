@@ -1,0 +1,114 @@
+import { render, screen } from '@/test/utils'
+import { describe, expect, it } from 'vitest'
+import { TeamsHero } from '../components/TeamsHero'
+
+describe('TeamsHero', () => {
+  /**
+   * Validates: the backdrop is muted, looping, inline footage that no screen
+   * reader announces.
+   * Why it matters: a landing page that starts making noise is the single
+   * fastest way to lose a visitor, and on iOS a video without `playsInline`
+   * hijacks the screen into the native fullscreen player — the first impression
+   * of the product would be a video controls bar.
+   */
+  it('renders the stadium footage silently', () => {
+    const { container } = render(<TeamsHero />)
+
+    const video = container.querySelector('video')
+    expect(video).not.toBeNull()
+    expect(video).toHaveAttribute('src', '/nflstadiums.mp4')
+    // React reflects `muted` as a DOM property only — there is no attribute to read.
+    expect(video?.muted).toBe(true)
+    expect(video).toHaveAttribute('loop')
+    expect(video).toHaveAttribute('playsinline')
+    expect(video).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  /**
+   * Validates: the brand glow survived the move to video.
+   * Why it matters: the green radial was the entire hero before the footage
+   * existed, and it is what makes the band read as this product rather than as
+   * stock stadium B-roll. It is easy to mistake for a leftover of the old design
+   * and delete while "cleaning up" the new one.
+   */
+  it('keeps the accent gradient over the footage', () => {
+    const { container } = render(<TeamsHero />)
+
+    const glow = container.querySelector('[class*="radial-gradient"]')
+    expect(glow?.className).toContain('var(--psl-accent)')
+  })
+
+  /**
+   * Validates: the hero pins the dark palette in both themes.
+   * Why it matters: the type sits on stadium footage that is dark whichever
+   * theme the user picked. Without this class, light mode resolves `text-ink` to
+   * near-black and the headline disappears into the video.
+   */
+  it('holds the dark palette regardless of theme', () => {
+    const { container } = render(<TeamsHero />)
+
+    expect(container.querySelector('section')).toHaveClass('dark')
+  })
+
+  /**
+   * Validates: the drawn wordmark carries a real accessible name, and the copy
+   * below it survives as text.
+   * Why it matters: the headline is SVG glyph outlines — to a screen reader it
+   * is a picture, and without the label the page's only `<h1>` announces
+   * nothing. The two lines under it are the actual value proposition, so they
+   * stay as selectable, translatable text rather than joining the artwork.
+   */
+  it('names the drawn headline and keeps the copy below it as text', () => {
+    render(<TeamsHero />)
+
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'SOME SEATS MEAN MORE' }),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/find your team's psl & tickets/i)).toBeInTheDocument()
+    expect(screen.getByText(/buy and sell personal seat licenses/i)).toBeInTheDocument()
+  })
+
+  /**
+   * Validates: the first 10 glyphs really are "SOME SEATS".
+   * Why it matters: the two-tone wordmark is split by character index in
+   * `globals.css` (`:nth-child(-n + 10)`), because StrokeText paints one colour
+   * per string. CSS cannot read the copy, so rewriting the headline without
+   * moving that number would cut the tint mid-word — and nothing else would
+   * complain. This is the only thing holding the two together.
+   */
+  it('keeps the tinted half aligned with the copy', () => {
+    const { container } = render(<TeamsHero />)
+
+    const glyphs = Array.from(container.querySelectorAll('[data-stroke-char]'))
+    expect(glyphs.map((glyph) => glyph.textContent).join('')).toBe('SOME SEATS MEAN MORE')
+    expect(
+      glyphs
+        .slice(0, 10)
+        .map((glyph) => glyph.textContent)
+        .join(''),
+    ).toBe('SOME SEATS')
+
+    expect(container.querySelector('h1')).toHaveClass('hero-wordmark')
+  })
+
+  /**
+   * Validates: the headline slot replaces the built-in copy rather than stacking
+   * with it.
+   * Why it matters: the backdrop and the title ship separately — a bespoke title
+   * component has to be able to take over the slot without the default copy
+   * showing through underneath it.
+   */
+  it('yields the slot to a supplied headline', () => {
+    const { unmount } = render(<TeamsHero />)
+    expect(screen.getByRole('heading', { level: 1 })).toBeInTheDocument()
+    unmount()
+
+    render(
+      <TeamsHero>
+        <h1>Custom headline</h1>
+      </TeamsHero>,
+    )
+    expect(screen.getByRole('heading', { level: 1 })).toHaveTextContent('Custom headline')
+    expect(screen.queryByText(/find your team's psl/i)).not.toBeInTheDocument()
+  })
+})
