@@ -22,7 +22,23 @@ import { dirname, resolve } from 'node:path'
 import { TEAMS } from '../src/domains/teams/data/teams.ts'
 import { TEAM_LOGOS } from '../src/domains/teams/data/teamLogos.ts'
 
-const ENDPOINT = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams'
+/**
+ * ESPN's public team list.
+ *
+ * An env var with a default, not a required one, and **not** a `VITE_` var:
+ * nothing in the browser bundle ever reads this. It is fetched here, by hand, by
+ * whoever runs `pnpm logos:sync`, and the answer is committed as
+ * `teamLogos.ts` — which is the reason the app makes zero requests to ESPN's API
+ * and the first screen stays as deterministic as the rest of the seeded demo.
+ *
+ * There is no secret to hide: the endpoint is unauthenticated and public. The
+ * override exists so a mirror or a recorded fixture can be pointed at during
+ * development without editing the script, and it defaults so that a fresh clone
+ * needs no `.env` to run the one command that uses it.
+ */
+const ENDPOINT =
+  process.env.ESPN_TEAMS_ENDPOINT ??
+  'https://site.api.espn.com/apis/site/v2/sports/football/nfl/teams'
 const OUT = resolve(
   dirname(fileURLToPath(import.meta.url)),
   '../src/domains/teams/data/teamLogos.ts',
