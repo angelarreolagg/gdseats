@@ -1,5 +1,8 @@
 import { Select } from '@/shared/components/Select'
+import { useMemo } from 'react'
 import { TeamLogo } from '@/domains/teams/components/TeamLogo'
+import { TrendChip } from '@/domains/teams/components/TrendChip'
+import { getMarketTrend } from '@/domains/teams/services/marketTrend.service'
 import type { Team } from '@/domains/teams/types/team.types'
 import { SORT_OPTIONS, type SortKey } from '../services/listingSearch.service'
 
@@ -22,6 +25,8 @@ export function SearchToolbar({
   onSortChange,
   onClearAll,
 }: SearchToolbarProps) {
+  const trend = useMemo(() => getMarketTrend(team), [team])
+
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border-hairline px-5 py-3 sm:px-6">
       <div className="flex min-w-0 items-center gap-3">
@@ -32,6 +37,10 @@ export function SearchToolbar({
           <p className="truncate text-sm font-semibold text-ink">{team.name}</p>
           <p className="truncate text-xs text-muted">{team.venue}</p>
         </div>
+
+        {/* The trend used to vanish the moment a franchise was picked. Focusable
+            here because, unlike on the card, this chip sits on its own. */}
+        <TrendChip trend={trend} focusable />
 
         {selectedSection !== null ? (
           <button

@@ -19,6 +19,27 @@
     outline-offset: 2px;
   }
 
+  /*
+   * Tailwind v3's preflight shipped `button, [role="button"] { cursor: pointer }`
+   * and v4 dropped it to match the browser default, which for a <button> is an
+   * arrow. Restoring it here fixes every control at once — and every control
+   * added later — instead of scattering `cursor-pointer` across components.
+   *
+   * `:not(:disabled)` keeps disabled controls from claiming to be clickable, and
+   * leaves Button's `disabled:cursor-not-allowed` unopposed rather than fighting
+   * this rule.
+   *
+   * Deliberately narrow: `label`, `summary` and `[tabindex]` are excluded. Labels
+   * wrap text inputs where the I-beam is right, and chips like FEATURED or the
+   * Demo version badge are focusable only to expose a tooltip — they are not
+   * clickable, so they keep the arrow. The hand means "this does something".
+   */
+  button:not(:disabled),
+  [role='button'],
+  select:not(:disabled) {
+    cursor: pointer;
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *,
     *::before,

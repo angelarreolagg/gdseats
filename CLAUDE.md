@@ -68,6 +68,10 @@ Everything is generated from a **seeded** PRNG (`shared/utils/seededRandom.ts`),
 
 `teams/services/marketTrend.service.ts` produces the per-franchise trend: 12 seeded months of demand plus a 3-month forecast. Momentum is measured across the **forecast** horizon, since the card answers "what is about to happen". The catalogue currently splits 5 heating / 8 steady / 11 cooling — imbalance is seed luck, not design, but a test pins that all three directions appear so a reseed can't silently flatten the feature.
 
+`MarketTrend.series` is no longer rendered — the sparkline was removed because at 84×30 it answered nothing the chip didn't. It is **not dead data**: `momentum` is derived from it, and `getTrendExplanation` counts its projected points to state its own horizon, so the tooltip's "over the next N months" can never drift from the forecast it describes.
+
+`TrendChip` (`teams/components/`) is the whole feature now — icon + label + momentum, with the reasoning in a tooltip. It takes `focusable` for the same reason `Tag` does: `TeamCard` is a `<button>`, so the chip must not take a tab stop there; `SearchToolbar` opts in so the copy is keyboard-reachable somewhere. A steady market omits the percentage, since it rounds to "0%" and reads as missing data.
+
 Generator invariants worth preserving (all covered by tests):
 - The ask multiplier is **centred on 1.0** (`0.78–1.22`). An asymmetric range skews the whole market to one verdict — an earlier version sat at `0.78–1.34` and produced 58% "Overpriced", which undersells the product.
 - Inventory is sized so **most of the 72 sections are populated**. A map with half its sections greyed out reads as broken, not sparse.
@@ -109,7 +113,18 @@ Dark mode is class-based (`@custom-variant dark` in `theme.css`); Tailwind v4 de
 
 **Dark-mode ratios are measured against the surface (`#0e1728`), not the page (`#040811`).** That pair replaced a neutral grey one in Aug 2026; every token gained contrast and none needed re-stepping, but **re-measure the whole dark column if the surface moves again** — the numbers in the comments are only true for that ground.
 
-**`AppHeader` pins itself to the dark palette in both themes** via a `dark` class on the `<header>`. The brand mark is a fixed bright-green seat, and `#a0f700` is 1.33:1 on white, so a light header would swallow the logo. Because the theme is only custom properties, that one class re-resolves every token inside the subtree — the children need no special-casing. Don't "fix" the header to follow the theme without also shipping a second, dark-ink logo.
+**Two surfaces pin themselves to the dark palette in both themes** via a `dark` class on their root — `AppHeader` and `TeamsHero`. Because the theme is only custom properties, that one class re-resolves every token inside the subtree, so their children need no special-casing. The reasons differ: the header's brand mark is a fixed bright-green seat and `#a0f700` is 1.33:1 on white, so a light bar would swallow the logo — don't "fix" it to follow the theme without also shipping a second, dark-ink logo. The hero's type sits on stadium footage that is dark whatever the user picked.
+
+## Hero
+
+`teams/components/TeamsHero.tsx` is the landing band: `public/nflstadiums.mp4` under a scrim, the brand glow, and the bottom fade — one component, because those layers only mean anything together.
+
+- **The green radial is the original hero, not decoration.** Before the video, the scrim and glow *were* the band. Keeping them means it reads as this product while a 6 MB file streams, and there is no flash of bare footage. It looks like a leftover of the old design; it isn't.
+- **The headline is a `children` slot** with the built-in copy as the fallback, so a bespoke title takes over without touching the backdrop.
+- **`autoPlay` is gated on `useReducedMotion()` by hand.** `MotionConfig` only governs Motion components and the `prefers-reduced-motion` block in `globals.css` only damps CSS animation — neither stops a looping `<video>`. `src/test/setup.ts` forces reduced motion, so jsdom never tries to play it either.
+- `muted` reflects as a **DOM property**, not an attribute; assert `video.muted`, not `toHaveAttribute('muted')`.
+
+`TeamSearchCombobox` sits beside `LeagueSwitch`, not in the hero — the reference put its search in the band, but a control there competes with the headline for the one thing that screen has to say. It jumps straight to a franchise's listings via the same `onSelectTeam` the cards use, and deliberately **does not filter the grid**. Hand-rolled rather than added as a dependency (the only Radix package here is the tooltip). Options suppress `mousedown`'s default so the blur-close can't unmount the row mid-click — the classic hand-built-combobox bug, pinned by a test. Venue is searchable alongside the name because a seat licence is bought for a building as much as for a team.
 
 ## Charts
 

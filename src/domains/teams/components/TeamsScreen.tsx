@@ -4,6 +4,8 @@ import { TEAMS, TEAMS_PER_PAGE } from '../data/teams'
 import { TeamCard } from './TeamCard'
 import { TeamsPagination } from './TeamsPagination'
 import { LeagueSwitch, type League } from './LeagueSwitch'
+import { TeamSearchCombobox } from './TeamSearchCombobox'
+import { TeamsHero } from './TeamsHero'
 
 interface TeamsScreenProps {
   onSelectTeam: (teamId: string) => void
@@ -19,30 +21,24 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
 
   return (
     <div>
-      {/* Hero band. A gradient rather than a photo — no image assets here. */}
-      <div className="relative h-44 overflow-hidden border-b border-border-hairline sm:h-56">
-        <div className="absolute inset-0 bg-[radial-gradient(120%_140%_at_50%_-20%,color-mix(in_oklab,var(--psl-accent)_22%,transparent),transparent_60%)]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-transparent to-page" />
-        <div className="relative mx-auto flex h-full max-w-7xl flex-col justify-end px-5 pb-8 sm:px-8">
-          <h1 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">
-            Personal seat licenses, priced by AI
-          </h1>
-          <p className="mt-1.5 max-w-xl text-sm text-muted">
-            Pick a franchise to browse live listings with an instant read on which ones are
-            actually worth it.
-          </p>
-        </div>
-      </div>
+      <TeamsHero />
 
       <div className="mx-auto max-w-7xl px-5 py-6 sm:px-8">
-        <div className="mb-5 flex items-center justify-between gap-4">
-          <LeagueSwitch
-            value={league}
-            onChange={(value) => {
-              setLeague(value)
-              setPage(0)
-            }}
-          />
+        <div className="mb-5 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <LeagueSwitch
+              value={league}
+              onChange={(value) => {
+                setLeague(value)
+                setPage(0)
+              }}
+            />
+            <TeamSearchCombobox
+              teams={TEAMS}
+              onSelectTeam={onSelectTeam}
+              disabled={league === 'mlb'}
+            />
+          </div>
           {league === 'nfl' ? (
             <TeamsPagination page={page} pageCount={pageCount} onChange={setPage} />
           ) : null}

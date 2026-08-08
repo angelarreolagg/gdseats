@@ -1,35 +1,19 @@
 import { useMemo } from 'react'
 import { motion } from 'motion/react'
-import { formatSignedPercent } from '@/shared/utils/formatters'
 import { getListingCountForTeam } from '../data/teams'
 import { getMarketTrend } from '../services/marketTrend.service'
-import type { Team, TrendTone } from '../types/team.types'
+import type { Team } from '../types/team.types'
 import { TeamCrest } from './TeamCrest'
 import { TeamLogo } from './TeamLogo'
-import { TrendSparkline } from './TrendSparkline'
-import { TREND_ICON } from './trendPresentation'
+import { TrendChip } from './TrendChip'
 
 interface TeamCardProps {
   team: Team
   onSelect: (teamId: string) => void
 }
 
-const TONE_INK: Record<TrendTone, string> = {
-  good: 'text-good',
-  fair: 'text-fair',
-  neutral: 'text-muted',
-}
-
-const TONE_CHIP: Record<TrendTone, string> = {
-  good: 'bg-good/12 text-good',
-  fair: 'bg-fair/12 text-fair',
-  neutral: 'bg-ink/8 text-muted',
-}
-
 export function TeamCard({ team, onSelect }: TeamCardProps) {
   const trend = useMemo(() => getMarketTrend(team), [team])
-  const momentum = formatSignedPercent(trend.momentum)
-  const TrendIcon = TREND_ICON[trend.iconName]
 
   return (
     <motion.button
@@ -58,29 +42,13 @@ export function TeamCard({ team, onSelect }: TeamCardProps) {
         <span className="text-sm font-semibold tracking-tight text-ink">{team.name}</span>
         <span className="text-xs text-muted">{team.venue}</span>
 
-        <span className="mt-2.5 flex items-center justify-between gap-2">
-          <TrendSparkline
-            series={trend.series}
-            tone={trend.tone}
-            label={`Demand ${momentum} over the next 3 months`}
-            className="h-[30px] w-[84px] shrink-0"
-          />
-          <span className={`text-xs font-semibold tabular-nums ${TONE_INK[trend.tone]}`}>
-            {momentum}
-          </span>
-        </span>
-
-        <span className="mt-2 flex flex-wrap items-center gap-1.5">
+        <span className="mt-3 flex flex-wrap items-center gap-1.5">
           <span className="inline-flex rounded-full bg-info/15 px-2 py-1 text-[10px] font-semibold tracking-wide text-info uppercase tabular-nums">
             {getListingCountForTeam(team).toLocaleString('en-US')} listings
           </span>
-          {/* Glyph + label, so direction never rides on colour alone. */}
-          <span
-            className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold tracking-wide uppercase ${TONE_CHIP[trend.tone]}`}
-          >
-            <TrendIcon aria-hidden="true" className="h-3 w-3 shrink-0" strokeWidth={2.5} />
-            {trend.label}
-          </span>
+          {/* Hover-only here: the card is a button, so the chip must not take a
+              tab stop of its own. SearchToolbar renders the focusable variant. */}
+          <TrendChip trend={trend} />
         </span>
 
         <span className="mt-1.5 text-[11px] text-muted">{trend.buyerImplication}</span>

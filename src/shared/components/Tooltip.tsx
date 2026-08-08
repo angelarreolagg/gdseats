@@ -30,8 +30,11 @@ export function Tooltip({ content, children, side = 'top', variant = 'text' }: T
           side={side}
           sideOffset={6}
           collisionPadding={12}
-          className={`z-[60] rounded-lg border border-border-hairline bg-surface text-ink shadow-raised will-change-[transform,opacity] data-[state=delayed-open]:animate-in ${
-            variant === 'panel' ? 'p-3' : 'px-2.5 py-1.5 text-xs font-medium'
+          // max-w is not optional: without it a long tooltip lays out as a single
+          // line and can span the whole viewport — a two-sentence one stretched
+          // across three cards before this was added.
+          className={`z-[60] max-w-[min(20rem,calc(100vw-2rem))] rounded-lg border border-border-hairline bg-surface text-ink shadow-raised will-change-[transform,opacity] data-[state=delayed-open]:animate-in ${
+            variant === 'panel' ? 'p-3' : 'px-2.5 py-1.5 text-xs leading-relaxed font-medium'
           }`}
         >
           {content}
