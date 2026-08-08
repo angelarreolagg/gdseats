@@ -115,6 +115,22 @@ Dark mode is class-based (`@custom-variant dark` in `theme.css`); Tailwind v4 de
 
 `PriceStatsChart` is inline SVG, no chart dependency (Recharts was removed). It is an **emphasis** chart: the listing in question takes the accent, every peer recedes to the muted token, because the question is "where does mine land". The price history table above it is the table-view twin, so no value is chart-only.
 
+## Team logos (ESPN)
+
+Real franchise marks come from ESPN. `teams/data/teamLogos.ts` is **generated** — refresh with `pnpm logos:sync`, never hand-edit. The sync script is the only thing in the repo that knows the API exists; the app ships a static import and makes **zero runtime requests** for this, which keeps the first screen as deterministic as the rest of the seeded demo.
+
+Three things that look like details and are not:
+
+- **Never link the raw asset.** ESPN's stored files are wildly inconsistent — the Raiders' dark mark is 491 KB at 4096², a grid of 24 would be ~12 MB. `getTeamLogoUrl` routes everything through `a.espncdn.com/combiner/i?…&w=&h=` at 2× the rendered size, which brings that same mark to ~5 KB. The map therefore stores **paths**, not URLs; a test pins that.
+- **`rel` is an unordered set**, not a positional array. Match with `includes`, never by index, and never assume `logos[0]` is the default.
+- **`["full","dark"]` means "for dark backgrounds"** — it carries a light keyline so black marks (Raiders, Jets) survive `#040811`. Verified visually, not inferred from the name.
+
+Our team ids *are* ESPN's abbreviations (`dal`, `sf`, `lv`, `jax`…), so the join needs no mapping table — the sync confirmed every published href matches the derived path exactly.
+
+`TeamLogo` has two independent fallbacks to `TeamCrest`, because they fail for different reasons: no entry in the map (catalogue grew without a re-sync) and `onError` (CDN up but not serving). `teamLogo.service.test.ts` guards the first by asserting every team in `TEAMS` has a mark.
+
+**`useIsDarkTheme` vs `useTheme`.** `useTheme` *sets* the theme — each instance writes localStorage and toggles the root class, so it is safe with exactly one consumer (`ThemeToggle`). Anything that only needs to *read* the theme uses `shared/hooks/useIsDarkTheme.ts`, which is `useSyncExternalStore` over a single MutationObserver. Don't call `useTheme` from list items.
+
 ## Icons and tooltips
 
 Icons come from **lucide-react**; there are no emoji in the UI. Services must stay free of React, so **they emit a semantic icon *name*** (`TagIconName`, `TrendDirection`) and the component layer resolves it — `listing/components/tagPresentation.ts`, `teams/components/trendPresentation.ts`, `deal-analyzer/components/statusPresentation.ts`. Never import a component into a service to shortcut this.

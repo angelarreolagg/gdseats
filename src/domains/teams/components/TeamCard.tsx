@@ -5,6 +5,7 @@ import { getListingCountForTeam } from '../data/teams'
 import { getMarketTrend } from '../services/marketTrend.service'
 import type { Team, TrendTone } from '../types/team.types'
 import { TeamCrest } from './TeamCrest'
+import { TeamLogo } from './TeamLogo'
 import { TrendSparkline } from './TrendSparkline'
 import { TREND_ICON } from './trendPresentation'
 
@@ -39,6 +40,8 @@ export function TeamCard({ team, onSelect }: TeamCardProps) {
       transition={{ type: 'spring', stiffness: 380, damping: 28 }}
       className="group flex flex-col overflow-hidden rounded-xl border border-border-hairline bg-surface text-left shadow-card transition-colors hover:border-accent-ink/40"
     >
+      {/* The generated crest stays as the banner's backdrop; the real mark sits
+          on top of it, so the franchise colours still carry the card. */}
       <span className="relative block h-28 overflow-hidden">
         <TeamCrest
           primary={team.primary}
@@ -46,6 +49,9 @@ export function TeamCard({ team, onSelect }: TeamCardProps) {
           seed={team.id}
           className="h-full w-full"
         />
+        <span className="absolute inset-0 flex items-center justify-center">
+          <TeamLogo team={team} size={72} className="h-16 w-16 drop-shadow-lg" />
+        </span>
       </span>
 
       <span className="flex flex-1 flex-col gap-1 p-3.5">

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { Tag } from '@/shared/components/Tag'
 import { Tooltip } from '@/shared/components/Tooltip'
 import { formatCurrency } from '@/shared/utils/formatters'
-import { TeamCrest } from '@/domains/teams/components/TeamCrest'
+import { TeamLogo } from '@/domains/teams/components/TeamLogo'
 import type { Team } from '@/domains/teams/types/team.types'
 import type { Listing } from '../types/listing.types'
 import { getTotalCost, getTotalPrice } from '../types/listing.types'
@@ -75,13 +75,8 @@ export function ListingSummaryCard({ listing, team }: ListingSummaryCardProps) {
   return (
     <section className="overflow-hidden rounded-xl border border-border-hairline bg-surface shadow-card">
       <header className="flex items-center gap-3 px-4 py-4">
-        <span className="h-10 w-10 shrink-0 overflow-hidden rounded-full">
-          <TeamCrest
-            primary={team.primary}
-            secondary={team.secondary}
-            seed={`summary-${team.id}`}
-            className="h-full w-full"
-          />
+        <span className="flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-track">
+          <TeamLogo team={team} size={40} className="h-7 w-7" />
         </span>
         <div className="min-w-0">
           <h2 className="truncate text-sm font-semibold text-ink">{team.name}</h2>

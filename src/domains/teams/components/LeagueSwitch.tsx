@@ -39,7 +39,7 @@ export function LeagueSwitch({ value, onChange }: LeagueSwitchProps) {
             transition={{ type: 'spring', stiffness: 400, damping: 30 }}
             className={`inline-flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
               selected
-                ? 'border border-accent/45 bg-gradient-to-b from-accent/25 to-accent/5 text-accent-ink shadow-[0_2px_14px_-6px_var(--psl-accent)]'
+                ? 'border border-accent/35 bg-gradient-to-b from-accent/15 to-accent/5 text-accent-ink shadow-[0_2px_12px_-8px_var(--psl-accent)]'
                 : 'border border-transparent text-muted hover:bg-track hover:text-ink'
             }`}
           >

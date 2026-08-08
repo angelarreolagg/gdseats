@@ -1,5 +1,5 @@
 import { Select } from '@/shared/components/Select'
-import { TeamCrest } from '@/domains/teams/components/TeamCrest'
+import { TeamLogo } from '@/domains/teams/components/TeamLogo'
 import type { Team } from '@/domains/teams/types/team.types'
 import { SORT_OPTIONS, type SortKey } from '../services/listingSearch.service'
 
@@ -25,13 +25,8 @@ export function SearchToolbar({
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border-hairline px-5 py-3 sm:px-6">
       <div className="flex min-w-0 items-center gap-3">
-        <span className="h-9 w-9 shrink-0 overflow-hidden rounded-full">
-          <TeamCrest
-            primary={team.primary}
-            secondary={team.secondary}
-            seed={`toolbar-${team.id}`}
-            className="h-full w-full"
-          />
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-track">
+          <TeamLogo team={team} size={36} className="h-6 w-6" />
         </span>
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-ink">{team.name}</p>
