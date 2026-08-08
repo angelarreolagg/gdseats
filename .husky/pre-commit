@@ -1,0 +1,16 @@
+# Nothing reaches a commit that the build would reject.
+#
+# Ordered cheapest-first so the common failure surfaces soonest. Roughly 8-10s
+# in total; the suite itself is ~3.5s, which is why it runs whole rather than
+# being filtered down to the changed files.
+#
+# To bypass in an emergency: git commit --no-verify
+
+# husky already invokes this with `sh -e`, so a failing step aborts. Stating it
+# here too: without it, `sh .husky/pre-commit` run by hand reports the exit code
+# of the LAST command only, and a type error sails through looking like a pass.
+set -e
+
+pnpm lint-staged   # eslint over staged .ts/.tsx only
+pnpm typecheck     # tsc -b — the class of error tests cannot see
+pnpm test          # vitest run — the whole suite
