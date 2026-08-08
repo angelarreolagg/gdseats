@@ -92,6 +92,39 @@ describe('TeamsHero', () => {
   })
 
   /**
+   * Validates: the demo disclosure is visible text, not a hover affordance.
+   * Why it matters: "these prices are invented" is the one claim a visitor has to
+   * be able to read before they trust anything below it. The header states it too,
+   * but only inside a tooltip — and hover tooltips never fire on touch, so on a
+   * phone that version does not exist. If this chip ever became a tooltip, an
+   * entire class of device would browse a mock marketplace with no indication it
+   * was one.
+   */
+  it('states the demo disclosure as visible copy', () => {
+    render(<TeamsHero />)
+
+    expect(screen.getByText(/demo version .* all data is mocked/i)).toBeInTheDocument()
+  })
+
+  /**
+   * Validates: the disclosure reads before the value proposition.
+   * Why it matters: the three lines fade in on separate beats, and the order is
+   * the point — a visitor who reads "the easy, transparent and secure way to buy"
+   * before learning it is a demo has been told something untrue for as long as the
+   * gap lasts. DOM order is what both a screen reader and the cascade follow, so
+   * pinning it here is what keeps the sequence honest.
+   */
+  it('places the disclosure above the value proposition', () => {
+    render(<TeamsHero />)
+
+    const disclosure = screen.getByText(/demo version .* all data is mocked/i)
+    const promise = screen.getByText(/find your team's psl & tickets/i)
+
+    // Node.compareDocumentPosition: FOLLOWING means `promise` comes after.
+    expect(disclosure.compareDocumentPosition(promise)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+
+  /**
    * Validates: the headline slot replaces the built-in copy rather than stacking
    * with it.
    * Why it matters: the backdrop and the title ship separately — a bespoke title

@@ -111,13 +111,32 @@ export function TeamsHero({ children }: TeamsHeroProps) {
             </h1>
             {/*
              * The copy holds until the headline has finished drawing, then rises
-             * in. Two beats rather than one so the lines arrive in reading order.
+             * in. Three beats rather than one so the lines arrive in reading
+             * order: disclosure, then promise, then detail.
              *
              * Under reduced motion StrokeText jumps straight to its end state, so
              * the delay has to collapse too — otherwise the value proposition
              * would sit invisible for 2.6s waiting on an animation that already
              * finished. `MotionConfig reducedMotion="user"` drops the transform
              * on its own, but it has no opinion about delays.
+             */}
+            {/*
+             * The demo disclosure, stated rather than tucked into a tooltip.
+             *
+             * `AppHeader` already carries a `DemoMarker`, and this is deliberately
+             * NOT a second copy of it: that one is a solid accent pill because it
+             * has to survive a dense bar, and two of those on one screen would
+             * read as a warning banner. Here the accent is a 6px dot and the words
+             * take the muted ink the second line already uses — the same
+             * information at a tenth of the volume.
+             *
+             * It also says the thing outright, where the header's version hides
+             * the detail behind hover. A hero is where a visitor decides whether
+             * to trust the numbers below it, and "these numbers are invented" is
+             * not something to make them hover to discover — nor something a
+             * touch device could discover at all.
+             *
+             * Not a button, not a link. It does nothing, so it is text.
              */}
             <motion.p
               initial={{ opacity: 0, y: 18 }}
@@ -127,7 +146,20 @@ export function TeamsHero({ children }: TeamsHeroProps) {
                 duration: 0.7,
                 ease: [0.22, 1, 0.36, 1],
               }}
-              className="mt-6 text-2xl font-semibold tracking-tight text-balance text-ink sm:text-3xl"
+              className="mt-6 inline-flex items-center gap-2 rounded-full border border-ink/15 bg-page/50 px-3.5 py-1.5 text-xs font-medium tracking-wide text-muted backdrop-blur-sm"
+            >
+              <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-accent" />
+              Demo version · all data is mocked
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{
+                delay: reduceMotion ? 0 : HEADLINE_SETTLES + 0.14,
+                duration: 0.7,
+                ease: [0.22, 1, 0.36, 1],
+              }}
+              className="mt-5 text-2xl font-semibold tracking-tight text-balance text-ink sm:text-3xl"
             >
               Find your team's PSL &amp; Tickets
             </motion.p>
@@ -135,7 +167,7 @@ export function TeamsHero({ children }: TeamsHeroProps) {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
-                delay: reduceMotion ? 0 : HEADLINE_SETTLES + 0.14,
+                delay: reduceMotion ? 0 : HEADLINE_SETTLES + 0.28,
                 duration: 0.7,
                 ease: [0.22, 1, 0.36, 1],
               }}
