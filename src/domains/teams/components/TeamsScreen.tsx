@@ -99,8 +99,27 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
           </p>
         )}
 
+        {/*
+         * The bar you see is 6px tall, which is nowhere near something a thumb
+         * can hit — as plain buttons these were 12×6px targets and simply did not
+         * respond on a phone. So the button is sized for the finger and the bar
+         * became a child of it:
+         *
+         * - `h-11` is the 44px touch target; `-my-[19px]` takes all but the bar's
+         *   own 6px back out of the flow, so the row still measures as the
+         *   hairline it looks like and nothing below it moves.
+         * - The spacing moved from the container's `gap` onto the button's `px`,
+         *   which is what makes the hit areas **tile edge to edge instead of
+         *   leaving dead strips between them**. At 24px wide they clear WCAG
+         *   2.5.8; a gap on the container would have left the same 12px targets
+         *   with empty space around them.
+         *
+         * Not a drag control on purpose: `TeamsPagination` above the grid is the
+         * primary way through the pages, and this stays a set of plain buttons so
+         * it keeps working with a keyboard and a screen reader for free.
+         */}
         {league === 'nfl' ? (
-          <div className="mt-6 flex justify-center gap-1.5">
+          <div className="mt-6 flex justify-center">
             {Array.from({ length: pageCount }, (_, index) => (
               <button
                 key={index}
@@ -108,10 +127,14 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
                 aria-label={`Go to page ${index + 1}`}
                 aria-current={index === page ? 'true' : undefined}
                 onClick={() => setPage(index)}
-                className={`h-1.5 rounded-full transition-all ${
-                  index === page ? 'w-6 bg-accent' : 'w-3 bg-track hover:bg-muted'
-                }`}
-              />
+                className="group -my-[19px] flex h-11 items-center px-1.5"
+              >
+                <span
+                  className={`block h-1.5 rounded-full transition-all ${
+                    index === page ? 'w-6 bg-accent' : 'w-3 bg-track group-hover:bg-muted'
+                  }`}
+                />
+              </button>
             ))}
           </div>
         ) : null}

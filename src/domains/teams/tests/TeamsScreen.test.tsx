@@ -113,4 +113,31 @@ describe('TeamsScreen league switch', () => {
     }
     expect(screen.queryByText(TEAMS[TEAMS_PER_PAGE].name)).not.toBeInTheDocument()
   })
+
+  /**
+   * Validates: each page indicator is a finger-sized button wrapping the hairline
+   * bar, rather than being the bar.
+   * Why it matters: styled as the bar itself these were 12×6px targets and did not
+   * respond to a thumb at all — the control was visible and inert on every phone.
+   * The height and padding are what make it hittable, and they look like cosmetic
+   * classes on a decorative element, so they are exactly what gets "cleaned up"
+   * back into the bar. The bar has to stay a child for the target to survive.
+   */
+  it('gives the page indicators a touch-sized target', async () => {
+    render(<TeamsScreen onSelectTeam={vi.fn()} />)
+
+    const indicator = screen.getByRole('button', { name: /go to page 2/i })
+
+    // The target lives on the button; the 6px bar it contains is decoration.
+    expect(indicator).toHaveClass('h-11', 'px-1.5')
+    expect(indicator.querySelector('span')).toHaveClass('h-1.5')
+
+    await userEvent.click(indicator)
+
+    expect(screen.getByText('2 of 3')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /go to page 2/i })).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
+  })
 })

@@ -141,7 +141,16 @@ export function TeamsHero({ children }: TeamsHeroProps) {
              * The accessible name is set here rather than left to the two
              * `role="img"` children, so it reads identically in both layouts.
              */}
-            <h1 aria-label={WORDMARK} className={oneLine ? 'hero-wordmark w-full' : 'w-full'}>
+            {/*
+             * `wordmark-draw` is on BOTH branches, where `hero-wordmark` is on
+             * one: it holds the fill at opacity 0 until GSAP takes it over, so
+             * the headline cannot paint solid in the frames before StrokeText's
+             * clipPath exists. See globals.css.
+             */}
+            <h1
+              aria-label={WORDMARK}
+              className={oneLine ? 'hero-wordmark wordmark-draw w-full' : 'wordmark-draw w-full'}
+            >
               {oneLine ? (
                 /* One string, so the two-tone split has to come from CSS:
                    `hero-wordmark` retints the first 10 glyphs — see globals.css. */

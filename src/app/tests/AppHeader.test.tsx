@@ -99,4 +99,27 @@ describe('AppHeader', () => {
     const { container } = render(<AppHeader onHome={vi.fn()} />)
     expect(container.querySelector('header')).toHaveClass('dark')
   })
+
+  /**
+   * Validates: the demo marker stays on one line, and the brand is what gives way
+   * when the bar runs out of room.
+   * Why it matters: on a phone "Demo version" was breaking over two lines inside a
+   * pill whose height is set by the row, which mangles the whole header. Keeping
+   * it to one line only works while something else can absorb the shortfall — so
+   * `whitespace-nowrap` on the marker, `shrink-0` on the control group and
+   * `truncate` + `min-w-0` on the wordmark are one mechanism, not four cosmetic
+   * classes. Drop any of them and the marker wraps again, or the overflow moves
+   * onto the page as a horizontal scrollbar.
+   */
+  it('keeps the demo marker on one line and lets the brand truncate', () => {
+    render(<AppHeader onHome={vi.fn()} />)
+
+    expect(screen.getByText('Demo version')).toHaveClass('whitespace-nowrap')
+
+    const wordmark = screen.getByText('G&D Seats')
+    expect(wordmark).toHaveClass('truncate')
+    // `min-width: auto` on a flex item refuses to shrink below its content, so
+    // without this the ellipsis can never engage and the overflow escapes.
+    expect(wordmark.closest('button')).toHaveClass('min-w-0')
+  })
 })

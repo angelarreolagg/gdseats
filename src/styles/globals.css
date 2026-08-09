@@ -253,3 +253,21 @@
 .hero-wordmark [data-fill-char]:nth-child(-n + 10) {
   fill: var(--psl-wordmark-lead);
 }
+
+/*
+ * The drawn wordmark's fill starts hidden, and GSAP is what reveals it.
+ *
+ * In `wipe` mode StrokeText leaves the fill <text> at full opacity and leans
+ * entirely on a <clipPath> to conceal it — and that clipPath is only rendered
+ * once getBBox() has landed. Until then the headline paints solid, and the
+ * stroke draws invisibly underneath it because TeamsHero passes the same colour
+ * as both strokeColor and fillColor.
+ *
+ * GSAP writes `opacity` inline on every tspan the moment it arms the timeline —
+ * 1 for the wipe, and 1 again on the reduced-motion end state — and an inline
+ * style outranks this rule. So this covers the frames before that and nothing
+ * after. It has to sit on both wordmark branches, unlike the tint above.
+ */
+.wordmark-draw [data-fill-char] {
+  opacity: 0;
+}
