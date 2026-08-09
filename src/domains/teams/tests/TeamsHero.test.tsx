@@ -168,6 +168,26 @@ describe('TeamsHero', () => {
   })
 
   /**
+   * Validates: both wordmark branches carry the class that holds the fill back
+   * until the draw owns it.
+   * Why it matters: StrokeText's `wipe` mode leaves the fill at full opacity and
+   * hides it with a clipPath that does not exist until getBBox() resolves — and
+   * TeamsHero paints the stroke in the same colour as the fill. Without this
+   * class the headline lands solid and the whole draw is invisible, which is the
+   * bug this fixed. It is easy to lose because the tint above it is deliberately
+   * one-branch-only, so the two look like they should match and do not.
+   */
+  it('gates the wordmark fill on the draw at both widths', () => {
+    setViewport('mobile')
+    const { container: narrow } = render(<TeamsHero />)
+    expect(narrow.querySelector('h1')).toHaveClass('wordmark-draw')
+
+    setViewport('desktop')
+    const { container: wide } = render(<TeamsHero />)
+    expect(wide.querySelector('h1')).toHaveClass('wordmark-draw')
+  })
+
+  /**
    * Validates: the headline slot replaces the built-in copy rather than stacking
    * with it.
    * Why it matters: the backdrop and the title ship separately — a bespoke title

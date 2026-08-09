@@ -1,4 +1,4 @@
-import { type CSSProperties, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { type CSSProperties, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -57,12 +57,8 @@ const StrokeText = ({
 }: StrokeTextProps) => {
   const rootRef = useRef<HTMLSpanElement | null>(null);
   const strokeTextRef = useRef<SVGTextElement | null>(null);
-  const wipeRectRef = useRef<SVGRectElement | null>(null);
 
   const [box, setBox] = useState<StrokeTextBox | null>(null);
-
-  const rawId = useId();
-  const wipeId = `stroke-text-wipe-${rawId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
 
   const characters = useMemo(() => Array.from(String(text ?? '')), [text]);
 
@@ -126,28 +122,25 @@ const StrokeText = ({
     if (typeof window === 'undefined' || !root || !box) return undefined;
 
     const strokes = gsap.utils.toArray(root.querySelectorAll('[data-stroke-char]'));
-    const fills = gsap.utils.toArray(root.querySelectorAll('[data-fill-char]'));
-    const wipe = wipeRectRef.current;
+    const fills = gsap.utils.toArray<SVGTSpanElement>(root.querySelectorAll('[data-fill-char]'));
     if (!strokes.length) return undefined;
 
     const fillEnabled = fillMode !== 'none';
     const useWipe = fillEnabled && fillMode === 'wipe';
     const fillDuration = Math.max(0.4, drawDuration * 0.5);
     const staggerConfig: number | gsap.StaggerVars = reverse ? { each: stagger, from: 'end' as const } : stagger;
-    const targets = [...strokes, ...fills, wipe].filter(Boolean);
+    const targets = [...strokes, ...fills];
 
     const setStart = () => {
       gsap.killTweensOf(targets);
       gsap.set(strokes, { strokeDasharray: dash, strokeDashoffset: dash });
-      gsap.set(fills, { opacity: useWipe ? 1 : 0 });
-      if (wipe) gsap.set(wipe, { attr: { width: 0 } });
+      gsap.set(fills, { opacity: 0 });
     };
 
     const setEnd = () => {
       gsap.killTweensOf(targets);
       gsap.set(strokes, { strokeDasharray: dash, strokeDashoffset: 0 });
       gsap.set(fills, { opacity: fillEnabled ? 1 : 0 });
-      if (wipe) gsap.set(wipe, { attr: { width: fillEnabled ? box.width : 0 } });
     };
 
     const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
@@ -167,16 +160,33 @@ const StrokeText = ({
 
       tl.to(strokes, { strokeDashoffset: 0, duration: drawDuration, ease, stagger: staggerConfig }, 0);
 
-      if (useWipe && wipe) {
-        tl.to(
-          wipe,
-          { attr: { width: box.width }, duration: fillDuration, ease: 'power2.inOut' },
-          drawDuration + fillDelay
-        );
-      } else if (fillEnabled) {
+      if (fillEnabled) {
+        // `wipe` sweeps the fill in glyph by glyph, left to right, on tightly
+        // spaced ramps that overlap by roughly two characters — so the leading
+        // edge reads as a wipe travelling across the word rather than as letters
+        // popping on one at a time. The spacing is solved so the last glyph
+        // finishes exactly at `fillDuration`, which keeps the whole reveal inside
+        // the window callers time their own copy against.
+        //
+        // `fade` keeps the original behaviour: the string comes up together on
+        // the component's own `stagger`.
+        const glyphDuration = useWipe ? Math.max(0.12, fillDuration * 0.22) : fillDuration;
+        const each =
+          useWipe && fills.length > 1
+            ? (fillDuration - glyphDuration) / (fills.length - 1)
+            : stagger;
+        const fillStagger: number | gsap.StaggerVars = reverse
+          ? { each, from: 'end' as const }
+          : each;
+
         tl.to(
           fills,
-          { opacity: 1, duration: fillDuration, ease: 'power2.out', stagger: staggerConfig },
+          {
+            opacity: 1,
+            duration: glyphDuration,
+            ease: useWipe ? 'power1.out' : 'power2.out',
+            stagger: useWipe ? fillStagger : staggerConfig
+          },
           drawDuration + fillDelay
         );
       }
@@ -236,14 +246,6 @@ const StrokeText = ({
         preserveAspectRatio="xMidYMid meet"
         aria-hidden="true"
       >
-        {fillMode === 'wipe' && box && (
-          <defs>
-            <clipPath id={wipeId} clipPathUnits="userSpaceOnUse">
-              <rect ref={wipeRectRef} x={box.x} y={box.y} width="0" height={box.height} />
-            </clipPath>
-          </defs>
-        )}
-
         <text
           ref={strokeTextRef}
           className="select-none"
@@ -270,7 +272,6 @@ const StrokeText = ({
           fill={fillColor}
           stroke="none"
           style={fontStyle}
-          clipPath={fillMode === 'wipe' && box ? `url(#${wipeId})` : undefined}
         >
           {characters.map((char, index) => (
             <tspan data-fill-char key={`f-${index}`}>
