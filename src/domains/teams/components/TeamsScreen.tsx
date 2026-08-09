@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
+import { useSwipe } from '@/shared/hooks/useSwipe'
 import { TEAMS, TEAMS_PER_PAGE } from '../data/teams'
 import { TeamCard } from './TeamCard'
 import { TeamsPagination } from './TeamsPagination'
@@ -16,6 +17,15 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
   const [league, setLeague] = useState<League>('nfl')
 
   const pageCount = Math.ceil(TEAMS.length / TEAMS_PER_PAGE)
+
+  // Swipe left for the next page, right for the previous — clamped, so a flick at
+  // either end is a no-op rather than a wrap. Spread onto both the grid and the
+  // indicator below it: the cards are where a thumb naturally lands, and the
+  // indicator is the thing that looks like it should respond to a drag.
+  const swipe = useSwipe({
+    onSwipeLeft: () => setPage((current) => Math.min(current + 1, pageCount - 1)),
+    onSwipeRight: () => setPage((current) => Math.max(current - 1, 0)),
+  })
   // MLB is chrome only — the demo carries one league's worth of mock data.
   const visible = league === 'nfl' ? TEAMS.slice(page * TEAMS_PER_PAGE, (page + 1) * TEAMS_PER_PAGE) : []
 
@@ -88,6 +98,7 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
             className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
+            {...swipe}
           >
             {visible.map((team) => (
               <TeamCard key={team.id} team={team} onSelect={onSelectTeam} />
@@ -114,12 +125,14 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
          *   2.5.8; a gap on the container would have left the same 12px targets
          *   with empty space around them.
          *
-         * Not a drag control on purpose: `TeamsPagination` above the grid is the
-         * primary way through the pages, and this stays a set of plain buttons so
-         * it keeps working with a keyboard and a screen reader for free.
+         * The swipe is spread on here too, but these stay plain `<button>`s and
+         * are NOT a `role="slider"`: the gesture is an enhancement layered over
+         * controls that already work with a keyboard and a screen reader, and it
+         * has no accessible equivalent of its own. `TeamsPagination` above the
+         * grid remains the primary path through the pages.
          */}
         {league === 'nfl' ? (
-          <div className="mt-6 flex justify-center">
+          <div className="mt-6 flex justify-center" {...swipe}>
             {Array.from({ length: pageCount }, (_, index) => (
               <button
                 key={index}

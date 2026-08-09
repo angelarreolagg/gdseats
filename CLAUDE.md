@@ -161,6 +161,14 @@ Renaming a module's extension leaves Vite's dev server holding the old resolutio
 
 `TeamSearchCombobox` sits beside `LeagueSwitch`, not in the hero — the reference put its search in the band, but a control there competes with the headline for the one thing that screen has to say. It jumps straight to a franchise's listings via the same `onSelectTeam` the cards use, and deliberately **does not filter the grid**. Hand-rolled rather than added as a dependency (the only Radix package here is the tooltip). Options suppress `mousedown`'s default so the blur-close can't unmount the row mid-click — the classic hand-built-combobox bug, pinned by a test. Venue is searchable alongside the name because a seat licence is bought for a building as much as for a team.
 
+**The grid pages on a swipe, via `shared/hooks/useSwipe.ts`.** The same props are spread on the card grid and on the dot indicator below it — the cards are where a thumb lands, the dots are what looks like it should respond to a drag. Three things in that hook are load-bearing and all are pinned by `TeamsScreen.test.tsx`:
+
+- **Mouse pointers are ignored outright.** A mouse drag across a grid is a text selection, not a page turn.
+- **The gesture must be clearly sideways** (`|dx|` over 48px *and* over 1.5× `|dy|`). Scrolling is what a finger does here nearly every time and a scroll is rarely straight; without the ratio a slanted scroll pages the catalogue out from under the reader.
+- **The trailing `click` is swallowed in the capture phase.** The pointer sequence still ends in a click on whatever card the finger came down on, so without this every swipe also opens a franchise. The flag disarms on use *and* on the next `pointerdown`, so a swipe that never produced a click can't eat an unrelated tap later.
+
+Nothing calls `preventDefault` on the pointer stream, so vertical scrolling is untouched — the browser keeps it and hands back a `pointercancel`. The dots stay plain `<button>`s rather than becoming a `role="slider"`: the gesture is an enhancement over controls that already work with a keyboard and a screen reader, and it has no accessible equivalent of its own.
+
 ## Charts
 
 `PriceStatsChart` is inline SVG, no chart dependency (Recharts was removed). It is an **emphasis** chart: the listing in question takes the accent, every peer recedes to the muted token, because the question is "where does mine land". The price history table above it is the table-view twin, so no value is chart-only.
