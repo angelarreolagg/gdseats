@@ -38,7 +38,20 @@
       property="og:image:alt"
       content="G&amp;D Seats — some seats mean more. A demo marketplace for NFL personal seat licenses."
     />
+    <!--
+      The static markup is English and stays that way — see the note in
+      src/shared/config/site.ts. `og:locale:alternate` is how a scraper is told
+      the other three exist without a second URL to point at, which there isn't:
+      the app holds the screen in React state, and locale routing (`/es/…`) would
+      advertise addresses that all resolve to this same document.
+
+      `useDocumentMeta` rewrites `og:locale` at runtime to match the language the
+      visitor is actually reading, so the live DOM never contradicts itself.
+    -->
     <meta property="og:locale" content="en_US" />
+    <meta property="og:locale:alternate" content="es_MX" />
+    <meta property="og:locale:alternate" content="pt_BR" />
+    <meta property="og:locale:alternate" content="ja_JP" />
 
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="G&amp;D Seats — AI-priced NFL personal seat licenses" />
@@ -128,6 +141,37 @@
           stored === 'dark' ||
           (!stored && matchMedia('(prefers-color-scheme: dark)').matches)
         if (dark) document.documentElement.classList.add('dark')
+      } catch {}
+    </script>
+
+    <script>
+      // Same shape as the theme script above, and here for the same reason: the
+      // first frame has to be labelled correctly. `:lang()` rules, screen-reader
+      // pronunciation and CJK font fallback all key off `<html lang>`, and none
+      // of them wait for React to mount.
+      //
+      // The supported list is stated twice — here and in
+      // src/shared/i18n/locales.ts — because static markup cannot import
+      // TypeScript, exactly like the SEO strings above. `site.config.test.ts`
+      // asserts the two agree, which is what stops them drifting.
+      try {
+        var stored = localStorage.getItem('psl-lang')
+        var supported = ['en', 'es', 'pt-BR', 'ja']
+        var pick = supported.indexOf(stored) > -1 ? stored : null
+        if (!pick) {
+          var nav = (navigator.language || 'en').toLowerCase()
+          // `pt` of any flavour lands on pt-BR: it is the only Portuguese bundle
+          // here, and Brazilian copy beats no copy for a pt-PT reader.
+          pick =
+            nav.indexOf('pt') === 0
+              ? 'pt-BR'
+              : nav.indexOf('es') === 0
+                ? 'es'
+                : nav.indexOf('ja') === 0
+                  ? 'ja'
+                  : 'en'
+        }
+        document.documentElement.lang = pick
       } catch {}
     </script>
   </head>

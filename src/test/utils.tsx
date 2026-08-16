@@ -1,6 +1,8 @@
 import type { ReactElement } from 'react'
 import { render as rtlRender, type RenderOptions } from '@testing-library/react'
 import { AppProviders } from '@/app/providers/AppProviders'
+import i18n from '@/shared/i18n'
+import type { Locale } from '@/shared/i18n/locales'
 import { stubMatchMedia } from './setup'
 
 /**
@@ -17,6 +19,22 @@ import { stubMatchMedia } from './setup'
  */
 export function setViewport(size: 'mobile' | 'desktop') {
   stubMatchMedia(size === 'desktop')
+}
+
+/**
+ * Run a test in a language other than English.
+ *
+ * **Call it before `render`, for the same class of reason as `setViewport`.**
+ * `changeLanguage` is async — it resolves immediately here because every bundle
+ * is already in memory, but a component that has already rendered only picks the
+ * change up on the re-render i18next's emitter schedules, which is not something
+ * a synchronous assertion after this call can rely on. Setting it first
+ * sidesteps the question entirely.
+ *
+ * `src/test/setup.ts` restores `en` after every test.
+ */
+export function setLocale(locale: Locale) {
+  void i18n.changeLanguage(locale)
 }
 
 /**

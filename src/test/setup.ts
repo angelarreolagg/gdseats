@@ -1,6 +1,20 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach, vi } from 'vitest'
+import i18n from '@/shared/i18n'
+import { DEFAULT_LOCALE } from '@/shared/i18n/locales'
+
+/**
+ * The suite runs in English, and that is what keeps 33 existing test files
+ * passing through the whole extraction: every assertion on copy is asserting on
+ * the `en` bundle, which is byte-identical to the literals it replaced.
+ *
+ * Imported for its side effect first — the singleton initialises synchronously
+ * with every locale bundled, so service tests that never render still have a
+ * working `t()`. Then pinned to `en`, because `resolveInitialLocale()` reads
+ * `navigator.language`, and jsdom's is whatever the machine running CI reports.
+ */
+void i18n.changeLanguage(DEFAULT_LOCALE)
 
 /**
  * jsdom has no layout, so the suite has to *pick* a viewport rather than measure
@@ -101,7 +115,8 @@ globalThis.IntersectionObserver = class {
 
 afterEach(() => {
   cleanup()
-  // Restore the default, or one mobile test silently rewrites the viewport for
-  // every test that runs after it in the same file.
+  // Restore the defaults, or one mobile test silently rewrites the viewport —
+  // and one `setLocale('ja')` the language — for every test that runs after it.
   stubMatchMedia(DESKTOP_WIDTH_MATCHES)
+  void i18n.changeLanguage(DEFAULT_LOCALE)
 })

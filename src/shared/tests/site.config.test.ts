@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import INDEX_HTML from '../../../index.html?raw'
 import ROBOTS_TXT from '../../../public/robots.txt?raw'
 import SITEMAP_XML from '../../../public/sitemap.xml?raw'
+import EN_META from '../i18n/locales/en/meta.json'
+import { LOCALE_CODES } from '../i18n/locales'
 import {
   DEFAULT_DESCRIPTION,
   DEFAULT_TITLE,
@@ -119,5 +121,31 @@ describe('site config against index.html', () => {
   it('points robots.txt and the sitemap at the same host', () => {
     expect(ROBOTS_TXT).toContain(`Sitemap: ${SITE_URL}/sitemap.xml`)
     expect(SITEMAP_XML).toContain(`<loc>${SITE_URL}/</loc>`)
+  })
+
+  /**
+   * Validates: the locale list in the pre-paint script is the app's locale list.
+   * Why it matters: that script is what puts the right `lang` on `<html>` before
+   * React mounts, and it cannot import `locales.ts` — static markup never can. A
+   * fifth locale added in TypeScript and not here would load its bundle
+   * correctly and still label the document `en`, so screen readers would read
+   * the page aloud in the wrong voice with nothing on screen looking wrong.
+   */
+  it('lists the same locales in the pre-paint script as the app supports', () => {
+    const declared = INDEX.match(/var supported = (\[[^\]]+\])/)![1]
+    expect(JSON.parse(declared.replace(/'/g, '"'))).toEqual([...LOCALE_CODES])
+  })
+
+  /**
+   * Validates: English `meta.json` says exactly what `site.ts` and the markup do.
+   * Why it matters: this is the THIRD copy of the title and description, and it
+   * exists because `useDocumentMeta` restores translated defaults — an English
+   * reader navigating home must land back on the string the scraper already
+   * cached, not on a paraphrase of it. The other two copies are kept honest by
+   * the cases above; without this one the new copy is the only unguarded one.
+   */
+  it('states the same default title and description in the en bundle', () => {
+    expect(EN_META.default.title).toBe(DEFAULT_TITLE)
+    expect(EN_META.default.description).toBe(DEFAULT_DESCRIPTION)
   })
 })
