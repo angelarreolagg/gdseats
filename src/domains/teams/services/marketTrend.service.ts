@@ -16,11 +16,6 @@ const FORECAST_MONTHS = 3
  */
 export const MATERIAL_MOMENTUM = 0.03
 
-const MONTH_NAMES = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-]
-
 /**
  * Presentation per direction.
  *
@@ -29,41 +24,56 @@ const MONTH_NAMES = [
  * cheaper, so it is the green one. This matches `insights.service.ts`, which
  * already scores a falling ask as positive — without the inversion, the same
  * green would mean "good deal" on a listing and "expensive" on a team card.
+ *
+ * That inversion is a translation hazard as much as a colour one: a Spanish
+ * "Enfriándose" reworded into something that reads as bad news would contradict
+ * the green it is printed in. It is stated in `locales/TRANSLATORS.md` for
+ * exactly that reason.
+ *
+ * Keys, not phrases, so this file stays free of copy as well as of React.
  */
 const PRESENTATION: Record<TrendDirection, {
-  label: string
-  buyerImplication: string
+  labelKey: string
+  buyerImplicationKey: string
   tone: TrendTone
   iconName: TrendDirection
 }> = {
   heating: {
-    label: 'Heating up',
-    buyerImplication: 'Entry cost rising',
+    labelKey: 'teams:trend.label.heating',
+    buyerImplicationKey: 'teams:trend.buyerImplication.heating',
     tone: 'fair',
     iconName: 'heating',
   },
   steady: {
-    label: 'Steady',
-    buyerImplication: 'Prices holding',
+    labelKey: 'teams:trend.label.steady',
+    buyerImplicationKey: 'teams:trend.buyerImplication.steady',
     tone: 'neutral',
     iconName: 'steady',
   },
   cooling: {
-    label: 'Cooling off',
-    buyerImplication: "Buyer's market",
+    labelKey: 'teams:trend.label.cooling',
+    buyerImplicationKey: 'teams:trend.buyerImplication.cooling',
     tone: 'good',
     iconName: 'cooling',
   },
 }
 
-function monthLabels(count: number, now: Date): string[] {
-  const labels: string[] = []
+/**
+ * Month indices rather than the `['Jan', 'Feb', …]` labels this replaced.
+ *
+ * `MarketTrend.series[].monthIndex` is not currently rendered — the sparkline
+ * was removed — but the series is not dead data: `momentum` is derived from it
+ * and `getTrendExplanation` counts its projected points to state its own
+ * horizon. An index keeps that true and leaves the field translatable if a chart
+ * ever comes back, rather than parking an English string nobody looks at.
+ */
+function monthIndices(count: number, now: Date): number[] {
+  const indices: number[] = []
   // Start far enough back that the last actual point is the current month.
   for (let offset = HISTORY_MONTHS - 1; offset > HISTORY_MONTHS - 1 - count; offset -= 1) {
-    const date = new Date(now.getFullYear(), now.getMonth() - offset, 1)
-    labels.push(MONTH_NAMES[date.getMonth()])
+    indices.push(new Date(now.getFullYear(), now.getMonth() - offset, 1).getMonth())
   }
-  return labels
+  return indices
 }
 
 /** Exactly ±3% is still steady — only a strictly larger move is a trend. */
@@ -114,9 +124,9 @@ export function getMarketTrend(team: Team, now: Date = new Date()): MarketTrend 
     forecast.push(last)
   }
 
-  const labels = monthLabels(HISTORY_MONTHS + FORECAST_MONTHS, now)
+  const months = monthIndices(HISTORY_MONTHS + FORECAST_MONTHS, now)
   const series: TrendPoint[] = [...history, ...forecast].map((value, index) => ({
-    label: labels[index],
+    monthIndex: months[index],
     value: Math.round(value * 10) / 10,
     projected: index >= HISTORY_MONTHS,
   }))

@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 
 export type League = 'nfl' | 'mlb'
 
@@ -7,9 +8,9 @@ interface LeagueSwitchProps {
   onChange: (league: League) => void
 }
 
-const LEAGUES: Array<{ value: League; label: string; hint?: string }> = [
-  { value: 'nfl', label: 'NFL Teams' },
-  { value: 'mlb', label: 'MLB Teams', hint: 'Soon' },
+const LEAGUES: Array<{ value: League; labelKey: string; hintKey?: string }> = [
+  { value: 'nfl', labelKey: 'league.nfl' },
+  { value: 'mlb', labelKey: 'league.mlb', hintKey: 'league.soon' },
 ]
 
 /**
@@ -39,10 +40,12 @@ const LEAGUES: Array<{ value: League; label: string; hint?: string }> = [
  * makes it the wrong thing to shrink to its text.
  */
 export function LeagueSwitch({ value, onChange }: LeagueSwitchProps) {
+  const { t } = useTranslation('teams')
+
   return (
     <div
       role="group"
-      aria-label="League"
+      aria-label={t('league.groupLabel')}
       className="flex w-full items-center gap-1.5 rounded-full border border-border-hairline bg-surface p-1.5 sm:inline-flex sm:w-auto sm:gap-2"
     >
       {LEAGUES.map((league) => {
@@ -68,15 +71,15 @@ export function LeagueSwitch({ value, onChange }: LeagueSwitchProps) {
 
             {/* Above the travelling fill, or the slide passes over the label. */}
             <span className={`relative z-10 ${selected ? 'text-accent-ink' : 'text-muted'}`}>
-              {league.label}
+              {t(league.labelKey)}
             </span>
-            {league.hint ? (
+            {league.hintKey ? (
               <span
                 className={`relative z-10 rounded-full px-1.5 py-0.5 text-[9px] font-semibold tracking-wide uppercase ${
                   selected ? 'bg-accent-ink/15 text-accent-ink' : 'bg-ink/8 text-muted'
                 }`}
               >
-                {league.hint}
+                {t(league.hintKey)}
               </span>
             ) : null}
           </button>

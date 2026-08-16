@@ -4,7 +4,8 @@ export type TrendDirection = 'heating' | 'steady' | 'cooling'
 export type TrendTone = 'good' | 'fair' | 'neutral'
 
 export interface TrendPoint {
-  label: string
+  /** 0–11. Not a label: month names are copy, and this layer holds none. */
+  monthIndex: number
   /** Demand index, 0–100. */
   value: number
   /** True for the forecast tail, drawn dashed. */
@@ -17,9 +18,10 @@ export interface MarketTrend {
   momentum: number
   /** 12 actual months plus 3 projected, oldest first. */
   series: TrendPoint[]
-  label: string
+  /** Translation key; `TrendChip` and `TeamCard` resolve it. */
+  labelKey: string
   /** What the direction means for someone buying, not for the franchise. */
-  buyerImplication: string
+  buyerImplicationKey: string
   tone: TrendTone
   /** Semantic name; `components/trendPresentation.ts` resolves the icon. */
   iconName: TrendDirection

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { useSwipe } from '@/shared/hooks/useSwipe'
 import { TEAMS, TEAMS_PER_PAGE } from '../data/teams'
 import { TeamCard } from './TeamCard'
@@ -13,6 +14,7 @@ interface TeamsScreenProps {
 }
 
 export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
+  const { t } = useTranslation('teams')
   const [page, setPage] = useState(0)
   const [league, setLeague] = useState<League>('nfl')
 
@@ -106,7 +108,7 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
           </motion.div>
         ) : (
           <p className="rounded-xl border border-border-hairline bg-surface px-5 py-12 text-center text-sm text-muted">
-            MLB listings aren't part of this demo yet.
+            {t('grid.mlbEmpty')}
           </p>
         )}
 
@@ -137,7 +139,7 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
               <button
                 key={index}
                 type="button"
-                aria-label={`Go to page ${index + 1}`}
+                aria-label={t('pagination.goToPage', { page: index + 1 })}
                 aria-current={index === page ? 'true' : undefined}
                 onClick={() => setPage(index)}
                 className="group -my-[19px] flex h-11 items-center px-1.5"

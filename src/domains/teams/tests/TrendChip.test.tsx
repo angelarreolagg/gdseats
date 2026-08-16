@@ -5,10 +5,29 @@ import { TrendChip } from '../components/TrendChip'
 import { getMarketTrend } from '../services/marketTrend.service'
 import { getTrendExplanation } from '../components/trendPresentation'
 import { TEAMS, getTeamById } from '../data/teams'
-import { formatSignedPercent } from '@/shared/utils/formatters'
+import { formatPercent, formatSignedPercent } from '@/shared/utils/formatters'
+import i18n from '@/shared/i18n'
 
 const NOW = new Date('2026-08-07')
 const TREND = getMarketTrend(getTeamById('dal')!, NOW)
+
+/** The label the chip renders, resolved the way the component resolves it. */
+const label = (trend = TREND) => i18n.t(trend.labelKey)
+
+/**
+ * The explanation as the chip renders it.
+ *
+ * `getTrendExplanation` returns keys plus the counted horizon now, so a test
+ * that wants to find the sentence on screen has to resolve it the same way —
+ * including passing `count`, which is what selects the plural form.
+ */
+function explain(trend = TREND) {
+  const { forecastKey, implicationKey, months, momentum } = getTrendExplanation(trend)
+  return {
+    forecast: i18n.t(forecastKey, { count: months, magnitude: formatPercent(momentum) }),
+    implication: i18n.t(implicationKey),
+  }
+}
 
 describe('TrendChip', () => {
   /**
@@ -19,7 +38,7 @@ describe('TrendChip', () => {
   it('renders the label and the momentum without hovering', () => {
     render(<TrendChip trend={TREND} />)
 
-    expect(screen.getByText(TREND.label)).toBeInTheDocument()
+    expect(screen.getByText(label())).toBeInTheDocument()
     expect(screen.getByText(formatSignedPercent(TREND.momentum))).toBeInTheDocument()
   })
 
@@ -40,8 +59,8 @@ describe('TrendChip', () => {
     // Scoped to the container because the open panel repeats the label in its own
     // header — and it renders through a portal, outside this node. `screen` would
     // find both and throw on the second tap.
-    const chip = () => within(container).getByText(TREND.label)
-    const { forecast } = getTrendExplanation(TREND)
+    const chip = () => within(container).getByText(label())
+    const { forecast } = explain()
 
     expect(screen.queryByText(forecast)).not.toBeInTheDocument()
 
@@ -68,9 +87,9 @@ describe('TrendChip', () => {
       </button>,
     )
 
-    await userEvent.click(screen.getByText(TREND.label))
+    await userEvent.click(screen.getByText(label()))
 
-    expect(await screen.findByText(getTrendExplanation(TREND).forecast)).toBeInTheDocument()
+    expect(await screen.findByText(explain().forecast)).toBeInTheDocument()
     expect(onSelect).not.toHaveBeenCalled()
   })
 
@@ -81,7 +100,7 @@ describe('TrendChip', () => {
    */
   it('opens the explanation on keyboard focus when focusable', async () => {
     render(<TrendChip trend={TREND} focusable />)
-    const { forecast, implication } = getTrendExplanation(TREND)
+    const { forecast, implication } = explain()
 
     await userEvent.tab()
     const tooltip = await screen.findByRole('tooltip')
@@ -102,7 +121,7 @@ describe('TrendChip', () => {
     await userEvent.tab()
     const tooltip = await screen.findByRole('tooltip')
 
-    expect(tooltip).toHaveTextContent(TREND.label)
+    expect(tooltip).toHaveTextContent(label())
     expect(tooltip).toHaveTextContent(formatSignedPercent(TREND.momentum))
   })
 
@@ -140,9 +159,9 @@ describe('TrendChip', () => {
 
     render(<TrendChip trend={steady} />)
 
-    expect(screen.getByText(steady.label)).toBeInTheDocument()
+    expect(screen.getByText(label(steady))).toBeInTheDocument()
     expect(screen.queryByText('0%')).not.toBeInTheDocument()
-    expect(getTrendExplanation(steady).forecast).toMatch(/projected to hold/i)
+    expect(explain(steady).forecast).toMatch(/projected to hold/i)
   })
 
   /**
@@ -154,6 +173,6 @@ describe('TrendChip', () => {
     const { container } = render(<TrendChip trend={TREND} />)
 
     expect(container.querySelector('svg')).toBeInTheDocument()
-    expect(screen.getByText(TREND.label)).toBeInTheDocument()
+    expect(screen.getByText(label())).toBeInTheDocument()
   })
 })

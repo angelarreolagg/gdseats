@@ -165,8 +165,11 @@ describe('trend presentation', () => {
     for (const direction of ['heating', 'steady', 'cooling'] as const) {
       const presentation = getTrendPresentation(direction)
       expect(TREND_ICON[presentation.iconName]).toBeDefined()
-      expect(presentation.label.length).toBeGreaterThan(0)
-      expect(presentation.buyerImplication.length).toBeGreaterThan(0)
+      // Keys now, not sentences — the words moved to the locale bundles. What
+      // this still guards is unchanged and is the point: a direction must always
+      // arrive with something to render, whichever half is edited.
+      expect(presentation.labelKey.length).toBeGreaterThan(0)
+      expect(presentation.buyerImplicationKey.length).toBeGreaterThan(0)
     }
   })
 })

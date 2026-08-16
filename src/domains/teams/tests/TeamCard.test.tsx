@@ -5,6 +5,7 @@ import { TeamCard } from '../components/TeamCard'
 import { getMarketTrend } from '../services/marketTrend.service'
 import { getListingCountForTeam, getTeamById } from '../data/teams'
 import { formatSignedPercent } from '@/shared/utils/formatters'
+import i18n from '@/shared/i18n'
 
 const TEAM = getTeamById('dal')!
 
@@ -19,8 +20,10 @@ describe('TeamCard', () => {
     render(<TeamCard team={TEAM} onSelect={vi.fn()} />)
     const trend = getMarketTrend(TEAM)
 
-    expect(screen.getByText(trend.label)).toBeInTheDocument()
-    expect(screen.getByText(trend.buyerImplication)).toBeInTheDocument()
+    // The service emits keys; the card resolves them. Resolving here too is
+    // what makes this assert the rendered sentence rather than the key beside it.
+    expect(screen.getByText(i18n.t(trend.labelKey))).toBeInTheDocument()
+    expect(screen.getByText(i18n.t(trend.buyerImplicationKey))).toBeInTheDocument()
   })
 
   /**

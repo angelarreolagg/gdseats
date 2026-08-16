@@ -1,5 +1,6 @@
+import { useTranslation } from 'react-i18next'
 import { Tooltip } from '@/shared/components/Tooltip'
-import { formatSignedPercent } from '@/shared/utils/formatters'
+import { formatPercent, formatSignedPercent } from '@/shared/utils/formatters'
 import type { MarketTrend, TrendTone } from '../types/team.types'
 import { TREND_ICON, getTrendExplanation } from './trendPresentation'
 
@@ -37,7 +38,9 @@ const TONE_INK: Record<TrendTone, string> = {
  * regardless.
  */
 export function TrendChip({ trend, focusable = false }: TrendChipProps) {
+  const { t } = useTranslation('teams')
   const Icon = TREND_ICON[trend.iconName]
+  const label = t(trend.labelKey)
 
   /*
    * `holo-chip` — the same rotating border DealBadge wears, and for the same
@@ -53,7 +56,7 @@ export function TrendChip({ trend, focusable = false }: TrendChipProps) {
       className={`holo-chip inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold tracking-wide whitespace-nowrap uppercase ${TONE_CHIP[trend.tone]}`}
     >
       <Icon aria-hidden="true" className="h-3 w-3 shrink-0" strokeWidth={2.5} />
-      {trend.label}
+      {label}
       {/* A steady market rounds to "0%", which reads as missing data rather than
           as a measurement — and the label already says the number isn't moving.
           The tooltip still carries the figure for anyone who wants it. */}
@@ -63,7 +66,14 @@ export function TrendChip({ trend, focusable = false }: TrendChipProps) {
     </span>
   )
 
-  const { forecast, implication } = getTrendExplanation(trend)
+  // The service hands back keys plus the horizon it counted off the series; the
+  // formatting and the plural selection both happen here, where the locale is.
+  const explanation = getTrendExplanation(trend)
+  const forecast = t(explanation.forecastKey, {
+    count: explanation.months,
+    magnitude: formatPercent(explanation.momentum),
+  })
+  const implication = t(explanation.implicationKey)
   const momentum = formatSignedPercent(trend.momentum)
 
   /*
@@ -82,7 +92,7 @@ export function TrendChip({ trend, focusable = false }: TrendChipProps) {
           className={`h-3.5 w-3.5 shrink-0 ${TONE_INK[trend.tone]}`}
           strokeWidth={2.5}
         />
-        <span className="text-xs font-semibold text-ink">{trend.label}</span>
+        <span className="text-xs font-semibold text-ink">{label}</span>
         {trend.direction === 'steady' ? null : (
           <span className={`ml-auto text-xs font-semibold tabular-nums ${TONE_INK[trend.tone]}`}>
             {momentum}
