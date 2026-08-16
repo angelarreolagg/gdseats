@@ -1,9 +1,9 @@
-import { useId, useMemo, useState } from "react";
-import { ChevronDown } from "lucide-react";
-import { motion } from "motion/react";
-import { useTranslation } from "react-i18next";
-import { Reveal } from "@/shared/components/Reveal";
-import { SELL_EMAIL, TICKETS_EMAIL } from "@/shared/config/contact";
+import { useId, useMemo, useState } from 'react'
+import { ChevronDown } from 'lucide-react'
+import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
+import { Reveal } from '@/shared/components/Reveal'
+import { SELL_EMAIL, TICKETS_EMAIL } from '@/shared/config/contact'
 
 /**
  * The categories, in the order the chips present them.
@@ -18,15 +18,15 @@ import { SELL_EMAIL, TICKETS_EMAIL } from "@/shared/config/contact";
  *
  * A plain union rather than an enum — `erasableSyntaxOnly` is on.
  */
-const FAQ_CATEGORIES = ["basics", "buying", "selling"] as const;
+const FAQ_CATEGORIES = ['basics', 'buying', 'selling'] as const
 
-type FaqCategory = (typeof FAQ_CATEGORIES)[number];
+type FaqCategory = (typeof FAQ_CATEGORIES)[number]
 
 interface FaqItem {
-  id: string;
-  category: FaqCategory;
-  question: string;
-  answer: string;
+  id: string
+  category: FaqCategory
+  question: string
+  answer: string
 }
 
 /**
@@ -43,23 +43,23 @@ interface FaqItem {
  * render, which is what lets `answer` stay a plain string for schema.org.
  */
 const FAQ_STRUCTURE: Array<{
-  id: string;
-  category: FaqCategory;
-  values?: Record<string, string>;
+  id: string
+  category: FaqCategory
+  values?: Record<string, string>
 }> = [
-  { id: "whatIsAPsl", category: "basics" },
-  { id: "howItWorks", category: "basics" },
-  { id: "isItSafe", category: "basics" },
-  { id: "howToBuy", category: "buying" },
-  { id: "howToSell", category: "selling", values: { sellEmail: SELL_EMAIL } },
-  { id: "worth", category: "selling" },
-  { id: "transfer", category: "selling" },
+  { id: 'whatIsAPsl', category: 'basics' },
+  { id: 'howItWorks', category: 'basics' },
+  { id: 'isItSafe', category: 'basics' },
+  { id: 'howToBuy', category: 'buying' },
+  { id: 'howToSell', category: 'selling', values: { sellEmail: SELL_EMAIL } },
+  { id: 'worth', category: 'selling' },
+  { id: 'transfer', category: 'selling' },
   {
-    id: "seasonTickets",
-    category: "buying",
+    id: 'seasonTickets',
+    category: 'buying',
     values: { ticketsEmail: TICKETS_EMAIL },
   },
-];
+]
 
 /**
  * Splits on an email address, capturing it, so `String.split` returns the parts
@@ -126,15 +126,15 @@ function FaqRow({
   filteredOut,
   onToggle,
 }: {
-  item: FaqItem;
-  open: boolean;
+  item: FaqItem
+  open: boolean
   /** Outside the chosen category. Hides the row below `sm` only. */
-  filteredOut: boolean;
-  onToggle: () => void;
+  filteredOut: boolean
+  onToggle: () => void
 }) {
-  const baseId = useId();
-  const buttonId = `${baseId}-question`;
-  const panelId = `${baseId}-answer`;
+  const baseId = useId()
+  const buttonId = `${baseId}-question`
+  const panelId = `${baseId}-answer`
 
   return (
     <li
@@ -145,11 +145,11 @@ function FaqRow({
       // overlay. `display: none` also takes a filtered row out of the
       // accessibility tree and the tab order outright, which is exactly right.
       className={`overflow-hidden rounded-xl border bg-surface transition-colors ${
-        filteredOut ? "hidden sm:list-item " : ""
+        filteredOut ? 'hidden sm:list-item ' : ''
       }${
         open
-          ? "border-accent-ink/40"
-          : "border-border-hairline hover:border-accent-ink/40"
+          ? 'border-accent-ink/40'
+          : 'border-border-hairline hover:border-accent-ink/40'
       }`}
     >
       {/* The heading wraps the button rather than sitting beside it, so the
@@ -183,7 +183,7 @@ function FaqRow({
         aria-labelledby={buttonId}
         inert={!open}
         initial={false}
-        animate={{ height: open ? "auto" : 0, opacity: open ? 1 : 0 }}
+        animate={{ height: open ? 'auto' : 0, opacity: open ? 1 : 0 }}
         transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
         className="overflow-hidden"
       >
@@ -192,7 +192,7 @@ function FaqRow({
         </p>
       </motion.div>
     </li>
-  );
+  )
 }
 
 /**
@@ -226,9 +226,9 @@ function FaqRow({
  * which is not worth a dependency.
  */
 export function FaqSection() {
-  const { t } = useTranslation("faq");
-  const [openId, setOpenId] = useState<string | null>(null);
-  const [category, setCategory] = useState<FaqCategory>(FAQ_CATEGORIES[0]);
+  const { t } = useTranslation('faq')
+  const [openId, setOpenId] = useState<string | null>(null)
+  const [category, setCategory] = useState<FaqCategory>(FAQ_CATEGORIES[0])
 
   /**
    * The resolved items — still one array, still feeding both the accordion and
@@ -249,23 +249,23 @@ export function FaqSection() {
         answer: t(`items.${entry.id}.answer`, entry.values ?? {}),
       })),
     [t],
-  );
+  )
 
   /** Switching category collapses whatever was open. The point of the filter is
    *  a short list, and arriving at a new one already a screen tall defeats it. */
   const chooseCategory = (next: FaqCategory) => {
-    setCategory(next);
-    setOpenId(null);
-  };
+    setCategory(next)
+    setOpenId(null)
+  }
 
   return (
     <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
       <div className="grid gap-8 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-16">
         <Reveal className="lg:sticky lg:top-24 lg:self-start">
           <h2 className="text-2xl font-semibold tracking-tight text-balance text-ink sm:text-3xl">
-            {t("heading")}
+            {t('heading')}
           </h2>
-          <p className="mt-3 text-sm text-pretty text-muted">{t("subheading")}</p>
+          <p className="mt-3 text-sm text-pretty text-muted">{t('subheading')}</p>
         </Reveal>
 
         <Reveal>
@@ -284,11 +284,11 @@ export function FaqSection() {
            */}
           <div
             role="group"
-            aria-label={t("filterLabel")}
+            aria-label={t('filterLabel')}
             className="mb-4 flex flex-wrap gap-2 sm:hidden"
           >
             {FAQ_CATEGORIES.map((option) => {
-              const selected = option === category;
+              const selected = option === category
               return (
                 <button
                   key={option}
@@ -297,13 +297,13 @@ export function FaqSection() {
                   onClick={() => chooseCategory(option)}
                   className={`rounded-full px-3.5 py-1.5 text-xs font-semibold tracking-wide whitespace-nowrap transition-colors ${
                     selected
-                      ? "bg-accent/15 text-accent-ink ring-1 ring-accent-ink/30"
-                      : "bg-surface text-muted ring-1 ring-border-hairline"
+                      ? 'bg-accent/15 text-accent-ink ring-1 ring-accent-ink/30'
+                      : 'bg-surface text-muted ring-1 ring-border-hairline'
                   }`}
                 >
                   {t(`categories.${option}`)}
                 </button>
-              );
+              )
             })}
           </div>
 
@@ -325,7 +325,7 @@ export function FaqSection() {
 
       <FaqStructuredData items={items} />
     </section>
-  );
+  )
 }
 
 /**
@@ -346,21 +346,21 @@ export function FaqSection() {
  * the page's visible text instead, which is the same content.
  */
 function FaqStructuredData({ items }: { items: FaqItem[] }) {
-  const { i18n } = useTranslation();
+  const { i18n } = useTranslation()
 
   const payload = {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
     // Declared, because the answers below are translated and a crawler reading
     // Spanish prose labelled `en-US` is worse than no label at all. The `@graph`
     // in index.html keeps `en-US`: that markup is static and never translated.
     inLanguage: i18n.language,
     mainEntity: items.map((item) => ({
-      "@type": "Question",
+      '@type': 'Question',
       name: item.question,
-      acceptedAnswer: { "@type": "Answer", text: item.answer },
+      acceptedAnswer: { '@type': 'Answer', text: item.answer },
     })),
-  };
+  }
 
   return (
     <script
@@ -369,5 +369,5 @@ function FaqStructuredData({ items }: { items: FaqItem[] }) {
       // from anything a user can reach — there is no injection surface here.
       dangerouslySetInnerHTML={{ __html: JSON.stringify(payload) }}
     />
-  );
+  )
 }
