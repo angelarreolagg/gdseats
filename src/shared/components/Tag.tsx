@@ -10,29 +10,15 @@ interface TagProps {
   icon?: LucideIcon
   /** Supplementary sentence. The chip's own label must stand without it. */
   tooltip?: string
-  /**
-   * Give the chip its own tab stop. Off inside a clickable row — a focusable
-   * element nested in a button is invalid and would add a tab stop per chip
-   * across every row. The detail card turns it on, so the copy stays reachable
-   * by keyboard somewhere.
-   */
+  /** Off inside a clickable row: a focusable element in a button is invalid. */
   focusable?: boolean
 }
 
 /**
- * Tinted pill, deliberately on a SHORT list of tones.
- *
- * The reference UI gives every amenity its own hue (blue, purple, maroon, teal).
- * Measured, that does not survive: blue vs violet come out at CVD ΔE 1.8 and 10.1
- * even in normal vision — below the floor, so those two tags are indistinguishable
- * side by side. Tags sit in a row, which makes every pair adjacent, and that caps
- * the usable hue count at about three.
- *
- * So colour here encodes *class*, not identity: promoted (accent), time-critical
- * (info), price signal (good/critical), and everything else neutral — amenity
- * names are already carried by their own text. Green vs red still collapses under
- * deuteranopia (ΔE 1.2 in light mode), which is why every tag ships an icon and an
- * uppercase label; the pairing is the mitigation, exactly as in StatusBadge.
+ * Tinted pill on a deliberately SHORT tone list. Measured, blue vs violet came
+ * out at CVD ΔE 1.8 — and tags sit in a row, so every pair is adjacent, capping
+ * usable hues at ~3. Colour encodes *class*, not identity; the icon and
+ * uppercase label are what carry the rest.
  */
 const TONES: Record<TagTone, string> = {
   good: 'bg-good/15 text-good',

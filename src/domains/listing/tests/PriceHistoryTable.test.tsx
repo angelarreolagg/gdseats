@@ -19,15 +19,6 @@ const HISTORY: PriceHistoryEntry[] = [
 ]
 
 describe('PriceHistoryTable', () => {
-  /**
-   * Validates: this column uses the DIRECTION convention — red when the number
-   * fell — which is the opposite of the AI panel's verdict badge.
-   *
-   * Why it matters: the two conventions sit on one screen and look contradictory
-   * out of context. Without this test the next person "harmonises" the table with
-   * the badge above it and silently breaks the match with the reference site,
-   * where a price cut has always read red.
-   */
   it('renders a fall in the critical tone and a rise in the good tone', () => {
     const { container } = render(<PriceHistoryTable history={HISTORY} />)
 
@@ -40,12 +31,6 @@ describe('PriceHistoryTable', () => {
     expect(rose?.closest('span')?.className).toContain('text-good')
   })
 
-  /**
-   * Validates: direction is readable without colour.
-   * Why it matters: red vs green is this app's CVD-worst pair — ΔE 1.2 under
-   * deuteranopia in light mode. The arrow icon and the sr-only word are the only
-   * things carrying direction for a red-green colourblind or screen-reader user.
-   */
   it('exposes direction as text, not colour alone', () => {
     render(<PriceHistoryTable history={HISTORY} />)
 
@@ -53,10 +38,6 @@ describe('PriceHistoryTable', () => {
     expect(screen.getByText('up')).toBeInTheDocument()
   })
 
-  /**
-   * Validates: the arrow carries the sign, so the figure is unsigned.
-   * Why it matters: an arrow beside "-23%" reads as a double negative.
-   */
   it('prints the percentage unsigned', () => {
     render(<PriceHistoryTable history={HISTORY} />)
 
@@ -73,14 +54,6 @@ describe('PriceHistoryTable', () => {
     expect(dates[0]).toBe('May 30, 2026')
   })
 
-  /**
-   * Validates: the Date column is formatted for the reader's locale.
-   * Why it matters: this column held generated English strings until the dates
-   * became data, and the old shortening in `listingSignals.service.ts` split on
-   * a comma — an assumption that is simply false in es, pt-BR and ja. Pinning
-   * one non-English rendering is what proves the column now asks the locale
-   * rather than printing whatever the generator happened to write down.
-   */
   it('formats dates for the active locale', () => {
     setLocale('ja')
     render(<PriceHistoryTable history={HISTORY} />)

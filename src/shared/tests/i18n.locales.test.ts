@@ -2,23 +2,6 @@ import { describe, expect, it } from 'vitest'
 import { DEFAULT_LOCALE, LOCALES } from '../i18n/locales'
 import { NAMESPACES, resources } from '../i18n/resources'
 
-/**
- * Validates: every locale carries the same keys, with the same placeholders, as
- * English.
- *
- * Why it matters commercially: both failure modes are silent in development and
- * loud to a paying visitor. A missing key renders the raw dotted path — a buyer
- * looking at a five-figure listing sees `analyzer:insights.trend.down` where the
- * verdict should be. A dropped `{{count}}` renders a grammatical sentence with a
- * hole where its number was, which is worse: it reads as finished copy and
- * quietly states nothing. Neither shows up unless someone reads the whole app in
- * a language they may not speak, which nobody does on every release.
- *
- * This is also what makes "the locale files are complete" a fact rather than an
- * aspiration, and therefore what makes it safe to add a locale by copying `en`
- * and translating it.
- */
-
 type Bundle = Record<string, unknown>
 
 /**
@@ -118,18 +101,6 @@ describe('locale bundles', () => {
     })
   })
 
-  /**
-   * Validates: `en` is the only bundle allowed to be checked for tone in English.
-   * Why it matters: the analyzer's whole product argument is that it reads as
-   * market context rather than as a warning — a five-figure purchase framed as a
-   * hazard is a documented conversion regression. This guard used to live in
-   * `insights.service.test.ts`; it moved with the words.
-   *
-   * Scoped to `en` deliberately, and that scoping is the honest part: the list is
-   * English, and inventing equivalents for three other languages without a native
-   * reviewer would be theatre that reads as coverage. `locales/TRANSLATORS.md`
-   * carries the rule in prose for the rest, which is where a human can act on it.
-   */
   it('keeps the English analyzer copy observational rather than directive', () => {
     const banned =
       /\b(too expensive|bad deal|overpriced|avoid|don't|do not|buy now|wait|should)\b/i

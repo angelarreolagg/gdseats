@@ -20,30 +20,13 @@ interface ShinyTextProps {
 }
 
 /**
- * Adapted from React Bits, like `StrokeText` and `SpotlightCard`. Three
- * divergences from upstream, all forced by this codebase's rules:
+ * Adapted from React Bits. The glyphs are painted with `background-clip: text`
+ * over a transparent fill, so **the gradient IS the colour** — a `text-*`
+ * utility does nothing here.
  *
- * 1. **The colours default to tokens, not hexes.** Upstream ships `#b5b5b5` and
- *    `#ffffff`, which would paint one fixed grey in both themes. Because the
- *    gradient is just a string, `var(--psl-…)` drops straight in and the text
- *    themes for free.
- * 2. **Reduced motion is hand-gated** — see below.
- * 3. **Named export**, matching the rest of `shared/components/`.
- *
- * **How it works, since it is not obvious:** the glyphs are painted with
- * `background-clip: text` over a transparent text fill, so the "colour" of the
- * text *is* the gradient. A `useAnimationFrame` loop walks the background
- * position, which slides the bright band across the letters. The consequence
- * worth knowing is that `color` and `shineColor` are the only things setting the
- * text colour — a `text-*` utility on this element does nothing.
- *
- * **`prefers-reduced-motion` has to be handled by hand here, and it is the one
- * thing most likely to be dropped in a re-sync.** `MotionConfig
- * reducedMotion="user"` governs Motion's *animations*; `useAnimationFrame` is a
- * raw frame loop, so the config never sees it and the shine would sweep forever
- * for someone who asked the system to stop things moving. Parking `progress` at
- * 0 leaves the highlight off-screen, so the reduced state is the flat `color` —
- * a normal-looking heading rather than a frozen half-gradient.
+ * **Reduced motion is hand-gated**, and is the likeliest thing lost in a
+ * re-sync: `useAnimationFrame` is a raw loop `MotionConfig` never sees. Parking
+ * `progress` at 0 renders the flat base colour.
  */
 export function ShinyText({
   text,

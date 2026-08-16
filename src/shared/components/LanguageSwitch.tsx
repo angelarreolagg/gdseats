@@ -9,34 +9,16 @@ interface LanguageSwitchProps {
 }
 
 /**
- * The language picker, hand-rolled on the model of `TeamSearchCombobox`.
+ * The language picker, hand-rolled on the model of `TeamSearchCombobox` — the
+ * only Radix package here is the tooltip.
  *
- * The only Radix package in this repo is the tooltip; the combobox, the dialog,
- * the sheet, the accordion and the league switch are all hand-built, and a
- * listbox is four ARIA attributes and an arrow-key loop. Adding a dependency for
- * this one would be the odd choice, not the safe one.
+ * Declares no height: `AppHeader`'s row owns it, as it does for every control
+ * there. Shows the two-letter code, never the endonym — the full names would
+ * spend the slack the wordmark's `truncate` needs at 350px.
  *
- * **The trigger declares no height, and must not.** `AppHeader`'s right-hand
- * group is `flex h-9 items-stretch sm:h-10` and owns the height of everything in
- * it — that is why `ThemeToggle` takes `size="none"`. Three controls with three
- * independent heights is exactly the bug that row was built to make impossible,
- * and `AppHeader.test.tsx` pins it.
- *
- * **The trigger shows the two-letter code, never the endonym.** "Português" in a
- * bar that already carries a wordmark, a theme toggle and a demo pill is what
- * pushes the row past what the wordmark's `truncate` can absorb at 350px. The
- * full names live in the open panel, where there is room for them — and they are
- * never translated, so someone who landed on Japanese by accident can still find
- * "English".
- *
- * **The panel resolves DARK tokens in both themes, and that is intentional.**
- * `AppHeader` carries a `dark` class to keep its bright-green mark legible, the
- * theme is nothing but custom properties scoped to `.dark`, and this popover
- * renders inside that subtree — so it inherits the dark palette even on a light
- * page. A dark menu hanging off a dark bar is how navigation menus normally
- * behave. It uses the same `bg-surface` / `border-border-hairline` / `text-ink`
- * tokens as the team combobox's listbox, so it needs no `dark:` utility (there
- * are deliberately none in components) and looks deliberate either way.
+ * The panel renders inside the header's `dark` subtree, so it resolves dark
+ * tokens on a light page. That is intentional, and it uses the same tokens as
+ * the team combobox's listbox so it needs no `dark:` variant.
  */
 export function LanguageSwitch({ className = '' }: LanguageSwitchProps) {
   const { t } = useTranslation('common')
@@ -55,8 +37,7 @@ export function LanguageSwitch({ className = '' }: LanguageSwitchProps) {
   const active = LOCALES[activeIndex]
   const current = LOCALES.find((entry) => entry.code === locale) ?? LOCALES[0]
 
-  // A pointerdown anywhere outside closes the panel. This is a document listener
-  // rather than an `onBlur` on the trigger because focus moves *into* the list on
+  // A document listener rather than `onBlur`: focus moves into the list on
   // keyboard use, and a blur handler would close it the moment it was navigated.
   useEffect(() => {
     if (!open) return
@@ -71,8 +52,7 @@ export function LanguageSwitch({ className = '' }: LanguageSwitchProps) {
   function choose(next: Locale) {
     setLocale(next)
     setOpen(false)
-    // Focus goes back where the user left it. Without this it lands on <body>
-    // and the next Tab restarts from the top of the page.
+    // Focus returns to the trigger, or the next Tab restarts from the top of the page.
     triggerRef.current?.focus()
   }
 
@@ -104,9 +84,7 @@ export function LanguageSwitch({ className = '' }: LanguageSwitchProps) {
 
   return (
     <div ref={rootRef} className={`relative ${className}`} onKeyDown={handleKeyDown}>
-      {/* No `h-*` and no `py-*`: the header row owns the box. `whitespace-nowrap`
-          for the same reason `DemoMarker` has it — a two-line label inside a
-          row-sized control mangles the bar. */}
+      {/* No height and `whitespace-nowrap`, both for the same reason as `DemoMarker`. */}
       <button
         ref={triggerRef}
         type="button"
@@ -136,13 +114,9 @@ export function LanguageSwitch({ className = '' }: LanguageSwitchProps) {
               key={entry.code}
               role="option"
               aria-selected={entry.code === locale}
-              /*
-               * The classic hand-built-listbox bug, already documented on
-               * `TeamSearchCombobox`: the panel closes on an outside pointerdown,
-               * and a click fires pointerdown first. Suppressing the default here
-               * is not what saves it — the outside check is — but it keeps focus
-               * off the `<li>` so the trigger still holds it when `choose` runs.
-               */
+              /* The classic hand-built-listbox bug: the panel closes on an outside
+                 pointerdown and a click fires pointerdown first. Suppressing the default
+                 keeps focus off the `<li>` so the trigger still holds it when `choose` runs. */
               onMouseDown={(event) => event.preventDefault()}
               onClick={() => choose(entry.code)}
               onMouseEnter={() => setActiveIndex(index)}
@@ -150,14 +124,13 @@ export function LanguageSwitch({ className = '' }: LanguageSwitchProps) {
                 index === activeIndex ? 'bg-track text-ink' : 'text-ink'
               }`}
             >
-              {/* The check occupies its slot either way, so the endonyms stay on
-                  one left edge instead of shifting as the selection moves. */}
+              {/* The check holds its slot either way, so the endonyms keep one left edge. */}
               <span className="flex h-4 w-4 shrink-0 items-center justify-center">
                 {entry.code === locale ? (
                   <Check aria-hidden="true" className="h-4 w-4 text-accent-ink" />
                 ) : null}
               </span>
-              {/* Endonyms, never translated — see the note on LOCALES. */}
+
               <span className="font-medium">{entry.endonym}</span>
             </li>
           ))}

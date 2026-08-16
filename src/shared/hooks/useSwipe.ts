@@ -5,12 +5,8 @@ import type { MouseEvent as ReactMouseEvent, PointerEvent as ReactPointerEvent }
 const SWIPE_THRESHOLD = 48
 
 /**
- * How much more horizontal than vertical the travel has to be.
- *
- * A phone's dominant gesture on a page like this is scrolling, and a scroll
- * almost never leaves the finger perfectly vertical. Requiring the sideways
- * component to clearly win is what keeps a slightly slanted scroll from paging
- * the grid out from under the reader.
+ * Scrolling is what a finger does here nearly every time, and a scroll is rarely
+ * straight — without the ratio a slanted scroll pages the catalogue away.
  */
 const DIRECTION_RATIO = 1.5
 
@@ -20,17 +16,12 @@ interface UseSwipeOptions {
 }
 
 /**
- * Horizontal swipe-to-page, as props to spread onto the surface being swiped.
+ * Horizontal swipe-to-page, spread onto the surface being swiped.
  *
- * Touch only, by design. A mouse drag across a grid is a text selection or a
- * nudge, not a page turn, and claiming it would make the desktop pointer feel
- * possessed — `pointerType === 'mouse'` is ignored outright. The gesture is
- * always an *enhancement*: whatever it drives must stay reachable by a control
- * that works with a keyboard and a screen reader.
- *
- * Nothing here calls `preventDefault` on the pointer stream, so vertical
- * scrolling is untouched — the browser keeps the scroll and simply hands us a
- * `pointercancel` when it takes over.
+ * Mouse pointers are ignored — a mouse drag across a grid is a text selection.
+ * The trailing `click` is swallowed in the capture phase, or every swipe also
+ * opens the card the finger came down on; the flag disarms on use and on the
+ * next `pointerdown`. Nothing calls `preventDefault`, so scrolling is untouched.
  */
 export function useSwipe({ onSwipeLeft, onSwipeRight }: UseSwipeOptions) {
   const start = useRef<{ x: number; y: number } | null>(null)

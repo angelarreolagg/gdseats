@@ -26,18 +26,9 @@ export interface DealVerdict {
 }
 
 /**
- * A bullet the panel can render, expressed as a key rather than a sentence.
- *
- * Same rule the icons already follow: the service names the thing, the component
- * layer resolves it. Three specific gains over letting `insights.service.ts`
- * call `t()` itself — the service stays a pure function rather than depending on
- * i18n init order, its unit tests assert logic instead of English prose, and the
- * "why it matters commercially" comments keep describing behaviour.
- *
- * **`params` carries raw numbers and epoch ms, never pre-formatted strings.**
- * The component formats at render, so an insight computed under one language and
- * read under another is still correct — and the service stops importing the
- * formatters entirely, which leaves it as arithmetic over signals.
+ * A bullet expressed as a key, not a sentence — same rule the icons follow.
+ * `params` carries raw numbers and epoch ms, never formatted strings, so the
+ * component formats at render and the service stays free of the formatters.
  */
 export interface Insight {
   id: string

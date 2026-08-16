@@ -12,12 +12,8 @@ interface TooltipProps {
   /** Structured content (a breakdown table) needs padding the text variant doesn't. */
   variant?: 'text' | 'panel'
   /**
-   * Open on tap where hover is unavailable.
-   *
-   * **Only for triggers that are decorative** — a chip whose whole job is to carry
-   * this tooltip. It swallows the tap, so a trigger that also *does* something
-   * must leave this off or its action stops firing: `AppHeader`'s logo is wrapped
-   * in a tooltip and is the button that navigates home.
+   * Opt-in, and must stay that way: it swallows the tap, so a trigger that also
+   * does something loses its action.
    */
   openOnTap?: boolean
 }
@@ -25,22 +21,11 @@ interface TooltipProps {
 /**
  * Radix wrapper carrying the project's tokens.
  *
- * Radix rather than a hand-rolled tooltip because of the accessibility ask: it
- * wires `aria-describedby`, opens on keyboard focus, closes on Escape, and
- * collision-flips near the viewport edge.
- *
- * IMPORTANT: a hover tooltip never fires on touch. `openOnTap` closes that gap for
- * decorative triggers, but the rule behind it has not moved — chips still carry
- * their own visible label, and the cost breakdown still repeats numbers
- * `MakeAnOfferCard` shows as rows. Tap is an enhancement, not a licence to put a
- * value here that exists nowhere else.
- *
- * **On touch the open state is fully controlled here, and Radix is given no
- * `onOpenChange`.** That is deliberate. Radix closes a tooltip on the trigger's
- * `pointerdown`, which lands before the `click` that would toggle it — so with
- * Radix sharing the state, a second tap reads as close-then-open and the tooltip
- * can never be dismissed by tapping the thing that opened it. Owning the state
- * outright is the only version where both taps behave.
+ * On touch the open state is fully controlled and Radix gets no `onOpenChange`:
+ * it closes on the trigger's `pointerdown`, which lands before the `click` that
+ * would toggle it, so a shared state can never be dismissed by tapping what
+ * opened it. Dismissal is a document listener that ignores the trigger, or the
+ * outside-tap close and the click-toggle cancel out.
  */
 export function Tooltip({
   content,

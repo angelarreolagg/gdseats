@@ -19,8 +19,7 @@ interface ListingRowProps {
 
 export function ListingRow({ listing, onOpen }: ListingRowProps) {
   const { t } = useTranslation(['search', 'listing'])
-  // Same service the detail panel calls — the verdict cannot drift between the
-  // list and the page it opens.
+  // Same service the detail panel calls, so the verdict cannot drift.
   const verdict = evaluateDeal(getTotalPrice(listing), getEstimatedTotal(listing))
 
   return (
@@ -29,9 +28,9 @@ export function ListingRow({ listing, onOpen }: ListingRowProps) {
       onClick={() => onOpen(listing.id)}
       whileHover={{ x: 2 }}
       transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-      // content-visibility lets the browser skip rendering — and animating — rows
-      // outside the viewport. Without it, ~170 holo chips spin at once and scroll
-      // stutters. contain-intrinsic-size keeps the scrollbar honest meanwhile.
+      // Lets the browser skip rendering — and animating — off-screen rows; without
+      // it ~170 holo chips spin at once. `contain-intrinsic-size` keeps the
+      // scrollbar honest meanwhile.
       style={{ contentVisibility: 'auto', containIntrinsicSize: 'auto 116px' }}
       className="w-full border-b border-border-hairline px-5 py-4 text-left transition-colors hover:bg-track"
     >

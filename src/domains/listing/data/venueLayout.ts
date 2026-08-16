@@ -1,22 +1,11 @@
 /**
- * A generic three-tier bowl, shared by the seat map and the listing generator so
- * the map's section numbers and the list's section numbers are the same set.
- *
- * This is a schematic, not a survey of any real venue: concentric rings of equal
- * sections around a centred field. It carries the information a buyer needs from
- * a seat map — which tier, which side, how far from the field — without pretending
- * to be an accurate floor plan.
+ * A generic three-tier bowl, shared by the seat map and the generator so their
+ * section numbers are the same set. A schematic, not a survey of any venue.
  */
 
 export interface Ring {
   level: 1 | 2 | 3
-  /**
-   * Translation key, not a word. Nothing renders the tier name today — the seat
-   * map labels sections, not rings — but the field is kept rather than deleted
-   * because it is the only place the three tiers are named at all, and a half
-   * state (an English literal in a translated app, sitting unrendered) is worse
-   * than either keeping it properly or removing it outright.
-   */
+  /** Nothing renders the tier name today; kept as a key rather than a half state. */
   labelKey: string
   /** First section number in the ring; sections run consecutively. */
   start: number
@@ -48,11 +37,8 @@ export function getRingForSection(section: number): Ring | undefined {
   return RINGS.find((ring) => section >= ring.start && section < ring.start + ring.count)
 }
 
-/**
- * Sideline premium. Sections are numbered around the bowl starting at the prime
- * sideline, so proximity to it is angular — the first and last sections of a ring
- * are neighbours, and both sit on the 50-yard line.
- */
+/** Proximity to the prime sideline is angular: a ring's first and last sections
+ * are neighbours, and both sit on the 50-yard line. */
 export function getSidelineMultiplier(section: number): number {
   const ring = getRingForSection(section)
   if (!ring) return 1

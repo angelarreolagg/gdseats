@@ -1,10 +1,6 @@
 import type { TagTone } from '@/shared/components/Tag'
 
-/**
- * Services name an icon; they never hold one. Keeping this a plain union is what
- * lets the generator stay pure — the React component is resolved at render time
- * by `components/tagPresentation.ts`.
- */
+/** A plain union, so the generator stays pure; the component resolves the icon. */
 export type TagIconName =
   | 'featured'
   | 'this-week'
@@ -17,11 +13,7 @@ export type TagIconName =
 
 export interface ListingTag {
   id: string
-  /**
-   * A translation key, never a phrase — same rule as `iconName` above. The
-   * generator names the tag; `components/tagPresentation.ts` and the row that
-   * renders it resolve the words.
-   */
+  /** A key, never a phrase — same rule as `iconName`. */
   labelKey: string
   /** Interpolation for the one tag that carries a figure ("12% off"). */
   labelParams?: Record<string, string | number>
@@ -32,14 +24,9 @@ export interface ListingTag {
 /** Richer than the analyzer's signal shape — this is what the detail table shows. */
 export interface PriceHistoryEntry {
   /**
-   * Epoch ms, not a display string.
-   *
-   * This used to be `"Jul 22, 2026"`, generated in English and rendered raw —
-   * untranslatable where it sat, and the reason `listingSignals.service.ts` once
-   * carried a `split(',')[0]` that only made sense in one locale. A number
-   * rather than an ISO string because the seeded generator produces it
-   * arithmetically and a demo has no timezone question to answer; the
-   * formatters pin `UTC` so it never drifts a day.
+   * Epoch ms, not a display string: generated English was untranslatable where it
+   * sat. A number rather than ISO because the seeded generator produces it
+   * arithmetically; the formatters pin UTC so it never drifts a day.
    */
   dateMs: number
   totalPrice: number
@@ -85,11 +72,8 @@ export function getEstimatedTotal(listing: Listing): number {
 }
 
 /**
- * Section average scaled to this listing's seat count.
- *
- * Comparison happens per seat — that is the only unit comparable across listings
- * of different sizes — but every number the panel shows is a total, because the
- * total is what the buyer actually offers. Scaling here keeps both true at once.
+ * Section average scaled to this listing's seat count. Comparison is per seat —
+ * the only unit comparable across sizes — but the buyer offers a total.
  */
 export function getSectionAverageTotal(listing: Listing): number {
   return listing.sectionAveragePerSeat * listing.seatCount

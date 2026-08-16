@@ -18,20 +18,7 @@ interface AIInsightPanelProps {
   className?: string
 }
 
-/**
- * The verdict block, sitting directly under the seat map in the listing detail.
- *
- * It used to live in the right-hand column between the summary and "Make an
- * offer", which put analysis in the middle of the offer flow it was meant to
- * support. Under the map it reads as part of understanding the seat, and the
- * right column runs summary → offer uninterrupted.
- *
- * (An earlier version was budgeted to ~274px so it would not outgrow the offer
- * card beside it. That constraint died with the move — this is now a full-width
- * block and spacing is free to breathe.)
- *
- * All arithmetic lives in the services; this component only formats and arranges.
- */
+/** The verdict block. All arithmetic lives in the services; this arranges. */
 export function AIInsightPanel({
   signals,
   analysisDelayMs,
@@ -50,8 +37,8 @@ export function AIInsightPanel({
       aria-labelledby="ai-insight-heading"
       className={`holo-ring rounded-xl border border-border-hairline bg-surface p-4 shadow-card ${className}`}
     >
-      {/* Gradient the AI mark strokes with. Zero-size and aria-hidden — it exists
-          only to give `.holo-icon` something to point `stroke: url(#…)` at. */}
+      {/* Zero-size and aria-hidden: it exists only to give `.holo-icon` something to
+          point `stroke: url(#…)` at. */}
       <svg width="0" height="0" aria-hidden="true" className="absolute">
         <defs>
           <linearGradient id="psl-holo-stroke" x1="0" y1="0" x2="1" y2="1">
@@ -79,12 +66,8 @@ export function AIInsightPanel({
       </header>
 
       <div className="flex flex-col gap-3">
-        {/* Rendered from the first frame, never gated.
-            `evaluateDeal` is a pure function over data the listing row already
-            had — the row behind this modal was showing this exact verdict and
-            percentage before the user clicked. Staging a wait over a number that
-            was just on screen reads as theatre and costs the panel its
-            credibility, which is the only thing it trades on. */}
+        {/* Never gated: `evaluateDeal` is pure over data the row already showed, so
+            staging a wait over a number that was just on screen reads as theatre. */}
         <StatusBadge
           status={verdict.status}
           formattedDiff={formatSignedPercent(verdict.percentageDiff)}
@@ -97,12 +80,8 @@ export function AIInsightPanel({
           differenceInk={presentation.ink}
         />
 
-        {/* The narrative — the part an AI would genuinely take time to produce,
-            and the only part that waits.
-            A plain conditional rather than AnimatePresence: `mode="wait"` holds
-            the incoming child until the outgoing one finishes exiting, and that
-            exit callback never fires in jsdom, so the insight would never mount
-            under test. */}
+        {/* The only part that waits. A plain conditional rather than AnimatePresence,
+            whose exit callback never fires in jsdom. */}
         <div className="border-t border-border-hairline pt-3">
           {isAnalyzing ? (
             <AnalysisPending />

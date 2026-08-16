@@ -1,15 +1,9 @@
 import { motion, useReducedMotion } from 'motion/react'
 
 /**
- * The delay map, in tenths of a second, and the reason the wave is symmetric.
- *
- * Read as a shape rather than as nine numbers: the value rises to the middle and
- * falls back, so the two ends start together, the pulse travels inward from both
- * edges and meets in the centre. A monotonic ramp (`0…8`) would give a wave that
- * marches one way like a loading bar; this one breathes, which is what reads as
- * a voice rather than as progress.
- *
- * Duplicated values are why the map is keyed by index and not by value.
+ * The delay map in tenths of a second. Read as a shape: the ends start together
+ * and the pulse travels inward, where a monotonic ramp would march one way like
+ * a loading bar. Duplicated values are why it is keyed by index.
  */
 const DELAY_STEPS = [0, 1, 2, 3, 4, 3, 2, 1, 0]
 

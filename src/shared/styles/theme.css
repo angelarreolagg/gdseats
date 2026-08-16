@@ -1,15 +1,6 @@
 /*
- * Design tokens.
- *
- * The brand green #a0f700 measures 1.33:1 on white — invisible as text or a thin
- * line in light mode. It is a dark-mode-native accent, so the accent is *stepped
- * per mode along the same hue*: the brand green stays the fill (behind dark ink,
- * 14.33:1), while a darker step of the same hue carries text and chart marks in
- * light mode. Every value below was measured against the surface it renders on.
- *
- * Status colours are never used alone: brand green vs amber measures CVD ΔE 7.0
- * (deuteranopia), so an emoji + text label always accompanies them. See
- * StatusBadge.tsx, which makes that structural.
+ * Dark-mode ratios are measured against the SURFACE (#0e1728), not the page.
+ * Re-measure the whole dark column if that ground moves.
  */
 
 /* Tailwind v4 defaults dark: to a media query; we drive it from a class. */

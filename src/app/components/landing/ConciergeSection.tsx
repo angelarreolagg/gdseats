@@ -12,21 +12,13 @@ const ASSURANCE_KEYS = ['quick', 'always', 'noSignup'] as const
 /**
  * The AI concierge card.
  *
- * The card wears `holo-ring`, which is not decoration picked for this band: the
- * iridescent border is this app's established mark for a machine's read on the
- * market, and it is otherwise worn only by `AIInsightPanel` and the verdict
- * chips. A visitor who has been through the buy flow has already learned what
- * the shimmer means, so the section is pre-labelled before a word is read. It
- * masks to the border, so the surface stays solid and the measured text
- * contrast still holds.
+ * `holo-ring` is this app's mark for a machine's read on a market — worn
+ * otherwise only by `AIInsightPanel` and the verdict chips.
  *
  * **Two phone numbers, and the split is the point.** The green button dials an
- * AI that does not exist, so it is a `<button>` that answers with the demo
- * invitation — never an `<a href="tel:">`, which would promise a call that
- * cannot connect. The "prefer a human" line underneath is the real (invented,
- * 555-range) house number and IS a genuine anchor, the same one the footer
- * lists, because `tel:` works without a backend. One number behind both would
- * mean the same digits were a link in one place and a button in another.
+ * AI that does not exist, so it is a `<button>`, never `<a href="tel:">`. The
+ * "prefer a human" line is the house number and IS a real anchor, since `tel:`
+ * works without a backend.
  */
 export function ConciergeSection() {
   const { t } = useTranslation('landing')
@@ -64,9 +56,8 @@ export function ConciergeSection() {
               </ul>
             </div>
 
-            {/* The inset panel is the `Card` primitive — a nested surface inside
-                the holo card, so it needs the border and radius the rest of the
-                app's cards use rather than a bespoke box. */}
+            {/* The `Card` primitive — a nested surface, so it takes the app's border and
+                radius rather than a bespoke box. */}
             <Card className="p-4">
               <div className="flex items-center justify-between gap-3">
                 <span className="flex items-center gap-2 text-sm text-ink">
@@ -86,14 +77,9 @@ export function ConciergeSection() {
                 {CONCIERGE_PHONE}
               </Button>
 
-              {/*
-               * The fingerprint is the one icon in this card that carries an
-               * idea rather than labelling a control: it marks the line as the
-               * human route out of an AI panel, opposite the `Phone` on the
-               * button above. `flex` + `flex-wrap` rather than an inline icon,
-               * so a narrow card breaks between the mark and the sentence
-               * instead of stranding the glyph on a line of its own.
-               */}
+              {/* The fingerprint marks the human route out of an AI panel, opposite the
+                  `Phone` above. `flex-wrap` so a narrow card breaks between mark and
+                  sentence instead of stranding the glyph. */}
               <p className="mt-3 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-center text-xs text-muted">
                 <FingerprintPattern
                   aria-hidden="true"
@@ -101,17 +87,9 @@ export function ConciergeSection() {
                   strokeWidth={2}
                 />
                 <span>
-                  {/*
-                   * The anchor sits mid-sentence, and where in the sentence
-                   * differs by language — Japanese puts the number before the
-                   * verb. `<Trans>` with a named tag keeps it one translatable
-                   * string; two `t()` calls around the `<a>` would freeze the
-                   * English clause order into every locale.
-                   *
-                   * The number itself is a value, not copy: it is passed in and
-                   * the `href` stays in code, so a translator cannot accidentally
-                   * change the digits the footer also prints.
-                   */}
+                  {/* `<Trans>`: the anchor sits mid-sentence, and where differs by language. The
+                      number is a value, not copy, so a translator cannot change the digits the
+                      footer also prints. */}
                   <Trans
                     i18nKey="landing:concierge.human"
                     values={{ number: CONTACT_PHONE }}

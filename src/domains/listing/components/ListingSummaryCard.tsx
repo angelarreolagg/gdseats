@@ -43,9 +43,8 @@ function BreakdownRow({ label, value, total = false }: {
 }
 
 /**
- * The cost breakdown is a hover/focus tooltip, so it never fires on touch. That is
- * acceptable only because every figure in it also appears as a visible row in
- * MakeAnOfferCard directly below — the tooltip is a shortcut, not the sole path.
+ * The breakdown is a tooltip, so it never fires on touch. Acceptable only
+ * because every figure also appears as a visible row in `MakeAnOfferCard`.
  */
 function TotalCostValue({ listing }: { listing: Listing }) {
   const { t } = useTranslation('listing')

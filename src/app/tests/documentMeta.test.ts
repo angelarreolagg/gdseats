@@ -31,13 +31,6 @@ describe('getDocumentMeta', () => {
     })
   })
 
-  /**
-   * Validates: a selected franchise names both the team and the building.
-   * Why it matters: a seat licence is bought for a venue as much as for a team —
-   * the same reason venue is searchable in `TeamSearchCombobox`. Two franchises
-   * share MetLife and two share SoFi, so the venue is what makes the title
-   * useful rather than decorative.
-   */
   it('names the team and the venue once a franchise is selected', () => {
     const { title } = getDocumentMeta(TEAM)
 
@@ -45,12 +38,6 @@ describe('getDocumentMeta', () => {
     expect(title).toContain('Allegiant Stadium')
   })
 
-  /**
-   * Validates: the open listing identifies the actual seats.
-   * Why it matters: this is the deepest screen and the one worth bookmarking.
-   * "Section 106, Row 39" is what a buyer comparing three tabs reads to tell them
-   * apart; the franchise name alone would make all three identical.
-   */
   it('identifies the seats when a listing is open', () => {
     const { title, description } = getDocumentMeta(TEAM, LISTING)
 
@@ -59,12 +46,6 @@ describe('getDocumentMeta', () => {
     expect(description).toContain('Allegiant Stadium')
   })
 
-  /**
-   * Validates: the brand trails on the deeper screens and leads on the entry one.
-   * Why it matters: a tab strip truncates from the right. Leading every title
-   * with "G&D Seats" would render three open tabs as three identical stubs, which
-   * is the exact problem this function exists to fix.
-   */
   it('leads with the brand only on the default screen', () => {
     expect(getDocumentMeta().title.startsWith('G&D Seats')).toBe(true)
     expect(getDocumentMeta(TEAM).title.startsWith('G&D Seats')).toBe(false)
@@ -72,12 +53,6 @@ describe('getDocumentMeta', () => {
     expect(getDocumentMeta(TEAM, LISTING).title.endsWith('G&D Seats')).toBe(true)
   })
 
-  /**
-   * Validates: a description never runs past what a search snippet shows.
-   * Why it matters: Google cuts the snippet near 160 characters. A description
-   * built from a long franchise and venue name that overruns gets truncated
-   * mid-clause, which reads as a broken page rather than a long one.
-   */
   it('keeps every generated description within snippet length', () => {
     for (const team of [TEAM, getTeamById('lac')!, getTeamById('ne')!]) {
       expect(getDocumentMeta(team).description.length).toBeLessThanOrEqual(200)
@@ -85,13 +60,6 @@ describe('getDocumentMeta', () => {
     }
   })
 
-  /**
-   * Validates: a listing with no team falls back rather than half-rendering.
-   * Why it matters: `App` derives `team` and `openListing` independently. During
-   * a transition it is briefly possible to hold one without the other, and a
-   * title reading "Section 106, Row 39 — undefined PSL" would ship straight to
-   * the tab.
-   */
   it('ignores a listing that arrives without its team', () => {
     expect(getDocumentMeta(undefined, LISTING).title).toBe(DEFAULT_TITLE)
   })

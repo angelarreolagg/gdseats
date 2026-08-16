@@ -8,25 +8,19 @@ import { getTotalPrice } from '../types/listing.types'
 
 interface MakeAnOfferCardProps {
   listing: Listing
-  /**
-   * Off inside `OfferSheet`, which supplies its own titled header.
-   *
-   * Two "Make an offer" headings in one dialog is a duplicate landmark to a
-   * screen reader, and it would make `getByRole('heading', { name: /make an
-   * offer/i })` match twice.
-   */
+  /** Off inside `OfferSheet`, which supplies its own titled header. */
   showHeading?: boolean
   /** Lets the sheet close itself once the notice is up. */
   onAfterSubmit?: () => void
   className?: string
 }
 
-/** How many digits sit before this offset — the caret's position in digit-space. */
+/** The caret position in digit-space. */
 function countDigits(value: string, upTo: number): number {
   return (value.slice(0, upTo).match(/\d/g) ?? []).length
 }
 
-/** The inverse: where to put the caret so that `n` digits sit behind it. */
+/** The inverse: where the caret goes so `n` digits sit behind it. */
 function offsetAfterDigits(value: string, n: number): number {
   if (n <= 0) return value.length && !/\d/.test(value[0]) ? 1 : 0
 
@@ -66,9 +60,8 @@ export function MakeAnOfferCard({
   className = 'rounded-xl border border-border-hairline bg-surface p-4 shadow-card',
 }: MakeAnOfferCardProps) {
   const { t } = useTranslation('listing')
-  // Held as the formatted string so the field can show "$23,550" and still be
-  // cleared. `type="number"` cannot render a currency symbol or separators at
-  // all, which is why this is a text field doing its own formatting.
+  // Held as the formatted string: `type="number"` cannot render a currency
+  // symbol or separators, so this is a text field doing its own formatting.
   const [offer, setOffer] = useState(() => formatCurrency(getTotalPrice(listing)))
   const inputRef = useRef<HTMLInputElement>(null)
   const pendingCaret = useRef<number | null>(null)
@@ -80,9 +73,8 @@ export function MakeAnOfferCard({
     const raw = event.target.value
     const digits = raw.replace(/\D/g, '')
 
-    // Remember the caret in digit-space, not character-space: reformatting adds
-    // and removes separators, so a raw offset would drift every time a comma
-    // appears and the caret would jump to the end mid-edit.
+    // Caret in digit-space, not characters: reformatting adds and removes
+    // separators, so a raw offset drifts every time a comma appears.
     pendingCaret.current = countDigits(raw, event.target.selectionStart ?? raw.length)
     setOffer(digits ? formatCurrency(Number(digits)) : '')
   }
@@ -108,13 +100,8 @@ export function MakeAnOfferCard({
       <label className="sr-only" htmlFor="offer-amount">
         {t('offer.amountLabel')}
       </label>
-      {/*
-       * `text-base` below `sm`, not `text-sm`. iOS Safari zooms the whole viewport
-       * when a field under 16px takes focus, and it does not zoom back out — the
-       * page is left scaled and horizontally scrollable for the rest of the visit.
-       * This is the single most common mobile form bug and it is invisible on
-       * every desktop browser.
-       */}
+      {/* `text-base` below `sm`: iOS Safari zooms the viewport when a field under
+          16px takes focus, and does not zoom back out. */}
       <input
         id="offer-amount"
         ref={inputRef}
@@ -153,8 +140,7 @@ export function MakeAnOfferCard({
           onAfterSubmit?.()
         }}
       >
-        {/* Full width, so a longer translation wraps rather than overflowing —
-            "Enviar oferta por US$ 23.550" is comfortably past the English. */}
+
         {t('offer.submit', { amount: formatCurrency(amount) })}
       </Button>
     </section>

@@ -6,13 +6,8 @@ import {
 } from './locales'
 
 /**
- * Detection and persistence, hand-rolled rather than pulled from
- * `i18next-browser-languagedetector`.
- *
- * That plugin is ~4 KB to read `localStorage` and `navigator.language`, and this
- * repo already hand-rolls exactly that logic for the theme (`psl-theme`, in
- * `index.html` and `useTheme.ts`). Fifteen lines matching a pattern already in
- * the codebase beat a dependency that does the same thing differently.
+ * Detection and persistence, hand-rolled rather than pulling in
+ * `i18next-browser-languagedetector` — the theme already does exactly this.
  */
 
 /** Every `localStorage` read is guarded — Safari private mode throws outright. */
@@ -25,13 +20,7 @@ export function readStoredLocale(): Locale | null {
   }
 }
 
-/**
- * Matched by prefix, not by equality: a browser reporting `es-419`, `pt-PT` or
- * `ja-JP` should land somewhere sensible rather than falling through to English.
- * `pt` of any flavour resolves to `pt-BR`, since that is the only Portuguese
- * bundle here — a pt-PT reader gets Brazilian copy, which is far better than
- * getting none.
- */
+/** Prefix-matched: `pt` of any flavour lands on the only Portuguese bundle. */
 function matchNavigatorLanguage(): Locale | null {
   const candidates =
     typeof navigator === 'undefined'
@@ -55,15 +44,8 @@ export function resolveInitialLocale(): Locale {
 }
 
 /**
- * Write the choice down and tell the document about it.
- *
- * `<html lang>` is not decoration: `:lang()` rules, screen-reader pronunciation
- * and CJK font fallback all key off it, and a Japanese page announcing itself as
- * English is read aloud in an English voice.
- *
- * Called from the `languageChanged` listener in `./index.ts` rather than from
- * the switcher, so `i18n.changeLanguage('ja')` typed into a console persists and
- * relabels the document exactly like a click does.
+ * `<html lang>` drives `:lang()`, screen-reader pronunciation and CJK font
+ * fallback. Called from the `languageChanged` listener, not the switcher.
  */
 export function persistLocale(code: Locale) {
   try {

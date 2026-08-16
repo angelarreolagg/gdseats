@@ -8,58 +8,22 @@ import { showOfferNotice } from '@/shared/utils/demoNotice'
 /**
  * The sell-side CTA.
  *
- * **It follows the theme, and must not be pinned dark again.** It shipped with
- * the `dark` class `AppHeader` and `TeamsHero` use, on the argument that light
- * mode is a long pale run and the one moment asking a visitor to act should not
- * be the flattest thing on the page. In light mode that argument bought a
- * near-black slab dropped into a near-white document — it read as a rendering
- * fault, not as emphasis. The two surfaces that *are* pinned have reasons this
- * one never had: the header carries a bright-green mark that a light bar would
- * swallow, and the hero's type sits on dark stadium footage. There is nothing
- * underneath this band forcing the issue.
+ * **Follows the theme; must not be pinned dark again.** In light mode the `dark`
+ * class produced a near-black slab in a near-white document, which read as a
+ * rendering fault. The two surfaces that do pin dark have reasons this never had.
  *
- * Emphasis now comes from the accent radial and the glow under the button,
- * which work in both palettes because they are `--psl-accent` mixed into
- * whatever the page happens to be.
- *
- * **The content is deliberately not in a card, and that was a correction.** It
- * briefly sat on an accent-tinted panel to mark it as the conversion moment;
- * the panel worked in isolation and was wrong for the page — every other band
- * here is open content on a ground, so a framed box read as a widget dropped
- * into the layout rather than as part of it. The rule this leaves behind: cards
- * in this app hold *things* (a listing, a pillar, a concierge), never a whole
- * section's message.
- *
- * **What marks it as the climax instead:** the radial, the blurred accent pool
- * under the button, and `size="lg"` — a Button prop and
- * never a `className`, because padding handed in that way is a second
- * declaration of a property the component already sets, and two of those
- * resolve by CSS source order rather than class order. The generous `py-20
- * sm:py-28` does the rest of the work the panel's padding was doing: on an open
- * band, space is the frame. No copy was added — the reference's four lines are
- * intact and the section is made special by treatment alone.
- *
- * **No border, and that is a correction rather than an omission.** This shipped
- * with `border-y` to give the band edges. On screen the hairline read as a seam
- * ruled across the page rather than as the edge of a slab — exactly what
- * `TeamsHero` already learned, which is why it has no bottom border either.
- * Don't add it back without looking at it in both modes first.
+ * No card and no border, both corrections: every other band here is open content
+ * on a ground, and `border-y` read as a seam ruled across the page. Emphasis
+ * comes from the radial, the button halo and `size="lg"` — a Button prop, never
+ * a `className`, since two declarations of one property resolve by source order.
  */
 export function SellCtaSection() {
   const { t } = useTranslation('landing')
 
   return (
     <section className="relative isolate overflow-hidden bg-page">
-      {/*
-       * The hero's radial, at the other end of the page — same formula, so the
-       * two accent washes are recognisably one treatment.
-       *
-       * It is mixed into `transparent` rather than painted over a fixed ground,
-       * so it lands as a soft green haze on `#fbfbfa` and as a glow on
-       * `#040811` without a second declaration. Now that the band is not pinned
-       * dark, this and the button's halo are the only things separating the
-       * section from the page, in either mode.
-       */}
+      {/* The hero's radial formula, mixed into `transparent` so it lands as a haze on
+          #fbfbfa and a glow on #040811 with no second declaration. */}
       <div className="absolute inset-0 bg-[radial-gradient(100%_120%_at_50%_120%,color-mix(in_oklab,var(--psl-accent)_16%,transparent),transparent_60%)]" />
 
       <div className="relative z-10 mx-auto max-w-7xl px-5 py-20 text-center sm:px-8 sm:py-28">
@@ -73,28 +37,18 @@ export function SellCtaSection() {
         </Reveal>
 
         <Reveal delay={0.14}>
-          {/*
-           * With no panel, the halo is what makes this the climax rather than a
-           * third centred text block. A blurred accent pool sitting behind the
-           * button in the stack, so it reads as the button emitting light rather
-           * than as a second shape. `pointer-events-none` matters: it overhangs
-           * 12px on every side and would otherwise swallow a click aimed just
-           * past the edge.
-           */}
+          {/* A blurred accent pool behind the button, so it reads as the button emitting
+              light. `pointer-events-none` — it overhangs 12px and would swallow clicks. */}
           <div className="relative mt-8 inline-block">
             <span
               aria-hidden="true"
               className="pointer-events-none absolute -inset-3 rounded-full bg-accent/25 blur-xl"
             />
-            {/* `size`, never padding through `className` — two declarations of
-                one property resolve by CSS source order, not class order. A
-                longer translation is handled by the size scale, not by a
-                one-off. */}
+
             <Button size="lg" onClick={showOfferNotice} className="group/cta relative">
               {t('sell.cta')}
-              {/* Named group, not the bare `group`: the arrow answers the
-                  BUTTON's hover. An unnamed one would fire from any ancestor
-                  that later became a group, which reads as the page twitching. */}
+              {/* Named group: the arrow answers the BUTTON's hover, not any ancestor that
+                  later becomes a group. */}
               <ArrowRight
                 aria-hidden="true"
                 className="h-4 w-4 shrink-0 transition-transform duration-300 group-hover/cta:translate-x-1"
@@ -104,9 +58,8 @@ export function SellCtaSection() {
           </div>
 
           <p className="mt-5 text-sm text-muted">
-            {/* Trailing anchor, same reasoning as the concierge line: one
-                translatable sentence with a named tag, so the address can sit
-                wherever the language puts it. */}
+            {/* One translatable sentence with a named tag, so the address can sit wherever
+                the language puts it. */}
             <Trans
               i18nKey="landing:sell.email"
               values={{ address: SELL_EMAIL }}

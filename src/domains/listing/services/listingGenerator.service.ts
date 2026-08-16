@@ -6,14 +6,7 @@ import { ALL_SECTIONS, getRingForSection, getSidelineMultiplier } from '../data/
 
 const ID_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789'
 
-/**
- * The window inventory is published in, as month indices — March to August 2026.
- *
- * Indices rather than the `['Mar', 'Apr', …]` array this replaced: those were
- * English display strings baked into the data, which is where a date becomes
- * untranslatable. `Date.UTC` turns an index into the epoch ms the type now
- * carries, and the formatters decide what a reader sees.
- */
+/** March–August 2026 as month indices; `Date.UTC` turns them into epoch ms. */
 const FIRST_MONTH_INDEX = 2
 const LAST_MONTH_INDEX = 7
 const PUBLICATION_YEAR = 2026
@@ -36,11 +29,8 @@ function roundTo(value: number, step: number): number {
 }
 
 /**
- * One team's inventory, generated from a seed keyed on the team id.
- *
- * Seeded rather than random: the seat map shows a per-section count beside the
- * list, and an unseeded set would reshuffle on every render and make those counts
- * disagree with the rows they describe.
+ * One team's inventory, seeded on the team id: the seat map prints a per-section
+ * count beside the list, and unseeded data would make the two disagree.
  */
 export function generateListingsForTeam(team: Team): Listing[] {
   const random = createRandom(`listings:${team.id}`)
@@ -61,10 +51,8 @@ export function generateListingsForTeam(team: Team): Listing[] {
       25,
     )
 
-    // What the seller is actually asking. The spread is centred on 1.0 on purpose:
-    // an asymmetric range skews the whole market to one verdict, and a demo where
-    // most rows read "Overpriced" undersells the thing being demoed. Uniform
-    // ±22% against a ±10% fair band gives roughly 27/45/27.
+    // Centred on 1.0 on purpose: an asymmetric range skews the market to one
+    // verdict, and a demo where most rows read "Overpriced" undersells the product.
     const askPerSeat = roundTo(fairPerSeat * random.float(0.78, 1.22), 25)
 
     const id = Array.from({ length: 6 }, () => random.pick(ID_ALPHABET.split(''))).join('')
@@ -93,8 +81,8 @@ export function generateListingsForTeam(team: Team): Listing[] {
     })
   }
 
-  // Section average is measured across the generated set rather than invented, so
-  // the insight bullet and the price-stats chart describe the same real numbers.
+  // Measured across the generated set, so the insight bullet and the price-stats
+  // chart describe the same numbers.
   const totalsBySection = new Map<number, number[]>()
   for (const draft of drafts) {
     const bucket = totalsBySection.get(draft.section) ?? []
@@ -126,9 +114,8 @@ function buildPriceHistory(
   return perSeat.map((price, index) => {
     const previous = index > 0 ? perSeat[index - 1] : null
     return {
-      // Walks forward a month per revision and then holds at the last one, so a
-      // long history stays inside the publication window rather than running off
-      // the end of the season.
+      // Walks forward a month per revision, then holds, so a long history stays
+      // inside the publication window.
       dateMs: Date.UTC(
         PUBLICATION_YEAR,
         Math.min(FIRST_MONTH_INDEX + index + 1, LAST_MONTH_INDEX),
@@ -169,10 +156,8 @@ function buildTags(
     if (random.chance(0.28)) tags.push(amenity)
   }
 
-  // A visible price cut is a signal, not an amenity, so it keeps a semantic colour.
-  // Direction convention: the number went DOWN, so it reads red — the same rule the
-  // price-history Change column follows. The verdict badge beside it is what tells
-  // the buyer whether that is good news.
+  // A price cut is a signal, not an amenity: it reads red because the number went
+  // DOWN, matching the history table. The verdict badge says whether that is good.
   const discount = (fairPerSeat - askPerSeat) / fairPerSeat
   if (discount > 0.08) {
     tags.push({

@@ -8,22 +8,9 @@ import i18n from '@/shared/i18n'
 import 'react-toastify/dist/ReactToastify.css'
 
 /**
- * `reducedMotion="user"` makes every animation in the tree respect the OS setting
- * without each component checking for it. The tooltip provider shares one delay
- * group, so moving between chips doesn't re-wait each time.
- *
- * The toast host lives here rather than in `App` so tests — which render through
- * these providers — can assert on toasts without mounting the whole shell.
- * `theme` reads the palette through `useIsDarkTheme`, never `useTheme`: this
- * only needs to know the mode, not own it. The colours themselves are remapped
- * onto our tokens in `globals.css`.
- *
- * `I18nextProvider` sits here for the same reason as the toast host: every
- * component test renders through these providers (`src/test/utils.tsx`), so the
- * whole suite gets i18n without a line changing in any test file. It goes
- * *inside* `MotionConfig` and *outside* `TooltipProvider` — nothing depends on
- * that order, but a tooltip's content is translated and the language should
- * already be resolved by the time the tooltip tree is built.
+ * `reducedMotion="user"` makes every animation respect the OS setting without
+ * each component checking. The toast host and `I18nextProvider` live here, not
+ * in `App`, so tests rendering through these providers get both for free.
  */
 export function AppProviders({ children }: { children: ReactNode }) {
   const isDark = useIsDarkTheme()

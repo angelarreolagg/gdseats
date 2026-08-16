@@ -4,13 +4,6 @@ import { describe, expect, it } from 'vitest'
 import { AppFooter } from '../components/AppFooter'
 
 describe('AppFooter', () => {
-  /**
-   * Validates: the policy shelf explains itself instead of failing silently.
-   * Why it matters: a marketplace asking for five figures is judged on whether
-   * Terms and Privacy exist at all. A link that does nothing when clicked reads
-   * as a broken site — which costs more trust than admitting the demo has no
-   * page behind it.
-   */
   it('tells the user why the company links go nowhere', async () => {
     render(<AppFooter />)
 
@@ -19,13 +12,6 @@ describe('AppFooter', () => {
     expect(await screen.findByText(/not available — this is a demo/i)).toBeInTheDocument()
   })
 
-  /**
-   * Validates: dead chrome is a button, live contact details are anchors.
-   * Why it matters: a screen reader announces "link" as "this navigates". Three
-   * of these navigate nowhere and two really do hand off to the phone and mail
-   * apps — the roles have to tell them apart, and `tel:`/`mailto:` are the only
-   * two things on this page that work without a backend.
-   */
   it('separates the dead links from the working ones by role', () => {
     render(<AppFooter />)
 
@@ -44,11 +30,6 @@ describe('AppFooter', () => {
     )
   })
 
-  /**
-   * Validates: the trust block — brand, promise, registered address, copyright.
-   * Why it matters: this is the footer's whole job. A secondary market with no
-   * postal address behind it looks like a scrape, not a business.
-   */
   it('carries the trust block', () => {
     render(<AppFooter />)
 

@@ -8,52 +8,23 @@ export type DocumentMeta = {
 }
 
 /**
- * Writes into the tags `index.html` already declared.
- *
- * `document.querySelector` and then set `content` — never `createElement`. Two
- * `<meta name="description">` tags in one document is a genuine SEO fault, and it
- * is completely invisible in the UI, so the only thing that would ever catch it
- * is the fact that this function cannot produce one.
- *
- * Missing nodes are skipped rather than created. If a tag is gone from
- * `index.html`, the fix belongs there, where the crawlers that matter will
- * actually see it.
+ * Writes into the tags `index.html` already declared — never `createElement`.
+ * Two `<meta name="description">` in one document is a real SEO fault and is
+ * invisible in the UI. Missing nodes are skipped; the fix belongs in the markup.
  */
 function setMetaContent(selector: string, content: string) {
   document.querySelector(selector)?.setAttribute('content', content)
 }
 
 /**
- * Keeps the tab title and the page description in step with what is on screen.
+ * Keeps the tab title and description in step with the screen.
  *
- * Scope, honestly stated: **this only reaches Google and the browser tab.**
- * Social scrapers (LinkedIn, Slack, X) fetch the HTML and never run the bundle,
- * so what they render is whatever `index.html` shipped with — the static tags,
- * always the default. That is why the defaults there are written to stand alone
- * rather than as placeholders.
+ * **Only reaches Google and the browser tab.** Social scrapers never run the
+ * bundle, so they see whatever `index.html` shipped with. `canonical` and
+ * `og:url` are deliberately untouched: every screen lives at the same URL.
  *
- * `og:title` and `og:description` are updated anyway so the live DOM does not
- * contradict the title beside it when someone inspects the page. `canonical` and
- * `og:url` are deliberately NOT touched: every screen lives at the same URL
- * (`useAppNavigation` holds the screen in React state, not in the address bar),
- * so rewriting them per screen would claim several canonical addresses for one
- * document, which is worse than leaving them alone.
- *
- * The cleanup restores the defaults. In the app that only fires when the whole
- * tree unmounts; its real job is keeping one test from leaking a title into the
- * next.
- *
- * **It still takes plain strings and still knows nothing about seats** — the
- * caller resolves the copy. What it gained is the *defaults*: it restores the
- * translated ones rather than `site.ts`'s English constants, so a visitor
- * reading in Spanish who navigates home does not watch the tab flip to English.
- * Under `en` those two are the same string by construction, and
- * `site.config.test.ts` is what keeps them that way.
- *
- * `og:locale` is updated alongside the rest so the live DOM does not advertise
- * `en_US` over a Japanese page. It reaches nobody who matters — a scraper never
- * runs this — but a page that contradicts itself under inspection is a page
- * nobody trusts.
+ * Still takes plain strings — the caller resolves the copy. It restores the
+ * *translated* defaults, so a switch does not flash English.
  */
 export function useDocumentMeta({ title, description }: DocumentMeta) {
   const { t, i18n } = useTranslation('meta')
@@ -75,9 +46,7 @@ export function useDocumentMeta({ title, description }: DocumentMeta) {
       setMetaContent('meta[property="og:title"]', t('default.title'))
       setMetaContent('meta[property="og:description"]', t('default.description'))
     }
-    // `i18n.language` is in the list on purpose: the copy above is already
-    // resolved by the caller, but the cleanup and `og:locale` read the live
-    // language, so a switch has to re-run this rather than leave the previous
-    // one's defaults armed.
+    // `i18n.language` is a dependency because the cleanup and `og:locale` read the
+    // live language, not because the resolved copy above does.
   }, [title, description, t, i18n.language])
 }

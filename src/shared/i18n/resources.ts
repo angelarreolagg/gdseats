@@ -46,15 +46,7 @@ import jaMeta from './locales/ja/meta.json'
 import jaSearch from './locales/ja/search.json'
 import jaTeams from './locales/ja/teams.json'
 
-/**
- * The namespaces, in one place, so `i18n.locales.test.ts` can walk them without
- * a second list to keep in step.
- *
- * They carry the domain structure the folder layout deliberately does not: the
- * locale files are centralised (one folder a translator can be handed) rather
- * than co-located under `src/domains/*`, and JSON creates no import edges, so
- * nothing about the dependency DAG cares either way.
- */
+/** The namespaces, in one place, so the parity test needs no second list. */
 export const NAMESPACES = [
   'common',
   'header',
@@ -72,15 +64,9 @@ export const NAMESPACES = [
 export type Namespace = (typeof NAMESPACES)[number]
 
 /**
- * All four locales, bundled statically — no `import()`, no `useSuspense`.
- *
- * Roughly 8–12 KB gzipped in total, against a 6.2 MB hero video and 57 KB gz of
- * GSAP for one headline. Lazy-loading would buy nothing measurable here and cost
- * a whole class of bugs: a flash of English before the Spanish chunk resolves, a
- * Suspense boundary above the shell, and async setup in every test file.
- *
- * Revisit past ~6 locales or ~50 KB gz, at which point the move is `import()`
- * per locale plus `i18n.addResourceBundle`.
+ * All four bundled statically — ~15 KB gz against a 6.2 MB hero video. Lazy
+ * loading would buy nothing and cost a flash of English plus async test setup.
+ * Revisit past ~6 locales.
  */
 export const resources = {
   en: {

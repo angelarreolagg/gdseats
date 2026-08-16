@@ -13,11 +13,9 @@ function inferTrend(listing: Listing): Trend {
 }
 
 /**
- * Adapter from the host's listing record to the analyzer's input shape.
- *
- * Everything crosses over as a TOTAL for this listing's seat count: comparison is
- * done per seat, but the buyer offers a total, so the panel speaks in totals.
- * This is the only place the two units meet.
+ * Adapter to the analyzer's input shape. Everything crosses as a TOTAL: the
+ * comparison is per seat, but the buyer offers a total. The only place the two
+ * units meet.
  */
 export function toListingSignals(listing: Listing): ListingSignals {
   return {
@@ -26,10 +24,8 @@ export function toListingSignals(listing: Listing): ListingSignals {
     sectionAverage: getSectionAverageTotal(listing),
     section: listing.section,
     trend: inferTrend(listing),
-    // Dates cross over as epoch ms and are shortened at render, which is what
-    // removed the `date.split(',')[0]` that used to live here: it was an
-    // assumption about US comma placement, and es/pt-BR have no comma to split
-    // on while ja writes the year first — so the "short" date was the year.
+    // Epoch ms, shortened at render — this replaced a `split(',')[0]` that only
+    // made sense in one locale.
     priceHistory: listing.priceHistory.map((entry) => ({
       dateMs: entry.dateMs,
       price: entry.totalPrice,

@@ -3,25 +3,15 @@ import { useCallback, useState } from 'react'
 export type Screen = { name: 'teams' } | { name: 'search'; teamId: string }
 
 /**
- * The one thing a router would have done for free.
- *
- * Screens swap in place, so the document keeps whatever scroll offset the last
- * one was left at — pick a team from halfway down the grid and the seat map
- * opens with its top half already scrolled past. Instant, not smooth: this is a
- * page change, and animating it would read as the old screen sliding away.
- *
- * Overlays are excluded on purpose. Closing a listing returns you to the list
- * you opened it from, and that position is worth keeping.
+ * `scrollTo(0, 0)` on every screen change — screens swap in place, so the
+ * document would otherwise inherit the previous one's offset. Overlays are
+ * excluded: closing a listing must return the buyer to the row they opened.
  */
 function resetScroll() {
   window.scrollTo(0, 0)
 }
 
-/**
- * Three screens, one of which is an overlay rather than a page — so this is state,
- * not routing. A router would add a dependency and config to model something the
- * reference design already shows as a modal over the search results.
- */
+/** Three screens, one an overlay — so state, not a route. */
 export function useAppNavigation() {
   const [screen, setScreen] = useState<Screen>({ name: 'teams' })
   const [openListingId, setOpenListingId] = useState<string | null>(null)

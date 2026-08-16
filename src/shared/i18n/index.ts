@@ -12,19 +12,10 @@ import { resources } from './resources'
 /**
  * The i18n singleton, initialised at import time.
  *
- * **`i18next` rather than `react-intl` or Lingui, and for one reason this
- * codebase already had:** domain services must stay free of React — they emit
- * semantic names (`TagIconName`, `TrendDirection`, `Recommendation`) and the
- * component layer resolves them. i18next's core is a plain JS singleton with no
- * React dependency, so a non-React module *can* reach for `t()` where it has to.
- * `demoNotice.tsx` and `documentMeta.ts` are the two places that do.
- *
- * That escape hatch is not the default. Services still emit keys; see the rule
- * in CLAUDE.md and the `insights.service` / `marketTrend.service` shapes.
- *
- * The other candidates were weighed and rejected on the same constraint the
- * build has: FormatJS and Lingui both want a Babel/SWC extraction step, and this
- * repo builds with `tsc -b` plus Vite and no custom transform.
+ * i18next rather than FormatJS or Lingui: both want a Babel/SWC extraction step,
+ * and this repo builds with `tsc -b` plus Vite and no custom transform. Its core
+ * is also plain JS, so `demoNotice.tsx` and `documentMeta.ts` can reach `t()`
+ * without a React hook. Services still emit keys.
  */
 void i18n.use(initReactI18next).init({
   resources,
@@ -43,13 +34,8 @@ void i18n.use(initReactI18next).init({
 })
 
 /**
- * Persistence hangs off the event, not off the switcher.
- *
- * Anything that changes the language — the `LanguageSwitch`, or
- * `i18n.changeLanguage('ja')` typed into a console — writes `localStorage` and
- * relabels `<html lang>` through this one listener. Putting it in the component
- * instead would make the console path silently non-persistent, which is exactly
- * the kind of gap that only shows up after a reload.
+ * Persistence hangs off the event, so `i18n.changeLanguage('ja')` from a console
+ * persists and relabels `<html lang>` exactly as a click does.
  */
 i18n.on('languageChanged', (next) => {
   if (isLocale(next)) persistLocale(next)
@@ -61,12 +47,8 @@ export function getLocale(): Locale {
 }
 
 /**
- * The locale `Intl` should format with, which is **not** the UI code.
- *
- * `formatters.ts` reads it from here rather than taking it as a parameter, so
- * ~30 call sites keep saying `formatCurrency(value)` and services stay free of
- * React (i18next is not React). See the note on `LOCALES` for why the two
- * identifiers differ.
+ * The Intl locale, which is **not** the UI code. Read here rather than passed,
+ * so `formatters.ts` works in services that hold no React hook.
  */
 export function getIntlLocale(): string {
   return intlLocaleFor(getLocale())

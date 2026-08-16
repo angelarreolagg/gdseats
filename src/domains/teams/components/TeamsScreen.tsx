@@ -20,10 +20,8 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
 
   const pageCount = Math.ceil(TEAMS.length / TEAMS_PER_PAGE)
 
-  // Swipe left for the next page, right for the previous — clamped, so a flick at
-  // either end is a no-op rather than a wrap. Spread onto both the grid and the
-  // indicator below it: the cards are where a thumb naturally lands, and the
-  // indicator is the thing that looks like it should respond to a drag.
+  // Clamped, so a flick at either end is a no-op. Spread on both the grid and the
+  // dot indicator: the cards are where a thumb lands, the dots look draggable.
   const swipe = useSwipe({
     onSwipeLeft: () => setPage((current) => Math.min(current + 1, pageCount - 1)),
     onSwipeRight: () => setPage((current) => Math.max(current - 1, 0)),
@@ -36,18 +34,10 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
       <TeamsHero />
 
       <div className="mx-auto max-w-7xl px-4 py-5 sm:px-8 sm:py-6">
-        {/*
-         * `sm:items-stretch`, not `items-center`: LeagueSwitch is the taller
-         * control (its pill sits inside a padded track), and matching the search
-         * field to it by hand would mean a hardcoded height that drifts the
-         * moment either one is restyled. Stretching lets the row settle it.
-         */}
+        {/* `items-stretch`: LeagueSwitch is the taller control, and matching the field
+            to it by hand would mean a height that drifts on the next restyle. */}
         <div className="mb-4 flex flex-col gap-3 sm:mb-5 sm:flex-row sm:flex-wrap sm:items-stretch sm:gap-4">
-          {/*
-           * Mobile row 1: the league, full width. It decides what the grid
-           * contains, so it reads before the two controls that only narrow or
-           * page through what it chose.
-           */}
+          {/* Mobile row 1: the league, full width — it decides what the grid contains. */}
           <div className="order-1 sm:order-1">
             <LeagueSwitch
               value={league}
@@ -58,20 +48,9 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
             />
           </div>
 
-          {/*
-           * Mobile row 2: search and pagination side by side.
-           *
-           * `items-stretch` is what settles them to one height — the pagination
-           * box is 46px and the field 42, and left alone they sit on different
-           * baselines with the shorter one floating. Stretching lets the taller
-           * one set the row and the field fill it (`h-full` on its input).
-           *
-           * `sm:contents` dissolves this wrapper at the breakpoint so both become
-           * direct items of the row above, where the field returns to its natural
-           * width beside the league switch and `sm:ml-auto` pushes pagination to
-           * the far right. It regroups elements across a breakpoint without
-           * rendering either control twice.
-           */}
+          {/* Mobile row 2: search and pagination side by side. `sm:contents` dissolves
+              this wrapper at the breakpoint so both become items of the row above —
+              regrouping across a breakpoint without rendering either control twice. */}
           <div className="order-2 flex items-stretch gap-3 sm:contents">
             <TeamSearchCombobox
               teams={TEAMS}
@@ -87,12 +66,8 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
           </div>
         </div>
 
-        {/*
-         * Two columns from the smallest screen up. One column put half a card in
-         * the fold and made the catalogue read as a list of two teams; two puts
-         * four franchises in view, which is what makes the grid legible as a
-         * catalogue at all.
-         */}
+        {/* Two columns from the smallest screen: one put half a card in the fold and
+            made the catalogue read as a list of two teams. */}
         {visible.length > 0 ? (
           <motion.div
             key={`${league}-${page}`}
@@ -112,27 +87,13 @@ export function TeamsScreen({ onSelectTeam }: TeamsScreenProps) {
           </p>
         )}
 
-        {/*
-         * The bar you see is 6px tall, which is nowhere near something a thumb
-         * can hit — as plain buttons these were 12×6px targets and simply did not
-         * respond on a phone. So the button is sized for the finger and the bar
-         * became a child of it:
-         *
-         * - `h-11` is the 44px touch target; `-my-[19px]` takes all but the bar's
-         *   own 6px back out of the flow, so the row still measures as the
-         *   hairline it looks like and nothing below it moves.
-         * - The spacing moved from the container's `gap` onto the button's `px`,
-         *   which is what makes the hit areas **tile edge to edge instead of
-         *   leaving dead strips between them**. At 24px wide they clear WCAG
-         *   2.5.8; a gap on the container would have left the same 12px targets
-         *   with empty space around them.
-         *
-         * The swipe is spread on here too, but these stay plain `<button>`s and
-         * are NOT a `role="slider"`: the gesture is an enhancement layered over
-         * controls that already work with a keyboard and a screen reader, and it
-         * has no accessible equivalent of its own. `TeamsPagination` above the
-         * grid remains the primary path through the pages.
-         */}
+        {/* The bar is 6px, nowhere near a thumb target, so the button is sized for the
+            finger and the bar is its child: `h-11` is the 44px target and `-my-[19px]`
+            takes it back out of the flow. Spacing lives on the button's `px` so the hit
+            areas tile edge to edge instead of leaving dead strips.
+
+            Plain buttons, not `role="slider"`: the swipe is an enhancement over controls
+            that already work with a keyboard. */}
         {league === 'nfl' ? (
           <div className="mt-6 flex justify-center" {...swipe}>
             {Array.from({ length: pageCount }, (_, index) => (

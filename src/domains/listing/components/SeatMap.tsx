@@ -43,13 +43,8 @@ export function SeatMap({
         viewBox={viewBox}
         className="h-full w-full"
         role={readOnly ? 'img' : 'group'}
-        /*
-         * Two keys for the read-only label, not one with a "not selected"
-         * placeholder: substituting a phrase into a slot that otherwise holds a
-         * number gives translators a sentence they cannot make grammatical in
-         * either case, which is how "section not selected highlighted" happened
-         * in English in the first place.
-         */
+        /* Two keys rather than one with a "not selected" placeholder: a phrase in a
+                   numeric slot gives translators a sentence they cannot make grammatical. */
         aria-label={
           readOnly
             ? selectedSection === null
@@ -107,9 +102,8 @@ export function SeatMap({
                 onClick={interactive ? () => onSelectSection?.(wedge.section) : undefined}
                 role={interactive ? 'button' : undefined}
                 tabIndex={interactive ? 0 : undefined}
-                // `count` rather than the hand-rolled `count === 1 ? '' : 's'`
-                // this replaced: that suffix is English grammar hard-coded into
-                // a component, and it is wrong in all three other locales.
+                // `count`, not a hand-rolled `s` — English grammar in a component is wrong in
+                // the other three locales.
                 aria-label={
                   interactive
                     ? t('map.sectionListings', { section: wedge.section, count })

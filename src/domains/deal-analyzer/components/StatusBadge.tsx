@@ -8,11 +8,7 @@ interface StatusBadgeProps {
   formattedDiff: string
 }
 
-/**
- * Reads as a tag, not an alert: fully rounded, soft tint, medium weight. The
- * earlier version was a heavy semibold block in status colours, which framed the
- * verdict as a verdict rather than as context.
- */
+/** Reads as a tag, not an alert: fully rounded, soft tint, medium weight. */
 export function StatusBadge({ status, formattedDiff }: StatusBadgeProps) {
   const { t } = useTranslation('analyzer')
   const { Icon, labelKey, pill } = STATUS_PRESENTATION[status]

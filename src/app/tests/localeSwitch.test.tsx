@@ -15,21 +15,6 @@ import { App } from '../App'
  * screen would buy nothing but runtime.
  */
 describe('switching language', () => {
-  /**
-   * Validates: choosing a language re-renders the app in it, including the tab
-   * title.
-   * Why it matters: this is the feature. Everything upstream of it is machinery,
-   * and all of the machinery can be individually correct while the visitor still
-   * sees English — a provider mounted below the shell, a component reading a
-   * second i18next instance, or a screen that resolved its copy once at module
-   * scope would each produce exactly that.
-   *
-   * The title is asserted alongside the body because it travels a different
-   * path: `getDocumentMeta` reads the singleton directly rather than through a
-   * hook, so it only updates because `App` subscribes to the language for the
-   * re-render. That subscription looks unused and is the thing most likely to be
-   * removed by someone tidying imports.
-   */
   it('renders the whole shell in the chosen language', async () => {
     render(<App />)
 
@@ -53,20 +38,8 @@ describe('switching language', () => {
     expect(document.documentElement.lang).toBe('ja')
   })
 
-  /**
-   * Validates: the drawn wordmark translates too, and its draw is replayed
-   * rather than left showing a finished animation of the previous language.
-   * Why it matters: the wordmark is the largest thing on the landing page, and
-   * `StrokeText` animates on **mount** — so a re-render alone would swap the
-   * glyphs in with no draw at all, which reads as a rendering glitch rather than
-   * as the headline arriving. The keyed Fragment in `TeamsHero` is what forces
-   * the remount; comparing node identity is the only way to observe it, since
-   * jsdom runs the animation itself as a no-op.
-   *
-   * It also protects a subtler thing: `StrokeText` measures `getBBox()` once and
-   * caches the viewBox. Without a remount the new copy would be drawn into the
-   * previous language's box and clipped.
-   */
+  // Node identity is the only observable: jsdom runs the draw as a no-op, and
+  // StrokeText caches its measured viewBox until remounted.
   it('translates and replays the drawn wordmark', async () => {
     const { container } = render(<App />)
 
@@ -84,14 +57,6 @@ describe('switching language', () => {
     expect(container.querySelector('h1')).not.toBe(before)
   })
 
-  /**
-   * Validates: the accessible name of the wordmark carries a separator even
-   * where the language writes none.
-   * Why it matters: the `<h1>` is the only one on the page and its name is
-   * assembled from two halves. Japanese puts no space between them, so relying on
-   * the two `role="img"` children to concatenate would announce the two clauses
-   * run together as a single word.
-   */
   it('keeps the two halves separated in the accessible name', async () => {
     render(<App />)
 

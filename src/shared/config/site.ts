@@ -1,33 +1,17 @@
 /**
- * Everything about the site that a crawler, a scraper, or the browser tab reads.
+ * Everything a crawler, a scraper or the browser tab reads.
  *
- * These values are stated **twice**: here, and literally in `index.html`. That is
- * not an oversight. `index.html` is a static file served before any JavaScript
- * runs, and it is the only version a social scraper (LinkedIn, Slack, X) ever
- * sees — none of them execute the bundle. So the tags have to be in the markup,
- * and the markup cannot import TypeScript. If you change a string here, change
- * the matching tag in `index.html`; the comment there points back at this file.
- *
- * `useDocumentMeta` then overwrites the same tags at runtime as the user moves
- * between screens, which is what Google (which does execute JS) and the tab title
- * pick up.
+ * Stated **twice** — here and literally in `index.html` — because a social
+ * scraper never runs the bundle and static markup cannot import TypeScript.
+ * Change one, change the other; `site.config.test.ts` enforces it.
  */
 
 /**
- * Absolute origin, no trailing slash. Live and verified.
+ * Absolute origin, no trailing slash. Open Graph requires absolute URLs.
  *
- * Every canonical link, `og:url`, `og:image`, sitemap entry and JSON-LD `@id` is
- * built from it, and Open Graph requires absolute URLs — a relative `og:image`
- * silently yields no preview card on most scrapers.
- *
- * Moving to a custom domain means changing it in **six** places, which is why
- * `site.config.test.ts` exists: here, `index.html`, `public/robots.txt`,
- * `public/sitemap.xml`, and the two JSON-LD `@id`s.
- *
- * If it ever ships to a GitHub Pages *subpath* (`…github.io/gdseats/`) rather
- * than its own domain, that is not the only change either: `vite.config.ts` needs
- * a matching `base`, and the absolute `/…` paths in `index.html` and
- * `site.webmanifest` all need the prefix too.
+ * Moving to a custom domain touches **six** places: here, `index.html`,
+ * `robots.txt`, `sitemap.xml`, and the two JSON-LD `@id`s. A GitHub Pages
+ * subpath would also need a matching `base` in `vite.config.ts`.
  */
 export const SITE_URL = 'https://gdseats.vercel.app'
 
@@ -36,21 +20,10 @@ export const SITE_NAME = 'G&D Seats'
 /** Expanded once, in the header tooltip. Used here for structured data. */
 export const SITE_LEGAL_NAME = 'Gridiron & Diamond Seats'
 
-/**
- * The tab title when nothing more specific applies.
- *
- * Front-loaded with the brand because the teams grid is the entry point and the
- * shareable URL; the deeper screens invert it (detail first, brand last) since by
- * then the user knows what site they are on.
- */
+/** Front-loaded with the brand; deeper screens invert it. */
 export const DEFAULT_TITLE = 'G&D Seats — AI-priced NFL personal seat licenses'
 
-/**
- * 145 characters. Google truncates the snippet around 155–160, so this is sized
- * to survive whole rather than to be cut mid-clause. It names the thing being
- * sold, the differentiator, and that it is a demo — a portfolio link that
- * oversells itself as a live marketplace costs more trust than it buys.
- */
+/** 145 chars: Google truncates the snippet around 155–160. */
 export const DEFAULT_DESCRIPTION =
   'Browse NFL personal seat licenses on an interactive seat map and see an AI valuation on every listing before you offer. Frontend demo, mock data.'
 

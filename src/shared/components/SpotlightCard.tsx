@@ -32,28 +32,12 @@ interface SpotlightCardProps extends PropsWithChildren {
 const DEFAULT_SPOTLIGHT = 'color-mix(in oklab, var(--psl-accent) 22%, transparent)'
 
 /**
- * A card that lights up under the cursor, with the glow tracking the pointer.
+ * Adapted from React Bits. Upstream hard-codes a dark card and an rgba glow;
+ * here it takes the app's own tokens, and `spotlightColor` was widened from
+ * upstream's `rgba(…)` template type to `string` so it can hold a `var()`.
  *
- * Adapted from React Bits, like `StrokeText`. Two deliberate divergences from
- * upstream, both about this codebase's rules rather than taste:
- *
- * 1. **Colours are tokens, not literals.** Upstream hard-codes
- *    `border-neutral-800 bg-neutral-900` and an rgba spotlight, which would
- *    render a permanently dark card in light mode. Here it is the same
- *    `border-border-hairline` + `bg-surface` every other card in the app uses,
- *    so it themes for free.
- * 2. **Named export**, matching the rest of `shared/components/`. `StrokeText`
- *    is the sole default export because it is kept byte-close to upstream for
- *    re-syncing; this one is already adapted, so there is nothing to re-sync.
- *
- * Reduced motion needs no handling: the only animation is the glow's
- * `transition-opacity`, and the `prefers-reduced-motion` block in `globals.css`
- * clamps every `transition-duration` to 0.01ms, so the fade simply stops being
- * a fade. Nothing moves on the page either way — the glow is paint, not layout.
- *
- * Touch devices never fire `mousemove`, so the spotlight just never appears.
- * That is the correct outcome, and the reason nothing may be encoded in it: the
- * card must read identically with the glow absent.
+ * **Nothing may be encoded in the spotlight**: touch devices never fire
+ * `mousemove`, so a phone sees the card with no glow at all.
  */
 export function SpotlightCard({
   children,

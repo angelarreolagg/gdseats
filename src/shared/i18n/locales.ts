@@ -1,27 +1,14 @@
 /**
- * The four locales, and the two different identifiers each one carries.
+ * The four locales and their two identifiers.
  *
- * **`code` and `intlLocale` are not the same thing, and conflating them is the
- * quietest bug available here.** `code` is what i18next resolves bundles with,
- * what `localStorage` holds and what `<html lang>` advertises. `intlLocale` is
- * what `Intl.NumberFormat` and `Intl.DateTimeFormat` are constructed with, and
- * it is qualified even where the UI code is not:
+ * `code` resolves bundles, fills `<html lang>` and is stored; `intlLocale`
+ * constructs `Intl` formatters. `es` formats as `es-MX` — `es-ES` would print
+ * `1.234,56` and every price would change meaning without changing a digit.
  *
- *  - `es` is unqualified because the copy targets US/LatAm Spanish generally,
- *    but it formats as `es-MX` — `1,234.56` grouping, which is what that
- *    audience reads. Falling back to `es-ES` would print `1.234,56` and every
- *    price on the page would change meaning without changing a digit.
- *  - `pt-BR` is qualified in both, because pt-PT and pt-BR diverge in vocabulary
- *    far enough to read as wrong to a speaker of the other.
+ * **Endonyms are never translated**: someone who landed on Japanese by accident
+ * still has to find "English" in the list.
  *
- * **The endonyms are never translated.** Someone who landed on Japanese by
- * accident and cannot read Japanese still has to be able to find "English" in
- * the list — a language picker written in the language you cannot read is a
- * trap, not a control.
- *
- * `as const` plus an indexed access type rather than an enum: `erasableSyntaxOnly`
- * is on in `tsconfig.app.json`, and an enum emits real code. Same shape
- * `FAQ_CATEGORIES` and `SortKey` already use.
+ * `as const` plus an indexed type, not an enum — `erasableSyntaxOnly` is on.
  */
 export const LOCALES = [
   { code: 'en', intlLocale: 'en-US', endonym: 'English', short: 'EN' },

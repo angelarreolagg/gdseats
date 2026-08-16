@@ -26,13 +26,6 @@ afterEach(() => {
 })
 
 describe('useDocumentMeta', () => {
-  /**
-   * Validates: the tab title follows the screen.
-   * Why it matters: three screens shared one static title before this hook
-   * existed. A visitor with the grid and two franchises open in tabs had no way
-   * to tell them apart, and any bookmark or history entry they made was labelled
-   * with the product name and nothing else.
-   */
   it('writes the supplied title to the document', () => {
     renderHook(() =>
       useDocumentMeta({ title: 'Las Vegas Raiders PSLs', description: 'Seats at Allegiant.' }),
@@ -41,14 +34,6 @@ describe('useDocumentMeta', () => {
     expect(document.title).toBe('Las Vegas Raiders PSLs')
   })
 
-  /**
-   * Validates: the description tag is REWRITTEN, never duplicated.
-   * Why it matters: two `<meta name="description">` tags in one document is a
-   * real SEO fault, and it is completely invisible on screen — nothing in the UI
-   * changes, no test fails, no error is logged. An implementation that reached
-   * for `createElement` would look correct in the browser and quietly cost the
-   * snippet. This assertion is the only thing standing in front of that.
-   */
   it('updates the existing description tag instead of appending another', () => {
     const { rerender } = renderHook(
       ({ description }: { description: string }) =>
@@ -65,12 +50,6 @@ describe('useDocumentMeta', () => {
     expect(descriptionContent()).toBe('Second description.')
   })
 
-  /**
-   * Validates: og:title and og:description track the page too.
-   * Why it matters: they are the same claim about the same page. Letting them
-   * drift from the title means anyone inspecting the live DOM reads two
-   * different answers to what this screen is.
-   */
   it('keeps the Open Graph title and description in step', () => {
     renderHook(() =>
       useDocumentMeta({ title: 'Section 106, Row 39', description: 'Two seats at Allegiant.' }),
@@ -84,13 +63,6 @@ describe('useDocumentMeta', () => {
     ).toBe('Two seats at Allegiant.')
   })
 
-  /**
-   * Validates: canonical is left alone.
-   * Why it matters: every screen lives at the same URL — the screen is React
-   * state, not an address. A hook that rewrote canonical per screen would tell a
-   * crawler that one document has three canonical addresses, which is a worse
-   * signal than the single honest one it already ships with.
-   */
   it('does not touch the canonical link', () => {
     document.head.innerHTML += '<link rel="canonical" href="https://gdseats.vercel.app/" />'
 
@@ -101,12 +73,6 @@ describe('useDocumentMeta', () => {
     )
   })
 
-  /**
-   * Validates: unmounting restores the defaults.
-   * Why it matters: mostly hygiene in the app, where this fires only when the
-   * whole tree goes. In the suite it is what stops one test's title leaking into
-   * the next and turning an unrelated failure into a mystery.
-   */
   it('restores the default title and description on unmount', () => {
     const { unmount } = renderHook(() =>
       useDocumentMeta({ title: 'Temporary', description: 'Temporary.' }),
@@ -118,12 +84,6 @@ describe('useDocumentMeta', () => {
     expect(descriptionContent()).toBe(DEFAULT_DESCRIPTION)
   })
 
-  /**
-   * Validates: a missing tag is skipped, not fatal.
-   * Why it matters: the hook runs on every screen change. If someone edits
-   * `index.html` and drops a tag, the right outcome is a weaker head — not a
-   * crash that takes the whole app down on navigation.
-   */
   it('survives a head with none of the expected tags', () => {
     document.head.innerHTML = ''
 

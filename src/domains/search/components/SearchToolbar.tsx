@@ -30,8 +30,7 @@ export function SearchToolbar({
   const { t } = useTranslation('search')
   const trend = useMemo(() => getMarketTrend(team), [team])
 
-  // `SORT_OPTIONS` keeps the values and their order; only the words are resolved
-  // here, into the `{ value, label }` shape `Select` renders.
+  // Only the words are resolved here, into `Select`'s shape.
   const sortOptions = useMemo(
     () => SORT_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) })),
     [t],

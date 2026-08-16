@@ -13,14 +13,9 @@ const MAX_BAR_WIDTH = 24
 const GAP = 2
 
 /**
- * Where this listing's price per seat sits among its section.
- *
- * An EMPHASIS chart, not a categorical one: the reader's question is "where does
- * mine land", so the listing in question takes the accent and every other bar
- * recedes to the muted token. Colour carries one distinction, not eight.
- *
- * The price history table directly above is the table-view twin, so no value here
- * is reachable only by reading a bar.
+ * Where this listing sits among its section. An EMPHASIS chart: the listing
+ * takes the accent and every peer recedes, because the question is "where does
+ * mine land". The history table above is the table-view twin.
  */
 export function PriceStatsChart({ sectionListings, listing }: PriceStatsChartProps) {
   const { t } = useTranslation('listing')
@@ -36,8 +31,8 @@ export function PriceStatsChart({ sectionListings, listing }: PriceStatsChartPro
   const slot = CHART.width / sorted.length
   const barWidth = Math.min(MAX_BAR_WIDTH, Math.max(4, slot - GAP))
 
-  // Scale from zero would flatten a section whose prices cluster; anchor a little
-  // below the cheapest instead so the spread stays readable.
+  // Anchored below the cheapest rather than at zero, or a section whose prices
+  // cluster would flatten.
   const floor = Math.max(0, min - (max - min) * 0.35 - 1)
   const scale = (value: number) =>
     max === floor ? plotHeight : ((value - floor) / (max - floor)) * plotHeight
@@ -122,14 +117,8 @@ export function PriceStatsChart({ sectionListings, listing }: PriceStatsChartPro
         {sorted.length === 1 ? (
           t('stats.onlyListing', { section: listing.section })
         ) : (
-          /*
-           * `<Trans>` with NAMED components rather than three `t()` calls glued
-           * together. The two emphasised runs sit in different places in
-           * different languages — Japanese puts the count after the noun it
-           * counts — and a split sentence would force every translator to keep
-           * our clause order. Named tags rather than indexed `<0>` for the same
-           * reason: reordering the clause must not reorder the markup.
-           */
+          /* `<Trans>` with NAMED components: the emphasised runs sit in different places
+                       in different languages, and indexed tags would reorder the markup. */
           <Trans
             i18nKey="listing:stats.comparison"
             values={{

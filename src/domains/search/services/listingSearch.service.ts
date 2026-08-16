@@ -4,12 +4,7 @@ import { getEstimatedTotal, getTotalPrice } from '@/domains/listing/types/listin
 
 export type SortKey = 'best-deal' | 'price-asc' | 'price-desc' | 'section'
 
-/**
- * The source of the sort *values and their order* — the switch below is keyed on
- * `value`, so this array stays here rather than moving into the toolbar. Only
- * the words moved out; `SearchToolbar` maps `labelKey` to `Select`'s `{ value,
- * label }` shape at render.
- */
+/** Owns the values and their order; only the words moved to the bundle. */
 export const SORT_OPTIONS: Array<{ value: SortKey; labelKey: string }> = [
   { value: 'best-deal', labelKey: 'search:sort.bestDeal' },
   { value: 'price-asc', labelKey: 'search:sort.priceAsc' },
@@ -32,8 +27,8 @@ export function sortListings(listings: Listing[], sort: SortKey): Listing[] {
 
   switch (sort) {
     case 'best-deal':
-      // Ascending: the most deeply undervalued listing leads. This is the payoff
-      // of computing the verdict for every row rather than only on the detail.
+      // Ascending, so the most undervalued listing leads — the payoff of computing
+      // the verdict for every row.
       return sorted.sort((a, b) => getListingDiff(a) - getListingDiff(b))
     case 'price-asc':
       return sorted.sort((a, b) => a.pricePerSeat - b.pricePerSeat)

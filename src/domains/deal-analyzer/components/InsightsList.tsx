@@ -12,13 +12,8 @@ interface InsightsListProps {
 }
 
 /**
- * Turns the service's raw signal values into the strings its sentences expect.
- *
- * `insights.service.ts` deliberately hands over numbers and epoch ms rather than
- * formatted text, so the formatting has to happen somewhere — and here is the
- * only place that knows the active locale. The mapping is by *name* because each
- * raw field has exactly one presentation: a `change` is always a magnitude, a
- * `dateMs` always a short date.
+ * Formats the service's raw signal values. Mapped by *name* because each raw
+ * field has one presentation: a `change` is a magnitude, a `dateMs` a short date.
  */
 function formatParams(params: Insight['params']): Record<string, string | number> {
   const formatted: Record<string, string | number> = {}

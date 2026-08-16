@@ -3,29 +3,15 @@ import type { ListingSignals } from '../types/deal.types'
 import { evaluateDeal } from '../services/pricing.service'
 import { generateInsights } from '../services/insights.service'
 
-/**
- * How long the panel spends "analysing".
- *
- * The maths underneath is instant and synchronous. This delay is deliberate
- * product theatre: a verdict that appears the same frame as the page reads as a
- * static label, while a short wait reads as work being done — and this panel's
- * whole job is to be believed. Long enough to register, short enough not to block
- * the offer flow beside it.
- */
+/** Deliberate theatre: an instant verdict reads as a static label. */
 export const ANALYSIS_DURATION_MS = 1400
 
 /**
- * Runs the deal analysis behind a simulated round-trip.
- *
  * Everything is computed synchronously; only the *reveal* of the narrative waits.
- * That keeps the services testable and confines the latency to one place.
  *
- * Note what `isAnalyzing` is for: it gates the recommendation and the bullets
- * ONLY. The verdict is a pure function over data the listing row already
- * rendered, so the panel must show it in the first frame — see the comment in
- * `AIInsightPanel`. Do not "simplify" this back into one flag around the whole
- * body; that regression is invisible in tests unless you look for it, which is
- * why there is one pinning it.
+ * `isAnalyzing` gates the recommendation and bullets ONLY — the verdict is a pure
+ * function over data the row already rendered, so it must show in the first
+ * frame. Do not simplify this into one flag around the whole body.
  */
 export function useDealAnalysis(
   signals: ListingSignals,

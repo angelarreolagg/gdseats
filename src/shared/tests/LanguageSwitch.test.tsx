@@ -56,14 +56,6 @@ const trigger = () =>
   })
 
 describe('LanguageSwitch', () => {
-  /**
-   * Validates: every locale the app bundles is offered, under its own name.
-   * Why it matters: the endonyms are deliberately never translated. A visitor who
-   * landed on Japanese by accident and cannot read Japanese has to be able to
-   * find "English" in this list — a picker written only in the language you are
-   * trying to leave is a trap, not a control, and it is the one screen where that
-   * failure has no workaround.
-   */
   it('lists every locale under its own name', async () => {
     render(<LanguageSwitch />)
     await userEvent.click(trigger())
@@ -73,14 +65,6 @@ describe('LanguageSwitch', () => {
     }
   })
 
-  /**
-   * Validates: the trigger stays narrow — the code, never the endonym.
-   * Why it matters: this control joined a header row that already had a wordmark,
-   * a theme toggle and a demo pill, and the wordmark's `truncate` is the only
-   * slack in it. "Português" on the trigger spends that slack, and past it the
-   * overflow lands on the page as a horizontal scrollbar. The full names live in
-   * the panel, where there is room.
-   */
   it('shows the two-letter code on the trigger, not the endonym', async () => {
     render(<LanguageSwitch />)
 
@@ -88,15 +72,6 @@ describe('LanguageSwitch', () => {
     expect(trigger()).not.toHaveTextContent('English')
   })
 
-  /**
-   * Validates: choosing a language switches the app, persists it, and relabels
-   * the document.
-   * Why it matters: these are three separate mechanisms and only the first is
-   * visible. Without the write the choice is lost on reload; without the `lang`
-   * attribute the page is still announced in the previous language's voice, and
-   * CJK font fallback picks the wrong face — both invisible to anyone reading the
-   * screen in the language they already chose.
-   */
   it('switches, persists, and relabels the document', async () => {
     render(<LanguageSwitch />)
     await userEvent.click(trigger())
@@ -111,15 +86,6 @@ describe('LanguageSwitch', () => {
     expect(trigger()).toHaveTextContent('ES')
   })
 
-  /**
-   * Validates: an option survives the click that selects it.
-   * Why it matters: this is the classic hand-built-listbox bug and the repo has
-   * already been bitten by it once — `TeamSearchCombobox` carries the same
-   * `onMouseDown` guard and the same test. The panel dismisses on an outside
-   * pointerdown, and a click fires pointerdown *first*, so without suppressing
-   * the default the option can unmount before its own click handler runs and the
-   * control silently does nothing on a real mouse.
-   */
   it('does not let the option unmount under the click that selects it', async () => {
     render(<LanguageSwitch />)
     await userEvent.click(trigger())
@@ -132,14 +98,6 @@ describe('LanguageSwitch', () => {
     expect(screen.getByRole('listbox')).toBeInTheDocument()
   })
 
-  /**
-   * Validates: the keyboard model is complete — arrows move, Enter selects,
-   * Escape closes and hands focus back.
-   * Why it matters: the trigger is a `<button>` with `aria-haspopup="listbox"`,
-   * which promises exactly this. Returning focus is the half most often skipped:
-   * without it focus falls to `<body>` and the next Tab restarts from the top of
-   * the page, which on this header means tabbing back through the entire nav.
-   */
   it('moves with the arrows, selects with Enter, and closes with Escape', async () => {
     render(<LanguageSwitch />)
 
@@ -159,12 +117,6 @@ describe('LanguageSwitch', () => {
     expect(trigger()).toHaveFocus()
   })
 
-  /**
-   * Validates: the active locale is marked, not merely current.
-   * Why it matters: the trigger shows a two-letter code, so the open panel is the
-   * only place a visitor can confirm which language they are actually on. Colour
-   * alone would not carry it, and `aria-selected` alone would not be visible.
-   */
   it('marks the active locale in the list', async () => {
     render(<LanguageSwitch />)
     await userEvent.click(trigger())

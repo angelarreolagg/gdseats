@@ -10,27 +10,15 @@ import type {
 const HISTORY_MONTHS = 12
 const FORECAST_MONTHS = 3
 
-/**
- * Below this, a move is noise. A card that announces a ±1% shift teaches the
- * reader to stop believing the ones that matter.
- */
+/** Below this a move is noise; a card announcing ±1% teaches readers to ignore it. */
 export const MATERIAL_MOMENTUM = 0.03
 
 /**
- * Presentation per direction.
+ * Presentation per direction. The tone is INVERTED against the intuitive
+ * reading: green means good for the buyer, so a cooling market is the green one.
+ * Matches `insights.service.ts`, which scores a falling ask as positive.
  *
- * The tone is deliberately INVERTED against the intuitive reading: green means
- * good for the buyer, not "number went up". A cooling market is where seats get
- * cheaper, so it is the green one. This matches `insights.service.ts`, which
- * already scores a falling ask as positive — without the inversion, the same
- * green would mean "good deal" on a listing and "expensive" on a team card.
- *
- * That inversion is a translation hazard as much as a colour one: a Spanish
- * "Enfriándose" reworded into something that reads as bad news would contradict
- * the green it is printed in. It is stated in `locales/TRANSLATORS.md` for
- * exactly that reason.
- *
- * Keys, not phrases, so this file stays free of copy as well as of React.
+ * Keys, not phrases, so this stays free of copy as well as of React.
  */
 const PRESENTATION: Record<TrendDirection, {
   labelKey: string
@@ -58,15 +46,7 @@ const PRESENTATION: Record<TrendDirection, {
   },
 }
 
-/**
- * Month indices rather than the `['Jan', 'Feb', …]` labels this replaced.
- *
- * `MarketTrend.series[].monthIndex` is not currently rendered — the sparkline
- * was removed — but the series is not dead data: `momentum` is derived from it
- * and `getTrendExplanation` counts its projected points to state its own
- * horizon. An index keeps that true and leaves the field translatable if a chart
- * ever comes back, rather than parking an English string nobody looks at.
- */
+/** Indices, not labels: month names are copy and this layer holds none. */
 function monthIndices(count: number, now: Date): number[] {
   const indices: number[] = []
   // Start far enough back that the last actual point is the current month.
@@ -89,23 +69,16 @@ export function getTrendPresentation(direction: TrendDirection) {
 }
 
 /**
- * Where a franchise's market is heading.
- *
- * Seeded on the team id like every other generator here: the sparkline and the
- * percentage printed beside it are two views of one array, so an unseeded walk
- * would let them contradict each other between renders.
- *
- * The series is anchored so the last ACTUAL point lands near `demandIndex × 100`,
- * which keeps this consistent with the inventory size derived from the same field.
+ * Where a franchise's market is heading. Seeded on the team id, or the momentum
+ * and the series would contradict each other between renders. Anchored so the
+ * last actual point lands near `demandIndex × 100`.
  */
 export function getMarketTrend(team: Team, now: Date = new Date()): MarketTrend {
   const random = createRandom(`trend:${team.id}`)
   const anchor = team.demandIndex * 100
 
-  // Monthly drift for this franchise, centred on zero so the catalogue splits
-  // roughly evenly between heating, steady, and cooling rather than skewing one
-  // way. The range is wide enough that the ±3% steady band stays a minority of
-  // the spread — a catalogue where most cards read "Steady" shows nothing.
+  // Centred on zero so the catalogue splits between the three directions rather
+  // than skewing one way, and wide enough that the ±3% band stays a minority.
   const drift = random.float(-0.05, 0.05)
 
   const history: number[] = [anchor]
@@ -115,8 +88,7 @@ export function getMarketTrend(team: Team, now: Date = new Date()): MarketTrend 
     history.unshift(Math.max(4, previous))
   }
 
-  // The forecast continues the trend, damped — a projection that extrapolates a
-  // trend at full strength is how forecasts end up absurd three steps out.
+  // Damped: extrapolating at full strength is how forecasts end up absurd.
   const forecast: number[] = []
   let last = history[history.length - 1]
   for (let index = 0; index < FORECAST_MONTHS; index += 1) {
@@ -131,8 +103,7 @@ export function getMarketTrend(team: Team, now: Date = new Date()): MarketTrend 
     projected: index >= HISTORY_MONTHS,
   }))
 
-  // Measured across the forecast horizon: the card answers "what is about to
-  // happen", not "what already did".
+  // Measured across the forecast: the card answers what is about to happen.
   const lastActual = history[history.length - 1]
   const lastProjected = forecast[forecast.length - 1]
   const momentum = lastActual > 0 ? (lastProjected - lastActual) / lastActual : 0

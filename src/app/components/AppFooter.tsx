@@ -8,11 +8,7 @@ import {
 import { SITE_NAME } from '@/shared/config/site'
 import { showDemoNotice } from '@/shared/utils/demoNotice'
 
-/**
- * The details themselves moved to `shared/config/contact` once the concierge
- * card and the sell CTA started quoting them too — a marketplace that lists
- * itself under two different phone numbers reads as a scam.
- */
+/** Shared with the concierge card and the sell CTA — one owner, one number. */
 const CONTACT = [
   { label: CONTACT_PHONE, href: CONTACT_PHONE_HREF },
   { label: CONTACT_EMAIL, href: CONTACT_EMAIL_HREF },
@@ -20,15 +16,7 @@ const CONTACT = [
 
 const COMPANY_KEYS = ['links.terms', 'links.privacy', 'links.sitemap'] as const
 
-/**
- * Fixed, not `new Date().getFullYear()`.
- *
- * The demo's data is dated 2026 throughout — the generator publishes into that
- * season — so a copyright line that silently rolls forward would be the one
- * thing on the page claiming a different year than everything above it. It is a
- * parameter rather than part of the sentence so no translator has to carry a
- * number they cannot verify.
- */
+/** Fixed: the demo's data is dated 2026 throughout. */
 const COPYRIGHT_YEAR = 2026
 
 function FooterHeading({ children }: { children: string }) {
@@ -36,14 +24,9 @@ function FooterHeading({ children }: { children: string }) {
 }
 
 /**
- * The trust bar. A marketplace asking for five figures needs an address, a
- * phone number and a policy shelf visible before the offer form, so this is
- * chrome that does real conversion work even with invented data behind it.
- *
- * The Company links are `<button>`, not `<a href="#">`. They navigate nowhere —
- * they explain that they can't — and a link that doesn't link lies to a screen
- * reader about what Enter will do. Contact details are genuine `tel:`/`mailto:`
- * anchors because those protocols work without a backend.
+ * The trust bar. Company links are `<button>`, not `<a href="#">` — a link that
+ * does not link lies to a screen reader about what Enter will do. Contact
+ * details are genuine anchors, since `tel:`/`mailto:` work without a backend.
  */
 export function AppFooter() {
   const { t } = useTranslation('footer')
@@ -57,9 +40,7 @@ export function AppFooter() {
             <span className="text-base font-semibold tracking-tight text-ink">{SITE_NAME}</span>
           </div>
           <p className="mt-4 text-sm text-muted">{t('trust')}</p>
-          {/* The address is invented but it is still a street address, and those
-              are not translated — a localised one would name a place that does
-              not exist in a format that does not match the country. */}
+          {/* Street addresses are not translated. */}
           <address className="mt-5 text-sm text-muted not-italic">
             1200 Gridiron Way, Suite 480
             <br />

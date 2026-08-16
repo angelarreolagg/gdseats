@@ -6,17 +6,9 @@ import { Reveal } from '@/shared/components/Reveal'
 import { SELL_EMAIL, TICKETS_EMAIL } from '@/shared/config/contact'
 
 /**
- * The categories, in the order the chips present them.
- *
- * Ordered as a visitor arrives rather than alphabetically: understand what the
- * thing is, then how to get one, then how to get rid of one. The first entry is
- * also the mobile default, so it has to be the one that answers a stranger.
- *
- * These are ids now rather than the words themselves — the labels live in
- * `faq.json` — but the array still owns the order, because the order is an
- * editorial decision and not something a translator should be able to change.
- *
- * A plain union rather than an enum — `erasableSyntaxOnly` is on.
+ * Ids, not labels — the labels live in `faq.json`. The array owns the order,
+ * which is editorial and not a translator's to change. First entry is the
+ * mobile default.
  */
 const FAQ_CATEGORIES = ['basics', 'buying', 'selling'] as const
 
@@ -30,17 +22,11 @@ interface FaqItem {
 }
 
 /**
- * The structure of the FAQ: which questions exist, in what order, in which
- * category, and which of them interpolate an address.
+ * Which questions exist, in what order and category, and which interpolate an
+ * address. One array feeds both the accordion and the `FAQPage` payload.
  *
- * The words moved to `faq.json`; this is what is left, and it is deliberately
- * still one array — the accordion and the `FAQPage` payload are both built from
- * it, which is the entire reason the JSON-LD is derived rather than written out.
- *
- * The email addresses are passed as values rather than living in the copy, so a
- * translator cannot accidentally alter an inbox that has to match
- * `shared/config/contact.ts`. `linkifyEmails` then turns them into anchors at
- * render, which is what lets `answer` stay a plain string for schema.org.
+ * Emails are values, not copy, so a translator cannot alter an inbox that has
+ * to match `shared/config/contact.ts`.
  */
 const FAQ_STRUCTURE: Array<{
   id: string
@@ -62,30 +48,18 @@ const FAQ_STRUCTURE: Array<{
 ]
 
 /**
- * Splits on an email address, capturing it, so `String.split` returns the parts
- * alternating: even indices are plain text, odd indices are the addresses.
- *
- * The trailing group is `(?:\.[\w-]+)+` rather than anything ending in `[\w.]+`
- * on purpose. One answer ends "…email us at tickets@gdseats.com." and a
- * character class that admits dots swallows the full stop into the address,
- * producing a `mailto:` that bounces. Requiring word characters after every dot
- * stops the match at `.com` and leaves the sentence its punctuation.
+ * Splits on an email, capturing it: even indices are text, odd are addresses.
+ * The trailing group is `(?:\.[\w-]+)+` so a sentence-final "…com." does not
+ * swallow the full stop into a `mailto:` that bounces.
  */
 const EMAIL_SPLIT = /([\w.+-]+@[\w-]+(?:\.[\w-]+)+)/g
 
 /**
- * Turns the email addresses inside an answer into real `mailto:` anchors.
+ * Emails to `mailto:` anchors at render, which is what lets `answer` stay a
+ * plain string for the schema.org payload.
  *
- * **This exists so `answer` can stay a plain string.** The same array feeds the
- * accordion and the `FAQPage` structured data, and schema.org wants text, not
- * markup — so the answers cannot become `ReactNode`s without either breaking the
- * payload or duplicating every answer into a second, drifting copy. Linkifying
- * at render time keeps one source and gives the UI the anchors anyway.
- *
- * Alternating `split` output rather than a `.test()` loop: `EMAIL_SPLIT` carries
- * the `g` flag, and `RegExp.test` on a global regex advances `lastIndex` between
- * calls, so the same string would match and then not match. Indexing by parity
- * has no state to get wrong.
+ * Index parity rather than `.test()`: `EMAIL_SPLIT` is global, and `RegExp.test`
+ * advances `lastIndex` between calls.
  */
 function linkifyEmails(answer: string) {
   return answer.split(EMAIL_SPLIT).map((part, index) =>
@@ -106,19 +80,10 @@ function linkifyEmails(answer: string) {
 }
 
 /**
- * One row of the accordion.
- *
- * The panel is **always mounted** and animates its height, rather than being
- * conditionally rendered inside `AnimatePresence`. Two reasons, and both matter:
- * `AnimatePresence`'s exit callback does not fire in jsdom (the hazard already
- * documented on `AIInsightPanel`), and a mounted panel keeps the answers in the
- * document for in-page search and for anything reading the page without running
- * the open handler.
- *
- * `inert` is what makes that safe. A collapsed panel is clipped to zero height
- * but its text is still laid out inside, so without `inert` a keyboard user
- * would tab into invisible content and a screen reader would read answers to
- * questions nobody expanded. React 19 reflects it as a real attribute.
+ * The panel is always mounted and clipped to zero height, not unmounted —
+ * `AnimatePresence`'s exit callback does not fire in jsdom, and a mounted panel
+ * stays reachable by find-in-page. `inert` is what keeps the collapsed text out
+ * of the tab order and the accessibility tree.
  */
 function FaqRow({
   item,
@@ -152,10 +117,8 @@ function FaqRow({
           : 'border-border-hairline hover:border-accent-ink/40'
       }`}
     >
-      {/* The heading wraps the button rather than sitting beside it, so the
-          question is one node in the document outline and one stop for a screen
-          reader's heading navigation — not a heading and a separate control
-          saying the same words. */}
+      {/* The heading wraps the button so the question is one node in the outline,
+          not a heading plus a control saying the same words. */}
       <h3>
         <button
           type="button"
@@ -196,50 +159,18 @@ function FaqRow({
 }
 
 /**
- * The FAQ band: a sticky heading on the left, the accordion on the right.
+ * The FAQ band. One row open at a time — state is the open id, not a set.
  *
- * **One row open at a time.** State is the open row's id rather than a set, so
- * the constraint is structural instead of enforced. Eight expanded answers would
- * run past three screens and bury the footer; keeping the column short is what
- * makes the section scannable rather than a wall to scroll through.
- *
- * The heading sticks at `top-24` to clear the sticky `AppHeader` above it, and
- * only from `lg` — below that it sits above the list in normal flow, because a
- * sticky element in a single column just eats the viewport.
- *
- * **Below `sm` the list is filtered to one category; from `sm` up it is the full
- * eight, exactly as before.** Eight rows plus eight answers is a long scroll on a
- * phone, where the same list on a desktop column is barely a screen — so the
- * filter earns its place on one and would be clutter on the other.
- *
- * **The split is CSS, not a JS breakpoint**, which matters architecturally:
- * `useMediaQuery` is a last resort here and the app has exactly one such
- * breakpoint (the listing overlay's aside, which needs one because two copies of
- * a form would collide on `id`). Nothing collides here. Every row stays mounted
- * and non-matching ones take `hidden sm:list-item`, so the desktop DOM is
- * unchanged, find-in-page still reaches every answer, and the structured data
- * below keeps describing all eight questions no matter what is on screen.
- *
- * The accordion is hand-rolled. The only Radix package here is the tooltip, and
- * the combobox, dialog, sheet and switch are all hand-built for the same
- * reason — a disclosure is a button, an `aria-expanded` and an `aria-controls`,
- * which is not worth a dependency.
+ * Below `sm` the list filters to one category; from `sm` up all eight show. The
+ * split is CSS (`hidden sm:list-item`), not a JS breakpoint, so every row stays
+ * mounted and the structured data still describes all eight.
  */
 export function FaqSection() {
   const { t } = useTranslation('faq')
   const [openId, setOpenId] = useState<string | null>(null)
   const [category, setCategory] = useState<FaqCategory>(FAQ_CATEGORIES[0])
 
-  /**
-   * The resolved items — still one array, still feeding both the accordion and
-   * the structured data, now in whatever language is active.
-   *
-   * That the payload follows the locale is the point rather than a side effect:
-   * publishing English `FAQPage` data over a Spanish page would be structured
-   * data that misquotes what a visitor can see, which is exactly what rich-result
-   * penalties are for. `FaqSection.test.tsx` asserts the structured questions
-   * equal the rendered button labels, under `en` and under `es`.
-   */
+  /** Resolved items — one array, feeding both the accordion and the JSON-LD. */
   const items: FaqItem[] = useMemo(
     () =>
       FAQ_STRUCTURE.map((entry) => ({
@@ -269,19 +200,9 @@ export function FaqSection() {
         </Reveal>
 
         <Reveal>
-          {/*
-           * Phone-only, via `sm:hidden` rather than a render branch.
-           *
-           * `display: none` removes these from the tab order and the
-           * accessibility tree completely, so a desktop visitor cannot reach an
-           * inert control — which is the only thing that would have justified
-           * paying for a second `useMediaQuery` breakpoint. Desktop therefore
-           * renders exactly what it rendered before: no chips, all eight rows.
-           *
-           * `aria-pressed` on plain buttons inside a labelled `role="group"`,
-           * matching `LeagueSwitch`. These are toggles, not tabs — a tablist
-           * would promise arrow-key navigation between panels that do not exist.
-           */}
+          {/* Phone-only via `sm:hidden`, so desktop cannot reach an inert control and no
+              second `useMediaQuery` breakpoint is needed. `aria-pressed` toggles, not
+              tabs — a tablist would promise arrow-key navigation between panels. */}
           <div
             role="group"
             aria-label={t('filterLabel')}
@@ -329,21 +250,10 @@ export function FaqSection() {
 }
 
 /**
- * `FAQPage` structured data, built from the same array the accordion renders.
- *
- * **This departs from how the rest of the SEO strings are handled, on purpose.**
- * `site.ts` and `index.html` state the title and description twice because a
- * scraper reads static markup and static HTML cannot import TypeScript, and
- * `site.config.test.ts` keeps the copies honest. That trade is worth it for
- * three short strings. It is not worth it for eight paragraph-length answers:
- * the duplication would be the largest block of copy in the repo, and the
- * failure mode — an answer edited in the UI and not in the markup, publishing
- * structured data that misquotes the page — is exactly what rich-result
- * penalties are for. Deriving both from one array makes that impossible.
- *
- * The cost is that the payload only exists after React renders. Google executes
- * JavaScript, so it is indexed; a crawler that does not will miss it and read
- * the page's visible text instead, which is the same content.
+ * `FAQPage` data derived from the same array the accordion renders, rather than
+ * duplicated into `index.html` the way the title and description are: eight
+ * paragraph-length answers would be the largest copy block in the repo, and a
+ * stale copy publishes structured data that misquotes the page.
  */
 function FaqStructuredData({ items }: { items: FaqItem[] }) {
   const { i18n } = useTranslation()
