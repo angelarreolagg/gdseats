@@ -8,6 +8,7 @@ import { generateListingsForTeam } from '@/domains/listing/services/listingGener
 import { useDocumentMeta } from '@/shared/hooks/useDocumentMeta'
 import { AppFooter } from './components/AppFooter'
 import { AppHeader } from './components/AppHeader'
+import { LandingSections } from './components/landing/LandingSections'
 import { getDocumentMeta } from './documentMeta'
 import { useAppNavigation } from './useAppNavigation'
 
@@ -38,7 +39,13 @@ export function App() {
       <AppHeader onHome={nav.backToTeams} />
 
       {nav.screen.name === 'teams' || !team ? (
-        <TeamsScreen onSelectTeam={nav.openTeam} />
+        // The landing sections sit INSIDE this branch, not beside the pair. A
+        // visitor deep in one franchise's listings is past being sold to, and
+        // an FAQ under the results would push the pagination off the page.
+        <>
+          <TeamsScreen onSelectTeam={nav.openTeam} />
+          <LandingSections />
+        </>
       ) : (
         <SearchScreen team={team} listings={listings} onOpenListing={nav.openListing} />
       )}

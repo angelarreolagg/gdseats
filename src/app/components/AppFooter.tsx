@@ -1,9 +1,19 @@
+import {
+  CONTACT_EMAIL,
+  CONTACT_EMAIL_HREF,
+  CONTACT_PHONE,
+  CONTACT_PHONE_HREF,
+} from '@/shared/config/contact'
 import { showDemoNotice } from '@/shared/utils/demoNotice'
 
-/** Invented, like every figure in this demo — no real number to misdial. */
+/**
+ * The details themselves moved to `shared/config/contact` once the concierge
+ * card and the sell CTA started quoting them too — a marketplace that lists
+ * itself under two different phone numbers reads as a scam.
+ */
 const CONTACT = [
-  { label: '+1 (512) 555-0142', href: 'tel:+15125550142' },
-  { label: 'help@gdseats.com', href: 'mailto:help@gdseats.com' },
+  { label: CONTACT_PHONE, href: CONTACT_PHONE_HREF },
+  { label: CONTACT_EMAIL, href: CONTACT_EMAIL_HREF },
 ]
 
 const COMPANY = ['Terms of service', 'Privacy policy', 'Sitemap']
