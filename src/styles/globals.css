@@ -231,28 +231,25 @@
 }
 
 /*
- * Two-tone hero wordmark.
+ * `.hero-wordmark` USED TO LIVE HERE, AND ITS ABSENCE IS THE POINT.
  *
- * StrokeText paints one `strokeColor` and one `fillColor` for the whole string,
- * so the split is made from outside: it renders one <tspan> per character, in
- * order, in both the stroke copy and the fill copy. The first N take the lead
- * colour; everything after keeps the accent the component was given.
+ * It made the two-tone headline by retinting the first ten `<tspan>`s
+ * (`:nth-child(-n + 10)`), because StrokeText paints one colour per string. That
+ * worked only while the copy was one fixed English phrase — CSS cannot read the
+ * copy, so the count was hard-coded to "SOME SEATS", and a rewritten headline
+ * cut the tint mid-word with nothing to complain about.
  *
- * The tspans inherit `stroke`/`fill` from their <text> as presentation
- * attributes, and a CSS declaration outranks an inherited attribute — so this
- * wins without `!important` and without touching the vendored component.
+ * Translating the wordmark is exactly that rewrite, in three languages at once.
+ * `TeamsHero` now applies the tint in a layout effect keyed on the length of the
+ * lead string, so it follows the copy in any language. `--psl-wordmark-lead` is
+ * read from the component instead of from here.
  *
- * THE COUNT IS TIED TO THE COPY: 10 is "SOME SEATS" in "SOME SEATS MEAN MORE".
- * Rewrite the headline and this number moves with it — TeamsHero.test.tsx fails
- * loudly if the two drift apart.
+ * **The tidier-looking alternative is a trap.** Rendering the lead and the tail
+ * as two `StrokeText`s makes the tint a prop and needs no DOM work at all — and
+ * gives each half its own GSAP timeline, both starting at zero, so the headline
+ * draws as two texts sweeping side by side instead of one. That shipped once.
+ * Don't reintroduce a glyph-count rule here either.
  */
-.hero-wordmark [data-stroke-char]:nth-child(-n + 10) {
-  stroke: var(--psl-wordmark-lead);
-}
-
-.hero-wordmark [data-fill-char]:nth-child(-n + 10) {
-  fill: var(--psl-wordmark-lead);
-}
 
 /*
  * The drawn wordmark's fill starts hidden, and GSAP is what reveals it.
@@ -266,7 +263,7 @@
  * GSAP writes `opacity` inline on every tspan the moment it arms the timeline —
  * 1 for the wipe, and 1 again on the reduced-motion end state — and an inline
  * style outranks this rule. So this covers the frames before that and nothing
- * after. It has to sit on both wordmark branches, unlike the tint above.
+ * after. It sits on the `<h1>` and therefore covers both wordmark layouts.
  */
 .wordmark-draw [data-fill-char] {
   opacity: 0;

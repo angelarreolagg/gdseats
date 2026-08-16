@@ -1,4 +1,4 @@
-import { render, screen, setViewport } from '@/test/utils'
+import { render, screen, setLocale, setViewport } from '@/test/utils'
 import { describe, expect, it } from 'vitest'
 import { TeamsHero } from '../components/TeamsHero'
 
@@ -105,26 +105,68 @@ describe('TeamsHero', () => {
   })
 
   /**
-   * Validates: the first 10 glyphs really are "SOME SEATS".
-   * Why it matters: the two-tone wordmark is split by character index in
-   * `globals.css` (`:nth-child(-n + 10)`), because StrokeText paints one colour
-   * per string. CSS cannot read the copy, so rewriting the headline without
-   * moving that number would cut the tint mid-word — and nothing else would
-   * complain. This is the only thing holding the two together.
+   * Validates: the wide headline is ONE StrokeText drawing the whole phrase.
+   * Why it matters: one component is one GSAP timeline, and that is the only
+   * thing making the draw read as a single left-to-right sweep. Splitting the
+   * phrase into two components makes the two-tone trivial and animates the halves
+   * simultaneously — which looks correct in a screenshot and reads as two
+   * separate texts in motion. That regression shipped once; this is what stops it
+   * coming back the next time someone wants the tint to be simpler.
    */
-  it('keeps the tinted half aligned with the copy', () => {
+  it('draws the wide headline as a single component', () => {
     const { container } = render(<TeamsHero />)
 
-    const glyphs = Array.from(container.querySelectorAll('[data-stroke-char]'))
-    expect(glyphs.map((glyph) => glyph.textContent).join('')).toBe('SOME SEATS MEAN MORE')
+    const drawn = container.querySelectorAll('h1 [role="img"]')
+    expect(drawn).toHaveLength(1)
+    expect(drawn[0]).toHaveAttribute('aria-label', 'SOME SEATS MEAN MORE')
+  })
+
+  /**
+   * Validates: the two-tone split follows the copy, not a hard-coded count.
+   * Why it matters: this replaced `:nth-child(-n + 10)` in `globals.css`, a count
+   * tied to "SOME SEATS" that CSS could not derive and that a rewritten headline
+   * cut mid-word. The headline is translated now, so that rule would be wrong in
+   * three languages at once. The tint is applied from `lead.length` instead —
+   * imperatively, because the alternative that avoids the DOM is the two-component
+   * split that breaks the animation.
+   */
+  it('tints exactly the lead glyphs, in whatever language', () => {
+    const { container } = render(<TeamsHero />)
+
+    const strokes = Array.from(container.querySelectorAll<SVGTSpanElement>('[data-stroke-char]'))
+    expect(strokes.map((glyph) => glyph.textContent).join('')).toBe('SOME SEATS MEAN MORE')
+
+    const tinted = strokes.filter((glyph) => glyph.style.stroke !== '')
+    expect(tinted.map((glyph) => glyph.textContent).join('')).toBe('SOME SEATS')
+
+    // And the fill copy of the same glyphs, or the wipe would reveal one colour
+    // over a stroke drawn in another.
+    const fills = Array.from(container.querySelectorAll<SVGTSpanElement>('[data-fill-char]'))
     expect(
-      glyphs
-        .slice(0, 10)
+      fills
+        .filter((glyph) => glyph.style.fill !== '')
         .map((glyph) => glyph.textContent)
         .join(''),
     ).toBe('SOME SEATS')
+  })
 
-    expect(container.querySelector('h1')).toHaveClass('hero-wordmark')
+  /**
+   * Validates: the tint count moves with the copy.
+   * Why it matters: this is the whole reason the CSS rule had to go. A count that
+   * does not follow the language paints part of the second clause in the lead
+   * colour, or leaves part of the first on the accent — a headline that looks
+   * subtly wrong in exactly the locales nobody re-reads.
+   */
+  it('moves the tint boundary with the language', () => {
+    setLocale('ja')
+    const { container } = render(<TeamsHero />)
+
+    const tinted = Array.from(container.querySelectorAll<SVGTSpanElement>('[data-stroke-char]'))
+      .filter((glyph) => glyph.style.stroke !== '')
+      .map((glyph) => glyph.textContent)
+      .join('')
+
+    expect(tinted).toBe('その席には')
   })
 
   /**
@@ -153,21 +195,46 @@ describe('TeamsHero', () => {
   })
 
   /**
-   * Validates: the two-line branch does NOT rely on the `nth-child(-n + 10)`
-   * tint, and the one-line branch still does.
-   * Why it matters: the CSS split counts glyphs, and the count is hard-coded to
-   * the current copy. Carrying that coupling onto a layout that does not need it
-   * would double the number of places a rewritten headline can silently cut the
-   * tint mid-word. Each narrow line paints its own colour from its own component.
+   * Validates: the wordmark is translated, and the `<h1>` announces the whole
+   * translated phrase.
+   * Why it matters: the headline is SVG glyph outlines, so the accessible name is
+   * the only thing a screen reader gets — and it is assembled from the two halves
+   * here rather than left to their concatenation. That matters most in Japanese,
+   * which writes no space between the halves: without an explicit separator the
+   * page's only `<h1>` would announce the two clauses run together.
    */
-  it('drops the glyph-count tint on the split layout', () => {
-    setViewport('mobile')
-    const { container: narrow } = render(<TeamsHero />)
-    expect(narrow.querySelector('h1')).not.toHaveClass('hero-wordmark')
+  it('translates the wordmark and names the whole phrase', () => {
+    setLocale('ja')
+    const { container } = render(<TeamsHero />)
 
-    setViewport('desktop')
-    const { container: wide } = render(<TeamsHero />)
-    expect(wide.querySelector('h1')).toHaveClass('hero-wordmark')
+    expect(
+      screen.getByRole('heading', { level: 1, name: 'その席には 意味がある' }),
+    ).toBeInTheDocument()
+
+    // The separator is explicit: Japanese writes no space between the two
+    // clauses, so a name built by concatenating children would run them together.
+    const glyphs = Array.from(container.querySelectorAll('[data-stroke-char]'))
+      .map((glyph) => glyph.textContent)
+      .join('')
+    expect(glyphs).toBe('その席には 意味がある')
+  })
+
+  /**
+   * Validates: the wordmark's font stack can actually draw the copy it is given.
+   * Why it matters: `StrokeText` strokes glyph outlines, so the face matters more
+   * here than anywhere else in the app — the Latin stack was chosen because SF
+   * Pro's overlapping contours render as loose slivers when stroked. None of
+   * Helvetica/Arial has CJK coverage, so translating the headline without
+   * extending the stack would hand Japanese to whatever the browser picked, with
+   * no one having looked at it. Fallback is per glyph, so the Latin locales are
+   * untouched by the additions.
+   */
+  it('carries CJK coverage in the wordmark font stack', () => {
+    const { container } = render(<TeamsHero />)
+
+    const font = (container.querySelector('h1 [role="img"]') as HTMLElement).style.fontFamily
+    expect(font).toMatch(/Helvetica/)
+    expect(font).toMatch(/Hiragino Sans|Yu Gothic|Noto Sans JP/)
   })
 
   /**
@@ -177,8 +244,8 @@ describe('TeamsHero', () => {
    * hides it with a clipPath that does not exist until getBBox() resolves — and
    * TeamsHero paints the stroke in the same colour as the fill. Without this
    * class the headline lands solid and the whole draw is invisible, which is the
-   * bug this fixed. It is easy to lose because the tint above it is deliberately
-   * one-branch-only, so the two look like they should match and do not.
+   * bug this fixed. It now sits on the `<h1>` and covers both layouts, where the
+   * two-tone tint it used to sit beside has become a prop on each half.
    */
   it('gates the wordmark fill on the draw at both widths', () => {
     setViewport('mobile')
