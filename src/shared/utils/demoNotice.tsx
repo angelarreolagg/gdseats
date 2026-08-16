@@ -1,4 +1,6 @@
+import { Trans } from 'react-i18next'
 import { toast } from 'react-toastify'
+import i18n from '@/shared/i18n'
 
 const LINKEDIN_URL = 'https://www.linkedin.com/in/angelarreola'
 
@@ -16,9 +18,15 @@ const LINKEDIN_URL = 'https://www.linkedin.com/in/angelarreola'
  * This file is `.tsx` because the offer notice carries a link. That is a UI
  * concern, not the React-free rule domain services live under — those emit icon
  * names so the component layer can resolve them; this *is* the component layer.
+ *
+ * It reaches the i18n singleton directly rather than through `useTranslation`,
+ * because a toast is fired from an event handler and there is no component here
+ * to hold a hook. This is the escape hatch i18next's plain-JS core was chosen
+ * for — and the reason it stays legitimate is that this is UI, not a domain
+ * service. The §6 keys-not-sentences rule is about the layers underneath.
  */
 export function showDemoNotice() {
-  toast.info('Not available — this is a demo.', { toastId: 'demo-only' })
+  toast.info(i18n.t('common:demo.notAvailable'), { toastId: 'demo-only' })
 }
 
 /**
@@ -37,7 +45,13 @@ export function showDemoNotice() {
 export function showOfferNotice() {
   toast.info(
     <span>
-      This is a demo — but <strong className="font-semibold">we can make it true</strong>.
+      {/* `<Trans>` rather than two `t()` calls around the `<strong>`: the
+          emphasis falls on different words in different languages, and splitting
+          the sentence would force every translator to keep our clause order. */}
+      <Trans
+        i18nKey="common:demo.offerInvitation"
+        components={{ strong: <strong className="font-semibold" /> }}
+      />
       <br />
       <a
         href={LINKEDIN_URL}

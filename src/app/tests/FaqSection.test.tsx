@@ -1,5 +1,5 @@
 import userEvent from '@testing-library/user-event'
-import { render, screen, within } from '@/test/utils'
+import { render, screen, setLocale, within } from '@/test/utils'
 import { describe, expect, it } from 'vitest'
 import { FaqSection } from '../components/landing/FaqSection'
 
@@ -298,5 +298,36 @@ describe('FaqSection', () => {
       .map((button) => button.textContent?.trim())
 
     expect(structured).toEqual(rendered)
+  })
+
+  /**
+   * Validates: the derivation actually follows the locale.
+   * Why it matters: "one array feeds both" became a much stronger claim once the
+   * answers came from `t()` — and a much easier one to break, because a payload
+   * built from anything but the same resolved array would still look perfect in
+   * English and only diverge in the three languages nobody re-reads. Publishing
+   * English `FAQPage` data over a Spanish page is structured data that misquotes
+   * the page, which is precisely what rich-result penalties are for.
+   *
+   * One non-English run is enough: the mechanism is the same for all three.
+   */
+  it('keeps the structured data in the language the page renders', () => {
+    setLocale('es')
+    const { container } = render(<FaqSection />)
+
+    const script = container.querySelector('script[type="application/ld+json"]')
+    const payload = JSON.parse(script?.textContent ?? '{}')
+
+    expect(payload.inLanguage).toBe('es')
+
+    const structured = payload.mainEntity.map((entry: { name: string }) => entry.name)
+    const rendered = within(accordion())
+      .getAllByRole('button')
+      .map((button) => button.textContent?.trim())
+
+    expect(structured).toEqual(rendered)
+    // Not merely equal to each other — actually Spanish, so a bundle that
+    // silently fell back to `en` on both sides cannot pass this.
+    expect(structured[0]).toMatch(/licencia de asiento personal/i)
   })
 })

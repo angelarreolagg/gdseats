@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
-import { DEFAULT_DESCRIPTION, DEFAULT_TITLE } from '@/shared/config/site'
+import { useTranslation } from 'react-i18next'
+import { intlLocaleFor, isLocale } from '@/shared/i18n/locales'
 
 export type DocumentMeta = {
   title: string
@@ -41,19 +42,42 @@ function setMetaContent(selector: string, content: string) {
  * The cleanup restores the defaults. In the app that only fires when the whole
  * tree unmounts; its real job is keeping one test from leaking a title into the
  * next.
+ *
+ * **It still takes plain strings and still knows nothing about seats** — the
+ * caller resolves the copy. What it gained is the *defaults*: it restores the
+ * translated ones rather than `site.ts`'s English constants, so a visitor
+ * reading in Spanish who navigates home does not watch the tab flip to English.
+ * Under `en` those two are the same string by construction, and
+ * `site.config.test.ts` is what keeps them that way.
+ *
+ * `og:locale` is updated alongside the rest so the live DOM does not advertise
+ * `en_US` over a Japanese page. It reaches nobody who matters — a scraper never
+ * runs this — but a page that contradicts itself under inspection is a page
+ * nobody trusts.
  */
 export function useDocumentMeta({ title, description }: DocumentMeta) {
+  const { t, i18n } = useTranslation('meta')
+
   useEffect(() => {
     document.title = title
     setMetaContent('meta[name="description"]', description)
     setMetaContent('meta[property="og:title"]', title)
     setMetaContent('meta[property="og:description"]', description)
+    setMetaContent(
+      'meta[property="og:locale"]',
+      // Open Graph wants `xx_YY`, not a BCP 47 tag.
+      (isLocale(i18n.language) ? intlLocaleFor(i18n.language) : 'en-US').replace('-', '_'),
+    )
 
     return () => {
-      document.title = DEFAULT_TITLE
-      setMetaContent('meta[name="description"]', DEFAULT_DESCRIPTION)
-      setMetaContent('meta[property="og:title"]', DEFAULT_TITLE)
-      setMetaContent('meta[property="og:description"]', DEFAULT_DESCRIPTION)
+      document.title = t('default.title')
+      setMetaContent('meta[name="description"]', t('default.description'))
+      setMetaContent('meta[property="og:title"]', t('default.title'))
+      setMetaContent('meta[property="og:description"]', t('default.description'))
     }
-  }, [title, description])
+    // `i18n.language` is in the list on purpose: the copy above is already
+    // resolved by the caller, but the cleanup and `og:locale` read the live
+    // language, so a switch has to re-run this rather than leave the previous
+    // one's defaults armed.
+  }, [title, description, t, i18n.language])
 }

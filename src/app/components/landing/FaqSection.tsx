@@ -1,6 +1,7 @@
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { motion } from "motion/react";
+import { useTranslation } from "react-i18next";
 import { Reveal } from "@/shared/components/Reveal";
 import { SELL_EMAIL, TICKETS_EMAIL } from "@/shared/config/contact";
 
@@ -11,9 +12,13 @@ import { SELL_EMAIL, TICKETS_EMAIL } from "@/shared/config/contact";
  * thing is, then how to get one, then how to get rid of one. The first entry is
  * also the mobile default, so it has to be the one that answers a stranger.
  *
+ * These are ids now rather than the words themselves — the labels live in
+ * `faq.json` — but the array still owns the order, because the order is an
+ * editorial decision and not something a translator should be able to change.
+ *
  * A plain union rather than an enum — `erasableSyntaxOnly` is on.
  */
-const FAQ_CATEGORIES = ["Basics", "Buying", "Selling"] as const;
+const FAQ_CATEGORIES = ["basics", "buying", "selling"] as const;
 
 type FaqCategory = (typeof FAQ_CATEGORIES)[number];
 
@@ -25,67 +30,34 @@ interface FaqItem {
 }
 
 /**
- * The single source for both the accordion and the structured data below it.
+ * The structure of the FAQ: which questions exist, in what order, in which
+ * category, and which of them interpolate an address.
  *
- * Anything added here appears in the UI and in the `FAQPage` payload at once —
- * which is the entire reason the JSON-LD is derived rather than written out.
+ * The words moved to `faq.json`; this is what is left, and it is deliberately
+ * still one array — the accordion and the `FAQPage` payload are both built from
+ * it, which is the entire reason the JSON-LD is derived rather than written out.
+ *
+ * The email addresses are passed as values rather than living in the copy, so a
+ * translator cannot accidentally alter an inbox that has to match
+ * `shared/config/contact.ts`. `linkifyEmails` then turns them into anchors at
+ * render, which is what lets `answer` stay a plain string for schema.org.
  */
-const FAQ_ITEMS: FaqItem[] = [
+const FAQ_STRUCTURE: Array<{
+  id: string;
+  category: FaqCategory;
+  values?: Record<string, string>;
+}> = [
+  { id: "whatIsAPsl", category: "basics" },
+  { id: "howItWorks", category: "basics" },
+  { id: "isItSafe", category: "basics" },
+  { id: "howToBuy", category: "buying" },
+  { id: "howToSell", category: "selling", values: { sellEmail: SELL_EMAIL } },
+  { id: "worth", category: "selling" },
+  { id: "transfer", category: "selling" },
   {
-    id: "what-is-a-psl",
-    category: "Basics",
-    question: "What is a Personal Seat License (PSL)?",
-    answer:
-      "A Personal Seat License (PSL) is a paid license that gives the holder the right to buy season tickets for a specific seat in a stadium. PSLs are typically issued when a new stadium is built or renovated, and they can be transferred or resold.",
-  },
-  {
-    id: "how-it-works",
-    category: "Basics",
-    question: "How does G&D Seats work?",
-    answer:
-      "G&D Seats is a platform that connects buyers and sellers of Personal Seat Licenses (PSLs) for NFL teams. We handle the entire transaction process and paperwork with the teams, while protecting both the buyer and seller.",
-  },
-  {
-    id: "is-it-safe",
-    category: "Basics",
-    question: "Is G&D Seats safe?",
-    answer:
-      "Yes, G&D Seats is a safe and secure platform. We protect both the buyer and seller through our escrow service. We verify the authenticity of the PSL, the seat location, and the identity of the parties involved. All transactions are fully refundable if for any reason the transaction does not go through.",
-  },
-  {
-    id: "how-to-buy",
-    category: "Buying",
-    question: "How do I buy a seat license?",
-    answer:
-      "Browse available listings by selecting your team, compare prices and seat locations, and make an offer directly through our platform. Then our team will guide you to complete the transaction in a fast and secure way.",
-  },
-  {
-    id: "how-to-sell",
-    category: "Selling",
-    question: "How do I sell my seat license?",
-    answer:
-      `Email us at ${SELL_EMAIL} and we will guide you through the process.`,
-  },
-  {
-    id: "worth",
-    category: "Selling",
-    question: "How much is my PSL worth?",
-    answer:
-      "PSL values vary based on the team, stadium, seat location, and current market demand. G&D Seats provides insights to help you find the right price for your license.",
-  },
-  {
-    id: "transfer",
-    category: "Selling",
-    question: "Can I transfer my PSL to someone else?",
-    answer:
-      "Yes, PSLs are transferable. However, there is a specific transfer process that depends on the team and stadium policies. G&D Seats is here to make the process simple and transparent for you.",
-  },
-  {
-    id: "season-tickets",
-    category: "Buying",
-    question: "Do I still need to buy season tickets after purchasing a PSL?",
-    answer:
-      `Yes. A PSL gives you the right to purchase season tickets for that seat each year, but the season tickets themselves are a separate cost and you are required to buy them to keep your license. We can also help you buy your season tickets so you don't have to spend more money out of pocket, email us at ${TICKETS_EMAIL}.`,
+    id: "seasonTickets",
+    category: "buying",
+    values: { ticketsEmail: TICKETS_EMAIL },
   },
 ];
 
@@ -254,8 +226,30 @@ function FaqRow({
  * which is not worth a dependency.
  */
 export function FaqSection() {
+  const { t } = useTranslation("faq");
   const [openId, setOpenId] = useState<string | null>(null);
   const [category, setCategory] = useState<FaqCategory>(FAQ_CATEGORIES[0]);
+
+  /**
+   * The resolved items — still one array, still feeding both the accordion and
+   * the structured data, now in whatever language is active.
+   *
+   * That the payload follows the locale is the point rather than a side effect:
+   * publishing English `FAQPage` data over a Spanish page would be structured
+   * data that misquotes what a visitor can see, which is exactly what rich-result
+   * penalties are for. `FaqSection.test.tsx` asserts the structured questions
+   * equal the rendered button labels, under `en` and under `es`.
+   */
+  const items: FaqItem[] = useMemo(
+    () =>
+      FAQ_STRUCTURE.map((entry) => ({
+        id: entry.id,
+        category: entry.category,
+        question: t(`items.${entry.id}.question`),
+        answer: t(`items.${entry.id}.answer`, entry.values ?? {}),
+      })),
+    [t],
+  );
 
   /** Switching category collapses whatever was open. The point of the filter is
    *  a short list, and arriving at a new one already a screen tall defeats it. */
@@ -269,12 +263,9 @@ export function FaqSection() {
       <div className="grid gap-8 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-16">
         <Reveal className="lg:sticky lg:top-24 lg:self-start">
           <h2 className="text-2xl font-semibold tracking-tight text-balance text-ink sm:text-3xl">
-            Frequently Asked Questions
+            {t("heading")}
           </h2>
-          <p className="mt-3 text-sm text-pretty text-muted">
-            Everything you need to know about buying and selling Personal Seat
-            Licenses in G&amp;D Seats.
-          </p>
+          <p className="mt-3 text-sm text-pretty text-muted">{t("subheading")}</p>
         </Reveal>
 
         <Reveal>
@@ -293,7 +284,7 @@ export function FaqSection() {
            */}
           <div
             role="group"
-            aria-label="Filter questions by category"
+            aria-label={t("filterLabel")}
             className="mb-4 flex flex-wrap gap-2 sm:hidden"
           >
             {FAQ_CATEGORIES.map((option) => {
@@ -310,14 +301,14 @@ export function FaqSection() {
                       : "bg-surface text-muted ring-1 ring-border-hairline"
                   }`}
                 >
-                  {option}
+                  {t(`categories.${option}`)}
                 </button>
               );
             })}
           </div>
 
           <ul className="space-y-3">
-            {FAQ_ITEMS.map((item) => (
+            {items.map((item) => (
               <FaqRow
                 key={item.id}
                 item={item}
@@ -332,7 +323,7 @@ export function FaqSection() {
         </Reveal>
       </div>
 
-      <FaqStructuredData />
+      <FaqStructuredData items={items} />
     </section>
   );
 }
@@ -354,11 +345,17 @@ export function FaqSection() {
  * JavaScript, so it is indexed; a crawler that does not will miss it and read
  * the page's visible text instead, which is the same content.
  */
-function FaqStructuredData() {
+function FaqStructuredData({ items }: { items: FaqItem[] }) {
+  const { i18n } = useTranslation();
+
   const payload = {
     "@context": "https://schema.org",
     "@type": "FAQPage",
-    mainEntity: FAQ_ITEMS.map((item) => ({
+    // Declared, because the answers below are translated and a crawler reading
+    // Spanish prose labelled `en-US` is worse than no label at all. The `@graph`
+    // in index.html keeps `en-US`: that markup is static and never translated.
+    inLanguage: i18n.language,
+    mainEntity: items.map((item) => ({
       "@type": "Question",
       name: item.question,
       acceptedAnswer: { "@type": "Answer", text: item.answer },
@@ -368,8 +365,8 @@ function FaqStructuredData() {
   return (
     <script
       type="application/ld+json"
-      // The payload is built from a module constant, not from anything a user
-      // can reach — there is no injection surface here.
+      // The payload is built from module constants and bundled locale files, not
+      // from anything a user can reach — there is no injection surface here.
       dangerouslySetInnerHTML={{ __html: JSON.stringify(payload) }}
     />
   );

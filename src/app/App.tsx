@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { AnimatePresence } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { getTeamById } from '@/domains/teams/data/teams'
 import { TeamsScreen } from '@/domains/teams/components/TeamsScreen'
 import { SearchScreen } from '@/domains/search/components/SearchScreen'
@@ -13,6 +14,11 @@ import { getDocumentMeta } from './documentMeta'
 import { useAppNavigation } from './useAppNavigation'
 
 export function App() {
+  // Subscribed purely for the re-render: `getDocumentMeta` reads the i18n
+  // singleton directly, so without something here listening for
+  // `languageChanged` the tab title would keep whatever language the visitor
+  // first arrived in, however many times they used the switcher.
+  useTranslation('meta')
   const nav = useAppNavigation()
   const team = nav.screen.name === 'search' ? getTeamById(nav.screen.teamId) : undefined
 

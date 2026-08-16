@@ -1,4 +1,5 @@
 import { ArrowRight } from 'lucide-react'
+import { Trans, useTranslation } from 'react-i18next'
 import { Button } from '@/shared/components/Button'
 import { Reveal } from '@/shared/components/Reveal'
 import { SELL_EMAIL, SELL_EMAIL_HREF } from '@/shared/config/contact'
@@ -45,6 +46,8 @@ import { showOfferNotice } from '@/shared/utils/demoNotice'
  * Don't add it back without looking at it in both modes first.
  */
 export function SellCtaSection() {
+  const { t } = useTranslation('landing')
+
   return (
     <section className="relative isolate overflow-hidden bg-page">
       {/*
@@ -62,10 +65,10 @@ export function SellCtaSection() {
       <div className="relative z-10 mx-auto max-w-7xl px-5 py-20 text-center sm:px-8 sm:py-28">
         <Reveal>
           <h2 className="text-3xl font-semibold tracking-tight text-balance text-ink sm:text-4xl">
-            Ready to sell your PSL?
+            {t('sell.heading')}
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-pretty text-muted sm:text-base">
-            We handle bulk sales as well
+            {t('sell.subheading')}
           </p>
         </Reveal>
 
@@ -83,8 +86,12 @@ export function SellCtaSection() {
               aria-hidden="true"
               className="pointer-events-none absolute -inset-3 rounded-full bg-accent/25 blur-xl"
             />
+            {/* `size`, never padding through `className` — two declarations of
+                one property resolve by CSS source order, not class order. A
+                longer translation is handled by the size scale, not by a
+                one-off. */}
             <Button size="lg" onClick={showOfferNotice} className="group/cta relative">
-              Start selling
+              {t('sell.cta')}
               {/* Named group, not the bare `group`: the arrow answers the
                   BUTTON's hover. An unnamed one would fire from any ancestor
                   that later became a group, which reads as the page twitching. */}
@@ -97,13 +104,21 @@ export function SellCtaSection() {
           </div>
 
           <p className="mt-5 text-sm text-muted">
-            Or email us at{' '}
-            <a
-              href={SELL_EMAIL_HREF}
-              className="rounded font-semibold text-accent-ink underline underline-offset-2"
-            >
-              {SELL_EMAIL}
-            </a>
+            {/* Trailing anchor, same reasoning as the concierge line: one
+                translatable sentence with a named tag, so the address can sit
+                wherever the language puts it. */}
+            <Trans
+              i18nKey="landing:sell.email"
+              values={{ address: SELL_EMAIL }}
+              components={{
+                email: (
+                  <a
+                    href={SELL_EMAIL_HREF}
+                    className="rounded font-semibold text-accent-ink underline underline-offset-2"
+                  />
+                ),
+              }}
+            />
           </p>
         </Reveal>
       </div>

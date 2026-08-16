@@ -1,12 +1,14 @@
 import { Eye, Lock, Zap, type LucideIcon } from 'lucide-react'
+import { Trans, useTranslation } from 'react-i18next'
 import { Reveal } from '@/shared/components/Reveal'
 import { ShinyText } from '@/shared/components/ShinyText'
 import { SpotlightCard } from '@/shared/components/SpotlightCard'
+import { SITE_NAME } from '@/shared/config/site'
 
 interface Pillar {
   Icon: LucideIcon
-  title: string
-  body: string
+  /** Locale-file id, not a title — the words live in `landing.json`. */
+  id: 'secure' | 'easy' | 'transparent'
 }
 
 /**
@@ -15,21 +17,9 @@ interface Pillar {
  * sentence needs to stay readable.
  */
 const PILLARS: Pillar[] = [
-  {
-    Icon: Lock,
-    title: 'Secure',
-    body: 'Find verified licenses and sellers that you can trust, plus our escrow service protects both the buyer and seller.',
-  },
-  {
-    Icon: Zap,
-    title: 'Easy to use',
-    body: "Our goal is to make the process as easy as possible. Don't worry about the paperwork and transfer rules, we handle it all for you.",
-  },
-  {
-    Icon: Eye,
-    title: 'Transparent',
-    body: 'No hidden fees or surprises. 100% refundable if the transaction does not go through.',
-  },
+  { Icon: Lock, id: 'secure' },
+  { Icon: Zap, id: 'easy' },
+  { Icon: Eye, id: 'transparent' },
 ]
 
 /**
@@ -47,6 +37,8 @@ const PILLARS: Pillar[] = [
  * measures 4.8:1 there, resolving back to the bright green in dark mode.
  */
 export function TheGDWaySection() {
+  const { t } = useTranslation('landing')
+
   return (
     <section className="mx-auto max-w-7xl px-5 py-16 sm:px-8 sm:py-20">
       <Reveal className="text-center">
@@ -63,11 +55,25 @@ export function TheGDWaySection() {
          * trying to read, where the stock 2s loop reads as a loading state.
          */}
         <h2 className="text-3xl font-semibold tracking-tight text-balance text-ink sm:text-4xl">
-          The <ShinyText text="G&D Seats" speed={2.5} /> way
+          {/*
+           * `<Trans>` rather than three fragments glued around `<ShinyText>`:
+           * the brand sits in the middle in English, at the front in Portuguese
+           * and at the front in Japanese, and only a single translatable
+           * sentence lets each language put it where it belongs.
+           *
+           * `ShinyText` reads its own `text` prop and ignores children, so the
+           * brand name inside the tag is never rendered — which is correct, since
+           * it is a proper noun and is not translated. The glyphs stay real text,
+           * so the `<h2>` still announces as one sentence and does not need an
+           * `aria-label`; `TheGDWaySection.test.tsx` pins that.
+           */}
+          <Trans
+            i18nKey="landing:gdWay.heading"
+            components={{ brand: <ShinyText text={SITE_NAME} speed={2.5} /> }}
+          />
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm text-pretty text-muted sm:text-base">
-          Find out why G&amp;D Seats is the best platform to buy and sell personal seat
-          licenses.
+          {t('gdWay.subheading')}
         </p>
       </Reveal>
 
@@ -86,7 +92,7 @@ export function TheGDWaySection() {
           // its items, but that only reaches the wrapper — without it the card
           // shrinks to its own copy and the three end at different depths, which
           // the bodies (two, three and two lines) guarantee.
-          <Reveal key={pillar.title} delay={index * 0.14} className="h-full">
+          <Reveal key={pillar.id} delay={index * 0.14} className="h-full">
             {/*
              * `group` is what lets the medallion answer the card's own hover.
              * The spotlight is painted by SpotlightCard on a layer the children
@@ -108,10 +114,12 @@ export function TheGDWaySection() {
                 {/* `shrink-0` above, so a two-word title wraps rather than
                     squeezing the mark out of square. */}
                 <h3 className="text-base font-semibold tracking-tight text-ink">
-                  {pillar.title}
+                  {t(`gdWay.pillars.${pillar.id}.title`)}
                 </h3>
               </div>
-              <p className="mt-4 text-sm text-pretty text-muted">{pillar.body}</p>
+              <p className="mt-4 text-sm text-pretty text-muted">
+                {t(`gdWay.pillars.${pillar.id}.body`)}
+              </p>
             </SpotlightCard>
           </Reveal>
         ))}
