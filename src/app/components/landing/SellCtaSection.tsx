@@ -1,6 +1,6 @@
 import { Button } from '@/shared/components/Button'
 import { Reveal } from '@/shared/components/Reveal'
-import { CONTACT_EMAIL, CONTACT_EMAIL_HREF } from '@/shared/config/contact'
+import { SELL_EMAIL, SELL_EMAIL_HREF } from '@/shared/config/contact'
 import { showOfferNotice } from '@/shared/utils/demoNotice'
 
 /**
@@ -18,16 +18,18 @@ import { showOfferNotice } from '@/shared/utils/demoNotice'
  * ending in a pale footer — the one moment asking a visitor to act should not
  * be the flattest thing on the page.
  *
- * **`border-y` is load-bearing, and only in dark mode.** In light the band is a
- * near-black block on `#fbfbfa` and separates itself. In dark the band and the
- * page are both `#040811`, so without the hairlines the section has no edges
- * and the CTA appears to float in the middle of nothing. The hero gets away
- * with no border because it fades into the page deliberately; this one is
- * supposed to read as a distinct slab.
+ * **No border, and that is a correction rather than an omission.** This shipped
+ * with `border-y`, on the reasoning that in dark mode the band and the page are
+ * both `#040811` and the section would otherwise have no edges. On screen the
+ * hairline read as a seam ruled across the page, not as the edge of a slab —
+ * exactly what `TeamsHero` already learned, which is why it has no bottom
+ * border either. The radial below is what gives the band presence in dark mode;
+ * in light, a near-black block on `#fbfbfa` separates itself and never needed
+ * the help. Don't add it back without looking at it in dark mode first.
  */
 export function SellCtaSection() {
   return (
-    <section className="dark relative isolate overflow-hidden border-y border-border-hairline bg-page">
+    <section className="dark relative isolate overflow-hidden bg-page">
       {/* The hero's radial, at the other end of the page. Same formula, so the
           two dark bands are recognisably the same treatment. */}
       <div className="absolute inset-0 bg-[radial-gradient(100%_120%_at_50%_120%,color-mix(in_oklab,var(--psl-accent)_16%,transparent),transparent_60%)]" />
@@ -35,11 +37,10 @@ export function SellCtaSection() {
       <div className="relative z-10 mx-auto max-w-7xl px-5 py-16 text-center sm:px-8 sm:py-20">
         <Reveal>
           <h2 className="text-3xl font-semibold tracking-tight text-balance text-ink sm:text-4xl">
-            Ready to sell your seats?
+            Ready to sell your PSL?
           </h2>
           <p className="mx-auto mt-3 max-w-xl text-sm text-pretty text-muted sm:text-base">
-            Season-ticket packages and multi-seat blocks too — tell us what you hold and
-            we will price it against the market.
+            We handle bulk sales as well
           </p>
         </Reveal>
 
@@ -51,10 +52,10 @@ export function SellCtaSection() {
           <p className="mt-4 text-sm text-muted">
             Or email us at{' '}
             <a
-              href={CONTACT_EMAIL_HREF}
+              href={SELL_EMAIL_HREF}
               className="rounded font-semibold text-accent-ink underline underline-offset-2"
             >
-              {CONTACT_EMAIL}
+              {SELL_EMAIL}
             </a>
           </p>
         </Reveal>

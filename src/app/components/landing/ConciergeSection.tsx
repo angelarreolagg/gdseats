@@ -1,12 +1,12 @@
-import { CircleCheck, Phone, Sparkles } from 'lucide-react'
+import { CircleCheck, FingerprintPattern, Phone, Sparkles } from 'lucide-react'
 import { Button } from '@/shared/components/Button'
 import { Card } from '@/shared/components/Card'
 import { Reveal } from '@/shared/components/Reveal'
 import { CONCIERGE_PHONE, CONTACT_PHONE, CONTACT_PHONE_HREF } from '@/shared/config/contact'
 import { showOfferNotice } from '@/shared/utils/demoNotice'
-import { VoiceBars } from './VoiceBars'
+import { SymmetricWave } from './SymmetricWave'
 
-const ASSURANCES = ['Takes a minute', 'Available 24/7', 'No signup required']
+const ASSURANCES = ['Takes 1 minute', 'Available 24/7', 'No signup required']
 
 /**
  * The AI concierge card.
@@ -40,13 +40,13 @@ export function ConciergeSection() {
               </p>
 
               <h2 className="mt-3 text-2xl font-semibold tracking-tight text-balance text-ink sm:text-3xl">
-                Tell Scout what you&rsquo;re after
+                Tell Scout what you need
               </h2>
 
               <p className="mt-3 max-w-xl text-sm text-pretty text-muted sm:text-base">
-                Scout is our AI concierge. Say the section you want, the budget you have
-                and what matters most about the seat — then let it work the board and
-                come back with the options worth your time.
+                Meet Scout, our AI concierge. Share your preferred section, budget, and
+                priorities, and our PSL team will find the best available options for
+                you.
               </p>
 
               <ul className="mt-6 flex flex-wrap gap-x-5 gap-y-2">
@@ -72,7 +72,7 @@ export function ConciergeSection() {
                   <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-accent" />
                   Scout is available now
                 </span>
-                <VoiceBars />
+                <SymmetricWave />
               </div>
 
               <Button
@@ -85,14 +85,29 @@ export function ConciergeSection() {
                 {CONCIERGE_PHONE}
               </Button>
 
-              <p className="mt-3 text-center text-xs text-muted">
-                Prefer a human?{' '}
-                <a
-                  href={CONTACT_PHONE_HREF}
-                  className="rounded font-semibold text-accent-ink underline underline-offset-2"
-                >
-                  {CONTACT_PHONE}
-                </a>
+              {/*
+               * The fingerprint is the one icon in this card that carries an
+               * idea rather than labelling a control: it marks the line as the
+               * human route out of an AI panel, opposite the `Phone` on the
+               * button above. `flex` + `flex-wrap` rather than an inline icon,
+               * so a narrow card breaks between the mark and the sentence
+               * instead of stranding the glyph on a line of its own.
+               */}
+              <p className="mt-3 flex flex-wrap items-center justify-center gap-x-1.5 gap-y-1 text-center text-xs text-muted">
+                <FingerprintPattern
+                  aria-hidden="true"
+                  className="h-3.5 w-3.5 shrink-0 text-accent-ink"
+                  strokeWidth={2}
+                />
+                <span>
+                  Prefer human touch? Call us at{' '}
+                  <a
+                    href={CONTACT_PHONE_HREF}
+                    className="rounded font-semibold text-accent-ink underline underline-offset-2"
+                  >
+                    {CONTACT_PHONE}
+                  </a>
+                </span>
               </p>
             </Card>
           </div>

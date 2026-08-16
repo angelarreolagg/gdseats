@@ -18,7 +18,7 @@ interface FaqItem {
 const FAQ_ITEMS: FaqItem[] = [
   {
     id: 'what-is-a-psl',
-    question: 'What is a personal seat license (PSL)?',
+    question: 'What is a Personal Seat License (PSL)?',
     answer:
       'A PSL is the right to buy season tickets for one specific seat, for as long as you hold it. You own the seat; the tickets themselves are bought separately each season. It is an asset — you can sell it, and its value moves with the team.',
   },
@@ -30,15 +30,9 @@ const FAQ_ITEMS: FaqItem[] = [
   },
   {
     id: 'is-it-safe',
-    question: 'Is it safe to buy here?',
+    question: 'Is G&D Seats safe?',
     answer:
       'Every license and seller is verified before it reaches the board, and funds are held in escrow until the club confirms the transfer into your name. If the transfer does not complete, the money goes back.',
-  },
-  {
-    id: 'ai-verdict',
-    question: 'How does the AI valuation work?',
-    answer:
-      'Each listing is compared against an estimate built from recent sales in the same section, the seat position, and the demand trend for the franchise. The verdict tells you whether the asking price sits above the market, in line with it, or below — and the reasoning is shown with it, not hidden.',
   },
   {
     id: 'how-to-buy',
@@ -48,7 +42,7 @@ const FAQ_ITEMS: FaqItem[] = [
   },
   {
     id: 'how-to-sell',
-    question: 'How do I sell mine?',
+    question: 'How do I sell my seat license?',
     answer:
       'Tell us the section, row and seat, and we price it against everything else on the market before it goes live. Listing is free — a commission comes out only when the sale completes.',
   },
@@ -59,8 +53,14 @@ const FAQ_ITEMS: FaqItem[] = [
       'It depends on the venue, the section, how the team is performing and how much inventory is already listed near your seat. The valuation on every listing is the same model we would run on yours.',
   },
   {
+    id: 'transfer',
+    question: 'Can I transfer my PSL to someone else?',
+    answer:
+      'Yes. A seat license is transferable, which is what makes a market for it possible in the first place. Each club sets its own rules on timing and fees, and we handle that paperwork as part of the sale.',
+  },
+  {
     id: 'season-tickets',
-    question: 'Do I still buy season tickets after getting a PSL?',
+    question: 'Do I still need to buy season tickets after purchasing a PSL?',
     answer:
       'Yes. The license secures your right to that seat; the tickets for each season are a separate purchase from the club. Without the license, the seat is not offered to you at all.',
   },
@@ -166,11 +166,11 @@ export function FaqSection() {
       <div className="grid gap-8 lg:grid-cols-[minmax(0,20rem)_minmax(0,1fr)] lg:gap-16">
         <Reveal className="lg:sticky lg:top-24 lg:self-start">
           <h2 className="text-2xl font-semibold tracking-tight text-balance text-ink sm:text-3xl">
-            Frequently asked questions
+            Frequently Asked Questions
           </h2>
           <p className="mt-3 text-sm text-pretty text-muted">
-            What a seat license is, how the market works, and what happens to your money
-            along the way.
+            Everything you need to know about buying and selling Personal Seat Licenses
+            in G&amp;D Seats.
           </p>
         </Reveal>
 

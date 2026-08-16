@@ -1,4 +1,4 @@
-import { Eye, ShieldCheck, Zap, type LucideIcon } from 'lucide-react'
+import { Eye, Lock, Zap, type LucideIcon } from 'lucide-react'
 import { Reveal } from '@/shared/components/Reveal'
 
 interface Pillar {
@@ -14,19 +14,19 @@ interface Pillar {
  */
 const PILLARS: Pillar[] = [
   {
-    Icon: ShieldCheck,
+    Icon: Lock,
     title: 'Secure',
-    body: 'Every license and seller is verified before it reaches the board, and escrow holds the funds until the club confirms the transfer. Both sides are covered.',
+    body: 'Find verified licenses and sellers that you can trust, plus our escrow service protects both the buyer and seller.',
   },
   {
     Icon: Zap,
     title: 'Easy to use',
-    body: 'Pick a team, read the verdict, make an offer. The paperwork and the club transfer rules are ours to handle, not yours to learn.',
+    body: "Our goal is to make the process as easy as possible. Don't worry about the paperwork and transfer rules, we handle it all for you.",
   },
   {
     Icon: Eye,
     title: 'Transparent',
-    body: 'The full total is on the listing before you commit — no hidden fees, and a full refund if the transfer does not go through.',
+    body: 'No hidden fees or surprises. 100% refundable if the transaction does not go through.',
   },
 ]
 
@@ -52,7 +52,8 @@ export function TheGDWaySection() {
           The <span className="text-accent-ink">G&amp;D Seats</span> way
         </h2>
         <p className="mx-auto mt-3 max-w-2xl text-sm text-pretty text-muted sm:text-base">
-          Why this is the straightest route to a seat license — buying or selling.
+          Find out why G&amp;D Seats is the best platform to buy and sell personal seat
+          licenses.
         </p>
       </Reveal>
 

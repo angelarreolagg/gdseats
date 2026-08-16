@@ -17,6 +17,16 @@ export const CONTACT_EMAIL = 'help@gdseats.com'
 export const CONTACT_EMAIL_HREF = 'mailto:help@gdseats.com'
 
 /**
+ * The sell-side address, separate from the general one above.
+ *
+ * A seller arriving from the CTA has a different question than someone with a
+ * support problem, and routing both to one inbox is how a "we handle bulk sales"
+ * promise turns into a week of silence. Only the sell CTA uses this.
+ */
+export const SELL_EMAIL = 'sell@gdseats.com'
+export const SELL_EMAIL_HREF = 'mailto:sell@gdseats.com'
+
+/**
  * The concierge's own line, deliberately NOT the number above.
  *
  * The two answer different things: this one reaches an AI that does not exist,
