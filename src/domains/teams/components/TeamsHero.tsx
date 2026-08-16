@@ -2,6 +2,34 @@ import type { ReactNode } from 'react'
 import { motion, useReducedMotion } from 'motion/react'
 import StrokeText from '@/shared/components/StrokeText'
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
+import heroStadiums from '@/assets/hero-stadiums.mp4'
+
+/**
+ * The footage is IMPORTED, not referenced from `public/`, and that is a caching
+ * decision rather than a tidiness one.
+ *
+ * Vite fingerprints imported assets (`hero-stadiums-a1b2c3.mp4`), and only a
+ * fingerprinted filename can safely be served `immutable` — the name changes
+ * whenever the bytes do, so a year-long cache can never go stale. A file in
+ * `public/` keeps its name forever, so the best any host can offer is
+ * revalidate-on-every-visit. `vercel.json` grants the long cache to
+ * `/assets/*`; this import is what makes the video eligible for it.
+ *
+ * That is the whole "loads instantly on a repeat visit" story: zero bytes, zero
+ * round trips, straight from disk.
+ */
+
+/**
+ * The exact codec string of the encode we ship, read out of the file's `avcC`
+ * box rather than guessed: H.264 High profile (0x64), no constraint flags
+ * (0x00), level 4.0 (0x28).
+ *
+ * It has to be right. A browser that cannot decode the listed codec skips the
+ * `<source>` silently — and with one source, skipping it means the hero plays
+ * nothing at all and never reports an error. **Re-read this from the file if
+ * the video is ever re-encoded**; do not carry it over on faith.
+ */
+const HERO_CODEC = 'video/mp4; codecs="avc1.640028"'
 
 /**
  * The headline, and the two halves it splits into.
@@ -100,16 +128,27 @@ export function TeamsHero({ children }: TeamsHeroProps) {
 
   return (
     <section className="dark relative isolate flex min-h-[clamp(300px,40svh,520px)] overflow-hidden">
+      {/*
+       * A `<source>` rather than a `src`, so the browser can reject a codec it
+       * cannot decode before spending a request on it — and so additional
+       * encodes (AV1 first, a narrow mobile cut behind `media`) drop in above
+       * this line without restructuring the element. With a single H.264 source
+       * there is nothing to negotiate yet; the shape is what is being set up.
+       *
+       * `preload="auto"`, not `"metadata"`: `autoPlay` overrides `preload`
+       * anyway, so `"metadata"` only ever misdescribed what this element does.
+       */}
       <video
-        src="/nflstadiums.mp4"
         autoPlay={!reduceMotion}
         muted
         loop
         playsInline
-        preload="metadata"
+        preload="auto"
         aria-hidden="true"
         className="absolute inset-0 h-full w-full object-cover"
-      />
+      >
+        <source src={heroStadiums} type={HERO_CODEC} />
+      </video>
 
       {/* The scrim. Everything above this point is footage; everything below is type. */}
       <div className="absolute inset-0 bg-page/65" />
@@ -216,32 +255,14 @@ export function TeamsHero({ children }: TeamsHeroProps) {
             </h1>
             {/*
              * The copy holds until the headline has finished drawing, then rises
-             * in. Three beats rather than one so the lines arrive in reading
-             * order: disclosure, then promise, then detail.
+             * in. Two beats rather than one so the lines arrive in reading order:
+             * promise, then detail.
              *
              * Under reduced motion StrokeText jumps straight to its end state, so
              * the delay has to collapse too — otherwise the value proposition
              * would sit invisible for 2.6s waiting on an animation that already
              * finished. `MotionConfig reducedMotion="user"` drops the transform
              * on its own, but it has no opinion about delays.
-             */}
-            {/*
-             * The demo disclosure, stated rather than tucked into a tooltip.
-             *
-             * `AppHeader` already carries a `DemoMarker`, and this is deliberately
-             * NOT a second copy of it: that one is a solid accent pill because it
-             * has to survive a dense bar, and two of those on one screen would
-             * read as a warning banner. Here the accent is a 6px dot and the words
-             * take the muted ink the second line already uses — the same
-             * information at a tenth of the volume.
-             *
-             * It also says the thing outright, where the header's version hides
-             * the detail behind hover. A hero is where a visitor decides whether
-             * to trust the numbers below it, and "these numbers are invented" is
-             * not something to make them hover to discover — nor something a
-             * touch device could discover at all.
-             *
-             * Not a button, not a link. It does nothing, so it is text.
              */}
             <motion.p
               initial={{ opacity: 0, y: 18 }}
@@ -251,20 +272,7 @@ export function TeamsHero({ children }: TeamsHeroProps) {
                 duration: 0.7,
                 ease: [0.22, 1, 0.36, 1],
               }}
-              className="mt-5 inline-flex items-center gap-2 rounded-full border border-ink/15 bg-page/50 px-3 py-1.5 text-[11px] font-medium tracking-wide text-muted backdrop-blur-sm sm:mt-6 sm:px-3.5 sm:text-xs"
-            >
-              <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-accent" />
-              Demo version · all data is mocked
-            </motion.p>
-            <motion.p
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: reduceMotion ? 0 : HEADLINE_SETTLES + 0.14,
-                duration: 0.7,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className="mt-4 text-2xl font-semibold tracking-tight text-balance text-ink sm:mt-5 sm:text-3xl"
+              className="mt-5 text-2xl font-semibold tracking-tight text-balance text-ink sm:mt-6 sm:text-3xl"
             >
               Find your team's PSL &amp; Tickets
             </motion.p>
@@ -272,7 +280,7 @@ export function TeamsHero({ children }: TeamsHeroProps) {
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
-                delay: reduceMotion ? 0 : HEADLINE_SETTLES + 0.28,
+                delay: reduceMotion ? 0 : HEADLINE_SETTLES + 0.14,
                 duration: 0.7,
                 ease: [0.22, 1, 0.36, 1],
               }}

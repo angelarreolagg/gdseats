@@ -16,12 +16,48 @@ describe('TeamsHero', () => {
 
     const video = container.querySelector('video')
     expect(video).not.toBeNull()
-    expect(video).toHaveAttribute('src', '/nflstadiums.mp4')
     // React reflects `muted` as a DOM property only — there is no attribute to read.
     expect(video?.muted).toBe(true)
     expect(video).toHaveAttribute('loop')
     expect(video).toHaveAttribute('playsinline')
     expect(video).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  /**
+   * Validates: the footage is an imported (therefore fingerprinted) asset, not a
+   * path typed into `public/`.
+   * Why it matters: only a content-hashed filename can safely be served
+   * `immutable`, which is what `vercel.json` grants `/assets/*` and what makes a
+   * repeat visit cost zero bytes. Moving the file back to `public/` for
+   * convenience would keep the hero working perfectly in dev and quietly cost
+   * every returning visitor a fresh 6 MB revalidation — nothing else would fail.
+   */
+  it('loads the footage from a fingerprinted asset import', () => {
+    const { container } = render(<TeamsHero />)
+
+    const source = container.querySelector('video source')
+    expect(source).not.toBeNull()
+    // Vite resolves the import to a real path; in test it stays under /src/assets.
+    expect(source?.getAttribute('src')).toMatch(/hero-stadiums.*\.mp4$/)
+    expect(source?.getAttribute('src')).not.toMatch(/^\/nflstadiums/)
+  })
+
+  /**
+   * Validates: the source declares the exact codec of the file we ship.
+   * Why it matters: a browser that cannot decode the advertised codec skips the
+   * `<source>` **silently** — no error, no event. With a single source that means
+   * an empty hero and no signal anywhere that something broke. The string was read
+   * out of the file's `avcC` box (High profile, level 4.0); a re-encode that
+   * changes the profile without updating it here would black out the band on
+   * whichever engines are strictest, which is the hardest kind of bug to notice.
+   */
+  it('declares the codec its encode actually uses', () => {
+    const { container } = render(<TeamsHero />)
+
+    expect(container.querySelector('video source')).toHaveAttribute(
+      'type',
+      'video/mp4; codecs="avc1.640028"',
+    )
   })
 
   /**
@@ -89,39 +125,6 @@ describe('TeamsHero', () => {
     ).toBe('SOME SEATS')
 
     expect(container.querySelector('h1')).toHaveClass('hero-wordmark')
-  })
-
-  /**
-   * Validates: the demo disclosure is visible text, not a hover affordance.
-   * Why it matters: "these prices are invented" is the one claim a visitor has to
-   * be able to read before they trust anything below it. The header states it too,
-   * but only inside a tooltip — and hover tooltips never fire on touch, so on a
-   * phone that version does not exist. If this chip ever became a tooltip, an
-   * entire class of device would browse a mock marketplace with no indication it
-   * was one.
-   */
-  it('states the demo disclosure as visible copy', () => {
-    render(<TeamsHero />)
-
-    expect(screen.getByText(/demo version .* all data is mocked/i)).toBeInTheDocument()
-  })
-
-  /**
-   * Validates: the disclosure reads before the value proposition.
-   * Why it matters: the three lines fade in on separate beats, and the order is
-   * the point — a visitor who reads "the easy, transparent and secure way to buy"
-   * before learning it is a demo has been told something untrue for as long as the
-   * gap lasts. DOM order is what both a screen reader and the cascade follow, so
-   * pinning it here is what keeps the sequence honest.
-   */
-  it('places the disclosure above the value proposition', () => {
-    render(<TeamsHero />)
-
-    const disclosure = screen.getByText(/demo version .* all data is mocked/i)
-    const promise = screen.getByText(/find your team's psl & tickets/i)
-
-    // Node.compareDocumentPosition: FOLLOWING means `promise` comes after.
-    expect(disclosure.compareDocumentPosition(promise)).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
   })
 
   /**

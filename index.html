@@ -58,6 +58,25 @@
     <link rel="manifest" href="/site.webmanifest" />
 
     <!--
+      Start the hero footage during HTML parse instead of after React mounts and
+      TeamsHero first renders — the difference is roughly the whole JS download,
+      parse and hydrate.
+
+      The href points at the SOURCE path on purpose: Vite rewrites it to the
+      fingerprinted /assets/ filename at build time, which is the only way this
+      hint and the <source> in TeamsHero can be guaranteed to name the same URL.
+      A hand-written /assets/ path would silently become a second, wasted
+      download the moment the file is re-encoded and its hash moves.
+
+      `as="video"` is honoured unevenly — media destinations go down a separate
+      loading path in some engines, which ignore the hint (and may note it in the
+      console). It costs nothing where unsupported and buys a real head start
+      where it works. If the console warning is unwanted, `rel="prefetch"` is the
+      quiet equivalent at lower priority.
+    -->
+    <link rel="preload" as="video" type="video/mp4" href="/src/assets/hero-stadiums.mp4" />
+
+    <!--
       Two theme-colors, not one. A single dark value paints the mobile browser bar
       #040811 even for a user reading in light mode, which reads as a rendering
       fault rather than as branding. The values are psl-page from each block of
