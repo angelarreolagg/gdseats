@@ -1,5 +1,8 @@
+import { useTranslation } from 'react-i18next'
+import { LanguageSwitch } from '@/shared/components/LanguageSwitch'
 import { ThemeToggle } from '@/shared/components/ThemeToggle'
 import { Tooltip } from '@/shared/components/Tooltip'
+import { SITE_NAME } from '@/shared/config/site'
 
 interface AppHeaderProps {
   onHome: () => void
@@ -17,13 +20,23 @@ interface AppHeaderProps {
  * comment there.
  */
 function DemoMarker() {
+  const { t } = useTranslation('header')
+
   return (
-    <Tooltip content="All data is mocked — no real listings or transactions" side="bottom">
+    <Tooltip content={t('demoTooltip')} side="bottom">
       <span
         tabIndex={0}
         className="inline-flex cursor-default items-center whitespace-nowrap rounded-xl bg-accent px-3 text-xs font-semibold tracking-tight text-on-accent shadow-raised sm:px-4 sm:text-sm"
       >
-        Demo version
+        {/*
+         * `demoMarker` is deliberately short in every locale — "Demo" rather
+         * than "Versión de demostración". The pill is sized by the row and is
+         * `whitespace-nowrap`, so a faithful long translation cannot wrap; it
+         * would push the row past what the wordmark's `truncate` can absorb, and
+         * the overflow would land on the page as a horizontal scrollbar. Stated
+         * again in locales/TRANSLATORS.md, where a translator will see it.
+         */}
+        {t('demoMarker')}
       </span>
     </Tooltip>
   )
@@ -42,6 +55,8 @@ function DemoMarker() {
  * no-op.
  */
 export function AppHeader({ onHome }: AppHeaderProps) {
+  const { t } = useTranslation('header')
+
   return (
     <header className="dark sticky top-0 z-30 border-b border-border-hairline bg-page/90 backdrop-blur">
       {/*
@@ -75,12 +90,14 @@ export function AppHeader({ onHome }: AppHeaderProps) {
        * effect of a margin and left the row's intent readable only from a child.
        */}
       <div className="flex items-center justify-between gap-3 px-7 py-2.5 sm:gap-6 sm:px-8 sm:py-3">
-        <Tooltip content="Gridiron &amp; Diamond Seats" side="bottom">
+        {/* The brand name and its expansion are proper nouns and stay English in
+            every locale; only the words around them are translated. */}
+        <Tooltip content={t('brandExpanded')} side="bottom">
           <button
             type="button"
             onClick={onHome}
             className="flex min-w-0 items-center gap-2.5 rounded-lg"
-            aria-label="G&D Seats home"
+            aria-label={t('home')}
           >
             <img src="/logo-mark.png" alt="" className="h-7 w-7 shrink-0 object-contain" />
             {/*
@@ -97,7 +114,7 @@ export function AppHeader({ onHome }: AppHeaderProps) {
              * the page instead.
              */}
             <span className="truncate text-base font-semibold tracking-tight text-ink">
-              G&amp;D Seats
+              {SITE_NAME}
             </span>
           </button>
         </Tooltip>
@@ -119,7 +136,11 @@ export function AppHeader({ onHome }: AppHeaderProps) {
         {/* `shrink-0`: these two are fixed and the brand absorbs any shortfall —
             see the wordmark above. The row's `justify-between` is what puts this
             group at the far end. */}
+        {/* Order: the two settings controls group together, and `DemoMarker`
+            stays last — it is the accent pill and the visual terminus of the
+            bar, so putting a bordered control after it would read as a stray. */}
         <div className="flex h-9 shrink-0 items-stretch gap-2 sm:h-10 sm:gap-3">
+          <LanguageSwitch />
           <ThemeToggle size="none" className="aspect-square rounded-xl" />
           <DemoMarker />
         </div>

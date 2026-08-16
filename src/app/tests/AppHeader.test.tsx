@@ -34,7 +34,7 @@ describe('AppHeader', () => {
   })
 
   /**
-   * Validates: neither of the two controls in the right-hand group declares its
+   * Validates: none of the three controls in the right-hand group declares its
    * own height — the row does.
    * Why it matters: they sit side by side, so a height mismatch is visible on
    * every page load, and it shipped exactly that way: the toggle took a fixed
@@ -43,21 +43,41 @@ describe('AppHeader', () => {
    * is the version that drifts again on the next restyle; having one owner is the
    * version that cannot. jsdom has no layout to measure, so the declaration is the
    * only thing a test can hold.
+   *
+   * Extended to three when `LanguageSwitch` joined the row, which is exactly the
+   * moment this stops being a curiosity: two controls that disagree look like a
+   * misalignment, three look like a broken bar.
    */
-  it('lets the row own the height of both controls', () => {
+  it('lets the row own the height of all three controls', () => {
     const { container } = render(<AppHeader onHome={vi.fn()} />)
 
+    const language = screen.getByRole('button', { name: /change language/i })
     const toggle = screen.getByRole('button', { name: /switch to (light|dark) mode/i })
     const marker = screen.getByText(/demo version/i)
     const row = container.querySelector('.items-stretch')
 
-    expect(row).toContainElement(toggle)
-    expect(row).toContainElement(marker)
-
-    for (const control of [toggle, marker]) {
+    for (const control of [language, toggle, marker]) {
+      expect(row).toContainElement(control)
       expect(control.className).not.toMatch(/(^|\s)(sm:)?h-\d/)
       expect(control.className).not.toMatch(/(^|\s)(sm:)?py-/)
     }
+  })
+
+  /**
+   * Validates: the language switch is in the bar and opens.
+   * Why it matters: it is the only way to reach three of the four locales — the
+   * others are behind a stored preference or a browser setting the visitor may
+   * not control. A bundle that ships and cannot be selected is dead weight.
+   */
+  it('carries a working language switch', async () => {
+    render(<AppHeader onHome={vi.fn()} />)
+
+    const trigger = screen.getByRole('button', { name: /change language/i })
+    expect(trigger).toHaveTextContent('EN')
+    expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
+
+    await userEvent.click(trigger)
+    expect(screen.getByRole('listbox')).toBeInTheDocument()
   })
 
   it('navigates home from the logo', async () => {
