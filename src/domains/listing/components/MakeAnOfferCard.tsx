@@ -1,4 +1,5 @@
 import { useLayoutEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/shared/components/Button'
 import { formatCurrency, parseCurrencyInput } from '@/shared/utils/formatters'
 import { showOfferNotice } from '@/shared/utils/demoNotice'
@@ -64,6 +65,7 @@ export function MakeAnOfferCard({
   onAfterSubmit,
   className = 'rounded-xl border border-border-hairline bg-surface p-4 shadow-card',
 }: MakeAnOfferCardProps) {
+  const { t } = useTranslation('listing')
   // Held as the formatted string so the field can show "$23,550" and still be
   // cleared. `type="number"` cannot render a currency symbol or separators at
   // all, which is why this is a text field doing its own formatting.
@@ -99,12 +101,12 @@ export function MakeAnOfferCard({
     <section className={className}>
       {showHeading ? (
         <h2 className="mb-3 text-sm font-semibold text-ink">
-          Make an offer <span className="text-over">*</span>
+          {t('offer.heading')} <span className="text-over">*</span>
         </h2>
       ) : null}
 
       <label className="sr-only" htmlFor="offer-amount">
-        Offer amount
+        {t('offer.amountLabel')}
       </label>
       {/*
        * `text-base` below `sm`, not `text-sm`. iOS Safari zooms the whole viewport
@@ -126,18 +128,18 @@ export function MakeAnOfferCard({
       />
 
       <div className="mt-3">
-        <FeeRow label="Transfer fee" value={formatCurrency(listing.transferFee)} />
-        <FeeRow label="Platform fee" value={formatCurrency(listing.platformFee)} />
-        <FeeRow label="Total cost · Includes all fees" value={formatCurrency(total)} emphasis />
+        <FeeRow label={t('offer.transferFee')} value={formatCurrency(listing.transferFee)} />
+        <FeeRow label={t('offer.platformFee')} value={formatCurrency(listing.platformFee)} />
+        <FeeRow label={t('offer.totalCost')} value={formatCurrency(total)} emphasis />
       </div>
 
       <label className="sr-only" htmlFor="offer-message">
-        Add a message
+        {t('offer.messageLabel')}
       </label>
       <input
         id="offer-message"
         type="text"
-        placeholder="Add a message"
+        placeholder={t('offer.messageLabel')}
         className="mt-3 w-full rounded-lg border border-border-hairline bg-track px-3 py-2.5 text-base text-ink transition-colors placeholder:text-muted focus:border-accent-ink focus:outline-none sm:text-sm"
       />
 
@@ -151,7 +153,9 @@ export function MakeAnOfferCard({
           onAfterSubmit?.()
         }}
       >
-        Submit offer for {formatCurrency(amount)}
+        {/* Full width, so a longer translation wraps rather than overflowing —
+            "Enviar oferta por US$ 23.550" is comfortably past the English. */}
+        {t('offer.submit', { amount: formatCurrency(amount) })}
       </Button>
     </section>
   )

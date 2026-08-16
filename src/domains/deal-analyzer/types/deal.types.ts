@@ -13,8 +13,8 @@ export type Trend = 'up' | 'down' | 'flat'
 export type InsightTone = 'positive' | 'neutral' | 'caution'
 
 export interface PriceHistoryPoint {
-  /** Display label, e.g. "Jul 27". */
-  date: string
+  /** Epoch ms. The component formats it; the analyzer only orders by it. */
+  dateMs: number
   price: number
 }
 
@@ -25,9 +25,25 @@ export interface DealVerdict {
   recommendation: Recommendation
 }
 
+/**
+ * A bullet the panel can render, expressed as a key rather than a sentence.
+ *
+ * Same rule the icons already follow: the service names the thing, the component
+ * layer resolves it. Three specific gains over letting `insights.service.ts`
+ * call `t()` itself — the service stays a pure function rather than depending on
+ * i18n init order, its unit tests assert logic instead of English prose, and the
+ * "why it matters commercially" comments keep describing behaviour.
+ *
+ * **`params` carries raw numbers and epoch ms, never pre-formatted strings.**
+ * The component formats at render, so an insight computed under one language and
+ * read under another is still correct — and the service stops importing the
+ * formatters entirely, which leaves it as arithmetic over signals.
+ */
 export interface Insight {
   id: string
-  text: string
+  /** e.g. `analyzer:insights.sectionAverage.above`. */
+  key: string
+  params: Record<string, string | number>
   tone: InsightTone
   /** Absolute magnitude of the underlying signal; used to rank. */
   weight: number

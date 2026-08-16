@@ -1,5 +1,6 @@
 import { motion } from 'motion/react'
 import { BrainCircuit } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { formatCurrency, formatSignedPercent } from '@/shared/utils/formatters'
 import type { ListingSignals } from '../types/deal.types'
 import { useDealAnalysis } from '../hooks/useDealAnalysis'
@@ -36,6 +37,7 @@ export function AIInsightPanel({
   analysisDelayMs,
   className = '',
 }: AIInsightPanelProps) {
+  const { t } = useTranslation('analyzer')
   const { listingPrice, estimatedPrice } = signals
   const { isAnalyzing, verdict, insights } = useDealAnalysis(signals, analysisDelayMs)
   const presentation = STATUS_PRESENTATION[verdict.status]
@@ -69,10 +71,10 @@ export function AIInsightPanel({
           id="ai-insight-heading"
           className="text-xs font-semibold tracking-wide text-ink uppercase"
         >
-          AI Insight
+          {t('panel.heading')}
         </h2>
         <span className="ml-auto text-[10px] font-medium tracking-wide text-muted uppercase">
-          Beta
+          {t('panel.beta')}
         </span>
       </header>
 

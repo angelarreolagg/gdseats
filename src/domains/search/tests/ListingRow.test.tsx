@@ -15,13 +15,13 @@ function buildListing(overrides: Partial<Listing> = {}): Listing {
     pricePerSeat: 14_450,
     transferFee: 300,
     platformFee: 2_600,
-    publicationDate: 'Aug 5, 2026',
+    publicationDateMs: Date.UTC(2026, 7, 5),
     estimatedPricePerSeat: 14_450,
     sectionAveragePerSeat: 14_000,
     priceHistory: [
-      { date: 'Aug 5, 2026', totalPrice: 28_900, pricePerSeat: 14_450, changePercent: null },
+      { dateMs: Date.UTC(2026, 7, 5), totalPrice: 28_900, pricePerSeat: 14_450, changePercent: null },
     ],
-    tags: [{ id: 'featured', label: 'Featured', tone: 'accent', iconName: 'featured' }],
+    tags: [{ id: 'featured', labelKey: 'listing:tags.featured', tone: 'accent', iconName: 'featured' }],
     ...overrides,
   }
 }

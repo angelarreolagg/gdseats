@@ -1,5 +1,7 @@
 import { Select } from '@/shared/components/Select'
 import { useMemo } from 'react'
+import { useTranslation } from 'react-i18next'
+import { formatCount } from '@/shared/utils/formatters'
 import { TeamLogo } from '@/domains/teams/components/TeamLogo'
 import { TrendChip } from '@/domains/teams/components/TrendChip'
 import { getMarketTrend } from '@/domains/teams/services/marketTrend.service'
@@ -25,7 +27,15 @@ export function SearchToolbar({
   onSortChange,
   onClearAll,
 }: SearchToolbarProps) {
+  const { t } = useTranslation('search')
   const trend = useMemo(() => getMarketTrend(team), [team])
+
+  // `SORT_OPTIONS` keeps the values and their order; only the words are resolved
+  // here, into the `{ value, label }` shape `Select` renders.
+  const sortOptions = useMemo(
+    () => SORT_OPTIONS.map((option) => ({ value: option.value, label: t(option.labelKey) })),
+    [t],
+  )
 
   return (
     <div className="flex flex-wrap items-center justify-between gap-4 border-b border-border-hairline px-5 py-3 sm:px-6">
@@ -48,9 +58,9 @@ export function SearchToolbar({
             onClick={onClearAll}
             className="ml-2 inline-flex items-center gap-1.5 rounded-full bg-accent/15 px-3 py-1.5 text-xs font-semibold text-accent-ink transition-colors hover:bg-accent/25"
           >
-            Section {selectedSection}
+            {t('toolbar.sectionFilter', { section: selectedSection })}
             <span aria-hidden="true">×</span>
-            <span className="sr-only">Clear section filter</span>
+            <span className="sr-only">{t('toolbar.clearSectionFilter')}</span>
           </button>
         ) : null}
       </div>
@@ -62,18 +72,21 @@ export function SearchToolbar({
           disabled={!hasFilters}
           className="text-sm text-muted transition-colors hover:text-ink disabled:pointer-events-none disabled:opacity-40"
         >
-          Clear all
+          {t('toolbar.clearAll')}
         </button>
 
         <span className="text-sm text-muted tabular-nums">
-          {listingCount.toLocaleString('en-US')} listings
+          {t('toolbar.listingCount', {
+            count: listingCount,
+            formatted: formatCount(listingCount),
+          })}
         </span>
 
         <Select
-          label="Order by"
+          label={t('toolbar.orderBy')}
           hideLabel
           value={sort}
-          options={SORT_OPTIONS}
+          options={sortOptions}
           onChange={(value) => onSortChange(value as SortKey)}
         />
       </div>

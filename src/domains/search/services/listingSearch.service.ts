@@ -4,11 +4,17 @@ import { getEstimatedTotal, getTotalPrice } from '@/domains/listing/types/listin
 
 export type SortKey = 'best-deal' | 'price-asc' | 'price-desc' | 'section'
 
-export const SORT_OPTIONS: Array<{ value: SortKey; label: string }> = [
-  { value: 'best-deal', label: 'Best deal' },
-  { value: 'price-asc', label: 'Price: low to high' },
-  { value: 'price-desc', label: 'Price: high to low' },
-  { value: 'section', label: 'Section' },
+/**
+ * The source of the sort *values and their order* — the switch below is keyed on
+ * `value`, so this array stays here rather than moving into the toolbar. Only
+ * the words moved out; `SearchToolbar` maps `labelKey` to `Select`'s `{ value,
+ * label }` shape at render.
+ */
+export const SORT_OPTIONS: Array<{ value: SortKey; labelKey: string }> = [
+  { value: 'best-deal', labelKey: 'search:sort.bestDeal' },
+  { value: 'price-asc', labelKey: 'search:sort.priceAsc' },
+  { value: 'price-desc', labelKey: 'search:sort.priceDesc' },
+  { value: 'section', labelKey: 'search:sort.section' },
 ]
 
 /** How far under fair value a listing sits. Negative is a bargain. */

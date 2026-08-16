@@ -10,7 +10,14 @@
 
 export interface Ring {
   level: 1 | 2 | 3
-  label: string
+  /**
+   * Translation key, not a word. Nothing renders the tier name today — the seat
+   * map labels sections, not rings — but the field is kept rather than deleted
+   * because it is the only place the three tiers are named at all, and a half
+   * state (an English literal in a translated app, sitting unrendered) is worse
+   * than either keeping it properly or removing it outright.
+   */
+  labelKey: string
   /** First section number in the ring; sections run consecutively. */
   start: number
   count: number
@@ -28,9 +35,9 @@ export const CENTER = { x: 300, y: 230 }
 export const FIELD = { x: 222, y: 182, width: 156, height: 96 }
 
 export const RINGS: Ring[] = [
-  { level: 1, label: 'Lower', start: 101, count: 20, radiusX: 118, radiusY: 78, depth: 30, priceMultiplier: 1.35 },
-  { level: 2, label: 'Club', start: 201, count: 24, radiusX: 158, radiusY: 116, depth: 28, priceMultiplier: 1.0 },
-  { level: 3, label: 'Upper', start: 301, count: 28, radiusX: 196, radiusY: 152, depth: 32, priceMultiplier: 0.55 },
+  { level: 1, labelKey: 'listing:rings.lower', start: 101, count: 20, radiusX: 118, radiusY: 78, depth: 30, priceMultiplier: 1.35 },
+  { level: 2, labelKey: 'listing:rings.club', start: 201, count: 24, radiusX: 158, radiusY: 116, depth: 28, priceMultiplier: 1.0 },
+  { level: 3, labelKey: 'listing:rings.upper', start: 301, count: 28, radiusX: 196, radiusY: 152, depth: 32, priceMultiplier: 0.55 },
 ]
 
 export const ALL_SECTIONS: number[] = RINGS.flatMap((ring) =>

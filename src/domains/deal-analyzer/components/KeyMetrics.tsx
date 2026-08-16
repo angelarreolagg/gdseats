@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 
 interface KeyMetricsProps {
   estimatedPrice: string
@@ -45,11 +46,16 @@ export function KeyMetrics({
   difference,
   differenceInk,
 }: KeyMetricsProps) {
+  const { t } = useTranslation('analyzer')
+
+  // Three `<dt>`s in a 3-column grid, each `truncate` — so these three labels
+  // are the ones every locale keeps short. A faithful long translation does not
+  // wrap here, it clips.
   return (
     <dl className="grid grid-cols-3 divide-x divide-border-hairline">
-      <Metric label="AI estimate" value={estimatedPrice} />
-      <Metric label="Listing" value={listingPrice} />
-      <Metric label="vs market" value={difference} ink={differenceInk} />
+      <Metric label={t('metrics.estimate')} value={estimatedPrice} />
+      <Metric label={t('metrics.listing')} value={listingPrice} />
+      <Metric label={t('metrics.vsMarket')} value={difference} ink={differenceInk} />
     </dl>
   )
 }

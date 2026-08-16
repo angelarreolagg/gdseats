@@ -1,4 +1,5 @@
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import { Tag } from '@/shared/components/Tag'
 import { formatCurrency, formatSignedPercent } from '@/shared/utils/formatters'
 import { DealBadge } from '@/domains/deal-analyzer/components/DealBadge'
@@ -17,6 +18,7 @@ interface ListingRowProps {
 }
 
 export function ListingRow({ listing, onOpen }: ListingRowProps) {
+  const { t } = useTranslation(['search', 'listing'])
   // Same service the detail panel calls — the verdict cannot drift between the
   // list and the page it opens.
   const verdict = evaluateDeal(getTotalPrice(listing), getEstimatedTotal(listing))
@@ -35,19 +37,23 @@ export function ListingRow({ listing, onOpen }: ListingRowProps) {
     >
       <div className="flex items-baseline justify-between gap-4">
         <span className="text-sm font-semibold tracking-tight text-ink">
-          Section {listing.section}, Row {listing.row}, {listing.seatRange}
+          {t('search:row.location', {
+            section: listing.section,
+            row: listing.row,
+            seatRange: listing.seatRange,
+          })}
         </span>
         <span className="shrink-0 text-sm font-semibold text-ink tabular-nums">
-          {formatCurrency(listing.pricePerSeat)}/seat
+          {t('search:row.pricePerSeat', { price: formatCurrency(listing.pricePerSeat) })}
         </span>
       </div>
 
       <div className="mt-1 flex items-baseline justify-between gap-4">
         <span className="text-xs text-muted">
-          ID: {listing.id} · {listing.seatCount} seats
+          {t('search:row.identity', { id: listing.id, count: listing.seatCount })}
         </span>
         <span className="shrink-0 text-xs text-muted underline decoration-border-hairline underline-offset-4 tabular-nums">
-          {formatCurrency(getTotalCost(listing))} total, incl. fees
+          {t('search:row.totalInclFees', { total: formatCurrency(getTotalCost(listing)) })}
         </span>
       </div>
 
@@ -57,10 +63,10 @@ export function ListingRow({ listing, onOpen }: ListingRowProps) {
           formattedDiff={formatSignedPercent(verdict.percentageDiff)}
         />
         {listing.tags.map((tag) => {
-          const { Icon, tooltip } = TAG_PRESENTATION[tag.iconName]
+          const { Icon, tooltipKey } = TAG_PRESENTATION[tag.iconName]
           return (
-            <Tag key={tag.id} tone={tag.tone} icon={Icon} tooltip={tooltip}>
-              {tag.label}
+            <Tag key={tag.id} tone={tag.tone} icon={Icon} tooltip={t(tooltipKey)}>
+              {t(tag.labelKey, tag.labelParams)}
             </Tag>
           )
         })}

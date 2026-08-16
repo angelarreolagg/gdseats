@@ -8,7 +8,9 @@ import {
   Share2,
   type LucideIcon,
 } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/shared/components/Button'
+import { SITE_NAME } from '@/shared/config/site'
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
 import { showDemoNotice } from '@/shared/utils/demoNotice'
 import { AIInsightPanel } from '@/domains/deal-analyzer/components/AIInsightPanel'
@@ -52,6 +54,7 @@ export function ListingDetailOverlay({
   sectionListings,
   onClose,
 }: ListingDetailOverlayProps) {
+  const { t } = useTranslation('listing')
   const panelRef = useRef<HTMLDivElement>(null)
   const hasAside = useMediaQuery(ASIDE_QUERY)
   const [offerOpen, setOfferOpen] = useState(false)
@@ -107,7 +110,7 @@ export function ListingDetailOverlay({
         ref={panelRef}
         role="dialog"
         aria-modal="true"
-        aria-label={`Listing ${listing.id}, section ${listing.section}`}
+        aria-label={t('detail.dialogLabel', { id: listing.id, section: listing.section })}
         tabIndex={-1}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -134,35 +137,35 @@ export function ListingDetailOverlay({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Back to search"
+            aria-label={t('detail.backToSearch')}
             className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-border-hairline px-2.5 py-2 text-sm font-medium text-ink transition-colors hover:bg-track sm:px-3"
           >
             <ChevronLeft aria-hidden="true" className="h-4 w-4" />
-            <span className="hidden sm:inline">Back to search</span>
+            <span className="hidden sm:inline">{t('detail.backToSearch')}</span>
           </button>
 
           <div className="flex min-w-0 items-center gap-2">
             <img src="/logo-mark.png" alt="" className="h-5 w-5 shrink-0 object-contain" />
             <span className="text-xs font-semibold tracking-widest whitespace-nowrap text-muted uppercase">
-              G&amp;D Seats
+              {SITE_NAME}
             </span>
           </div>
 
           <button
             type="button"
             onClick={showDemoNotice}
-            aria-label="Share"
+            aria-label={t('detail.share')}
             className="inline-flex shrink-0 items-center gap-2 rounded-lg border border-border-hairline px-2.5 py-2 text-sm font-medium text-ink transition-colors hover:bg-track sm:px-3"
           >
             <Share2 aria-hidden="true" className="h-4 w-4" />
-            <span className="hidden sm:inline">Share</span>
+            <span className="hidden sm:inline">{t('detail.share')}</span>
           </button>
         </header>
 
         <div className="grid grid-cols-1 gap-6 p-5 lg:grid-cols-[minmax(0,1fr)_360px] lg:p-6">
           <div className="flex flex-col gap-8">
             <section>
-              <SectionHeading icon={MapPin}>Location</SectionHeading>
+              <SectionHeading icon={MapPin}>{t('detail.location')}</SectionHeading>
               <SeatMap
                 className="h-64 w-full"
                 selectedSection={listing.section}
@@ -176,12 +179,12 @@ export function ListingDetailOverlay({
             <AIInsightPanel signals={signals} />
 
             <section>
-              <SectionHeading icon={History}>Price history</SectionHeading>
+              <SectionHeading icon={History}>{t('detail.priceHistory')}</SectionHeading>
               <PriceHistoryTable history={listing.priceHistory} />
             </section>
 
             <section>
-              <SectionHeading icon={ChartColumn}>Price stats</SectionHeading>
+              <SectionHeading icon={ChartColumn}>{t('detail.priceStats')}</SectionHeading>
               <PriceStatsChart sectionListings={sectionListings} listing={listing} />
             </section>
           </div>
@@ -210,7 +213,7 @@ export function ListingDetailOverlay({
            */
           <div className="sticky bottom-0 z-10 border-t border-border-hairline bg-page/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
             <Button type="button" fullWidth onClick={() => setOfferOpen(true)}>
-              Make an offer
+              {t('detail.makeAnOffer')}
             </Button>
           </div>
         )}

@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Minus, Plus, RotateCcw } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { IconButton } from '@/shared/components/IconButton'
 import { buildSectionGeometry, CENTER, FIELD, VIEWBOX } from '../data/venueLayout'
 
@@ -27,6 +28,7 @@ export function SeatMap({
   showLabels = true,
   className = '',
 }: SeatMapProps) {
+  const { t } = useTranslation('listing')
   const geometry = useMemo(() => buildSectionGeometry(), [])
   const [zoom, setZoom] = useState(1)
 
@@ -41,10 +43,19 @@ export function SeatMap({
         viewBox={viewBox}
         className="h-full w-full"
         role={readOnly ? 'img' : 'group'}
+        /*
+         * Two keys for the read-only label, not one with a "not selected"
+         * placeholder: substituting a phrase into a slot that otherwise holds a
+         * number gives translators a sentence they cannot make grammatical in
+         * either case, which is how "section not selected highlighted" happened
+         * in English in the first place.
+         */
         aria-label={
           readOnly
-            ? `Seat map, section ${selectedSection ?? 'not selected'} highlighted`
-            : 'Stadium seat map — select a section to filter listings'
+            ? selectedSection === null
+              ? t('map.readOnlyLabelUnselected')
+              : t('map.readOnlyLabel', { section: selectedSection })
+            : t('map.interactiveLabel')
         }
       >
         {/* Field. */}
@@ -96,9 +107,12 @@ export function SeatMap({
                 onClick={interactive ? () => onSelectSection?.(wedge.section) : undefined}
                 role={interactive ? 'button' : undefined}
                 tabIndex={interactive ? 0 : undefined}
+                // `count` rather than the hand-rolled `count === 1 ? '' : 's'`
+                // this replaced: that suffix is English grammar hard-coded into
+                // a component, and it is wrong in all three other locales.
                 aria-label={
                   interactive
-                    ? `Section ${wedge.section}, ${count} listing${count === 1 ? '' : 's'}`
+                    ? t('map.sectionListings', { section: wedge.section, count })
                     : undefined
                 }
                 aria-pressed={interactive ? isSelected : undefined}
@@ -134,7 +148,7 @@ export function SeatMap({
       {showControls ? (
         <div className="absolute right-3 bottom-3 flex flex-col gap-1.5">
           <IconButton
-            label="Zoom in"
+            label={t('map.zoomIn')}
             size="sm"
             disabled={zoom >= MAX_ZOOM}
             onClick={() => setZoom((current) => Math.min(MAX_ZOOM, current + 0.4))}
@@ -142,14 +156,14 @@ export function SeatMap({
             <Plus aria-hidden="true" className="h-4 w-4" />
           </IconButton>
           <IconButton
-            label="Zoom out"
+            label={t('map.zoomOut')}
             size="sm"
             disabled={zoom <= MIN_ZOOM}
             onClick={() => setZoom((current) => Math.max(MIN_ZOOM, current - 0.4))}
           >
             <Minus aria-hidden="true" className="h-4 w-4" />
           </IconButton>
-          <IconButton label="Reset view" size="sm" onClick={() => setZoom(1)}>
+          <IconButton label={t('map.resetView')} size="sm" onClick={() => setZoom(1)}>
             <RotateCcw aria-hidden="true" className="h-4 w-4" />
           </IconButton>
         </div>

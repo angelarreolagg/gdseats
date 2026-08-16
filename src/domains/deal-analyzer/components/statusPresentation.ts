@@ -3,7 +3,13 @@ import type { DealStatus, InsightTone, Recommendation } from '../types/deal.type
 
 interface StatusPresentation {
   Icon: LucideIcon
-  label: string
+  /**
+   * A key, not a phrase. This file is already the presentation layer, so it is
+   * where the icon and the tint are chosen — but the words are conversion
+   * copy and belong in the locale bundle where a translator can see the tone
+   * rules that go with them.
+   */
+  labelKey: string
   /** Soft tinted pill — a tag, not an alert. */
   pill: string
   /** Ink colour for text set on a plain surface. */
@@ -28,19 +34,19 @@ interface StatusPresentation {
 export const STATUS_PRESENTATION: Record<DealStatus, StatusPresentation> = {
   undervalued: {
     Icon: Gem,
-    label: 'Attractive value',
+    labelKey: 'status.undervalued',
     pill: 'bg-attractive/12 text-attractive',
     ink: 'text-attractive',
   },
   fair: {
     Icon: Equal,
-    label: 'In line with market',
+    labelKey: 'status.fair',
     pill: 'bg-aligned/12 text-aligned',
     ink: 'text-aligned',
   },
   overpriced: {
     Icon: TrendingUp,
-    label: 'Above market range',
+    labelKey: 'status.overpriced',
     pill: 'bg-above/12 text-above',
     ink: 'text-above',
   },
@@ -49,11 +55,14 @@ export const STATUS_PRESENTATION: Record<DealStatus, StatusPresentation> = {
 /**
  * Suggestive, never directive. "Wait" and "Buy now" tell the buyer what to do with
  * their money; these offer a reading and leave the decision with them.
+ *
+ * `getRecommendation()` returns the semantic key and this maps it to a
+ * translation key — the sentence itself never appears in either layer.
  */
-export const RECOMMENDATION_COPY: Record<Recommendation, string> = {
-  opportunity: 'This could be a strong opportunity based on recent trends',
-  aligned: 'This listing is aligned with recent market activity',
-  patience: 'You may find better value by waiting',
+export const RECOMMENDATION_KEY: Record<Recommendation, string> = {
+  opportunity: 'recommendation.opportunity',
+  aligned: 'recommendation.aligned',
+  patience: 'recommendation.patience',
 }
 
 /**

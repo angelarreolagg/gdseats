@@ -5,14 +5,30 @@ import type { Listing, ListingTag, PriceHistoryEntry } from '../types/listing.ty
 import { ALL_SECTIONS, getRingForSection, getSidelineMultiplier } from '../data/venueLayout'
 
 const ID_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ0123456789'
-const MONTHS = ['Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug']
+
+/**
+ * The window inventory is published in, as month indices — March to August 2026.
+ *
+ * Indices rather than the `['Mar', 'Apr', …]` array this replaced: those were
+ * English display strings baked into the data, which is where a date becomes
+ * untranslatable. `Date.UTC` turns an index into the epoch ms the type now
+ * carries, and the formatters decide what a reader sees.
+ */
+const FIRST_MONTH_INDEX = 2
+const LAST_MONTH_INDEX = 7
+const PUBLICATION_YEAR = 2026
 
 const AMENITY_TAGS: ListingTag[] = [
-  { id: 'parking', label: 'Parking', tone: 'neutral', iconName: 'parking' },
-  { id: 'aisle', label: 'Aisle', tone: 'neutral', iconName: 'aisle' },
-  { id: 'covered', label: 'Covered', tone: 'neutral', iconName: 'covered' },
-  { id: 'accessible', label: 'Accessible', tone: 'neutral', iconName: 'accessible' },
-  { id: 'financing', label: 'Financing', tone: 'neutral', iconName: 'financing' },
+  { id: 'parking', labelKey: 'listing:tags.parking', tone: 'neutral', iconName: 'parking' },
+  { id: 'aisle', labelKey: 'listing:tags.aisle', tone: 'neutral', iconName: 'aisle' },
+  { id: 'covered', labelKey: 'listing:tags.covered', tone: 'neutral', iconName: 'covered' },
+  {
+    id: 'accessible',
+    labelKey: 'listing:tags.accessible',
+    tone: 'neutral',
+    iconName: 'accessible',
+  },
+  { id: 'financing', labelKey: 'listing:tags.financing', tone: 'neutral', iconName: 'financing' },
 ]
 
 function roundTo(value: number, step: number): number {
@@ -66,7 +82,11 @@ export function generateListingsForTeam(team: Team): Listing[] {
       pricePerSeat: askPerSeat,
       transferFee: roundTo(askPerSeat * seatCount * 0.01, 25),
       platformFee: roundTo(askPerSeat * seatCount * 0.1, 25),
-      publicationDate: `${random.pick(MONTHS)} ${random.int(1, 28)}, 2026`,
+      publicationDateMs: Date.UTC(
+        PUBLICATION_YEAR,
+        random.int(FIRST_MONTH_INDEX, LAST_MONTH_INDEX),
+        random.int(1, 28),
+      ),
       estimatedPricePerSeat: fairPerSeat,
       priceHistory: buildPriceHistory(random, askPerSeat, seatCount),
       tags: buildTags(random, askPerSeat, fairPerSeat),
@@ -106,7 +126,14 @@ function buildPriceHistory(
   return perSeat.map((price, index) => {
     const previous = index > 0 ? perSeat[index - 1] : null
     return {
-      date: `${MONTHS[Math.min(index + 1, MONTHS.length - 1)]} ${random.int(1, 28)}, 2026`,
+      // Walks forward a month per revision and then holds at the last one, so a
+      // long history stays inside the publication window rather than running off
+      // the end of the season.
+      dateMs: Date.UTC(
+        PUBLICATION_YEAR,
+        Math.min(FIRST_MONTH_INDEX + index + 1, LAST_MONTH_INDEX),
+        random.int(1, 28),
+      ),
       totalPrice: price * seatCount,
       pricePerSeat: price,
       changePercent: previous === null ? null : (price - previous) / previous,
@@ -122,10 +149,20 @@ function buildTags(
   const tags: ListingTag[] = []
 
   if (random.chance(0.55)) {
-    tags.push({ id: 'featured', label: 'Featured', tone: 'accent', iconName: 'featured' })
+    tags.push({
+      id: 'featured',
+      labelKey: 'listing:tags.featured',
+      tone: 'accent',
+      iconName: 'featured',
+    })
   }
   if (random.chance(0.25)) {
-    tags.push({ id: 'this-week', label: 'This week', tone: 'info', iconName: 'this-week' })
+    tags.push({
+      id: 'this-week',
+      labelKey: 'listing:tags.thisWeek',
+      tone: 'info',
+      iconName: 'this-week',
+    })
   }
 
   for (const amenity of AMENITY_TAGS) {
@@ -140,7 +177,8 @@ function buildTags(
   if (discount > 0.08) {
     tags.push({
       id: 'price-drop',
-      label: `${Math.round(discount * 100)}% off`,
+      labelKey: 'listing:tags.priceDrop',
+      labelParams: { percent: Math.round(discount * 100) },
       tone: 'critical',
       iconName: 'price-drop',
     })

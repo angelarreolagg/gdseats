@@ -1,12 +1,21 @@
 import { describe, expect, it } from 'vitest'
-import { render, screen } from '@/test/utils'
+import { render, screen, setLocale } from '@/test/utils'
 import { PriceHistoryTable } from '../components/PriceHistoryTable'
 import type { PriceHistoryEntry } from '../types/listing.types'
 
+/**
+ * Epoch ms rather than the display strings this fixture used to hold — the whole
+ * point of the change is that the table decides how a date reads, so a test that
+ * supplied the finished words could not tell whether it did.
+ *
+ * `Date.UTC` and not `new Date(2026, 1, 9)`: the formatters pin `timeZone: 'UTC'`
+ * so a calendar date cannot slip a day for a reader west of Greenwich, and a
+ * local-time fixture would make this suite pass or fail on the machine's zone.
+ */
 const HISTORY: PriceHistoryEntry[] = [
-  { date: 'Feb 9, 2026', totalPrice: 13_000, pricePerSeat: 6_500, changePercent: null },
-  { date: 'Apr 22, 2026', totalPrice: 10_000, pricePerSeat: 5_000, changePercent: -0.23 },
-  { date: 'May 30, 2026', totalPrice: 11_500, pricePerSeat: 5_750, changePercent: 0.15 },
+  { dateMs: Date.UTC(2026, 1, 9), totalPrice: 13_000, pricePerSeat: 6_500, changePercent: null },
+  { dateMs: Date.UTC(2026, 3, 22), totalPrice: 10_000, pricePerSeat: 5_000, changePercent: -0.23 },
+  { dateMs: Date.UTC(2026, 4, 30), totalPrice: 11_500, pricePerSeat: 5_750, changePercent: 0.15 },
 ]
 
 describe('PriceHistoryTable', () => {
@@ -62,6 +71,22 @@ describe('PriceHistoryTable', () => {
     expect(screen.getByText('--')).toBeInTheDocument()
     const dates = screen.getAllByText(/2026$/).map((node) => node.textContent)
     expect(dates[0]).toBe('May 30, 2026')
+  })
+
+  /**
+   * Validates: the Date column is formatted for the reader's locale.
+   * Why it matters: this column held generated English strings until the dates
+   * became data, and the old shortening in `listingSignals.service.ts` split on
+   * a comma — an assumption that is simply false in es, pt-BR and ja. Pinning
+   * one non-English rendering is what proves the column now asks the locale
+   * rather than printing whatever the generator happened to write down.
+   */
+  it('formats dates for the active locale', () => {
+    setLocale('ja')
+    render(<PriceHistoryTable history={HISTORY} />)
+
+    expect(screen.getByText('2026/05/30')).toBeInTheDocument()
+    expect(screen.queryByText('May 30, 2026')).not.toBeInTheDocument()
   })
 
   it('shows both total and per-seat prices', () => {

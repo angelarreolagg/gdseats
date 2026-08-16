@@ -2,11 +2,6 @@ import type { ListingSignals, Trend } from '@/domains/deal-analyzer/types/deal.t
 import type { Listing } from '../types/listing.types'
 import { getEstimatedTotal, getSectionAverageTotal, getTotalPrice } from '../types/listing.types'
 
-/** Short label for insight copy — "Jul 22, 2026" reads long inside a bullet. */
-function shortDate(date: string): string {
-  return date.split(',')[0]
-}
-
 function inferTrend(listing: Listing): Trend {
   const history = listing.priceHistory
   if (history.length < 2) return 'flat'
@@ -31,8 +26,12 @@ export function toListingSignals(listing: Listing): ListingSignals {
     sectionAverage: getSectionAverageTotal(listing),
     section: listing.section,
     trend: inferTrend(listing),
+    // Dates cross over as epoch ms and are shortened at render, which is what
+    // removed the `date.split(',')[0]` that used to live here: it was an
+    // assumption about US comma placement, and es/pt-BR have no comma to split
+    // on while ja writes the year first — so the "short" date was the year.
     priceHistory: listing.priceHistory.map((entry) => ({
-      date: shortDate(entry.date),
+      dateMs: entry.dateMs,
       price: entry.totalPrice,
     })),
   }

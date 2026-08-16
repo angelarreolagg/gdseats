@@ -1,6 +1,7 @@
 import { useId } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { X } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { IconButton } from '@/shared/components/IconButton'
 import type { Listing } from '../types/listing.types'
 import { MakeAnOfferCard } from './MakeAnOfferCard'
@@ -35,6 +36,7 @@ const DISMISS_VELOCITY = 500
  * branch there.
  */
 export function OfferSheet({ listing, open, onClose }: OfferSheetProps) {
+  const { t } = useTranslation('listing')
   const titleId = useId()
 
   return (
@@ -80,10 +82,10 @@ export function OfferSheet({ listing, open, onClose }: OfferSheetProps) {
 
             <header className="flex items-center justify-between gap-4 border-b border-border-hairline px-4 pb-3">
               <h2 id={titleId} className="text-base font-semibold text-ink">
-                Make an offer
+                {t('offer.heading')}
               </h2>
               {/* `md` (40px), not `sm` — this is a touch-only surface. */}
-              <IconButton label="Close offer form" onClick={onClose}>
+              <IconButton label={t('offer.close')} onClick={onClose}>
                 <X aria-hidden="true" className="h-4 w-4" />
               </IconButton>
             </header>

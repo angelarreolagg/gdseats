@@ -17,14 +17,31 @@ export type TagIconName =
 
 export interface ListingTag {
   id: string
-  label: string
+  /**
+   * A translation key, never a phrase — same rule as `iconName` above. The
+   * generator names the tag; `components/tagPresentation.ts` and the row that
+   * renders it resolve the words.
+   */
+  labelKey: string
+  /** Interpolation for the one tag that carries a figure ("12% off"). */
+  labelParams?: Record<string, string | number>
   tone: TagTone
   iconName: TagIconName
 }
 
 /** Richer than the analyzer's signal shape — this is what the detail table shows. */
 export interface PriceHistoryEntry {
-  date: string
+  /**
+   * Epoch ms, not a display string.
+   *
+   * This used to be `"Jul 22, 2026"`, generated in English and rendered raw —
+   * untranslatable where it sat, and the reason `listingSignals.service.ts` once
+   * carried a `split(',')[0]` that only made sense in one locale. A number
+   * rather than an ISO string because the seeded generator produces it
+   * arithmetically and a demo has no timezone question to answer; the
+   * formatters pin `UTC` so it never drifts a day.
+   */
+  dateMs: number
   totalPrice: number
   pricePerSeat: number
   /** Signed fraction vs the previous entry; null for the oldest row. */
@@ -42,7 +59,8 @@ export interface Listing {
   pricePerSeat: number
   transferFee: number
   platformFee: number
-  publicationDate: string
+  /** Epoch ms — see the note on `PriceHistoryEntry.dateMs`. */
+  publicationDateMs: number
   /**
    * Fair value per seat, as the host platform would supply it. The deal-analyzer
    * evaluates this; it never produces it.

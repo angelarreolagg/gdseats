@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from 'react-i18next'
 import { formatCompactCurrency, formatCurrency } from '@/shared/utils/formatters'
 import type { Listing } from '../types/listing.types'
 
@@ -22,6 +23,7 @@ const GAP = 2
  * is reachable only by reading a bar.
  */
 export function PriceStatsChart({ sectionListings, listing }: PriceStatsChartProps) {
+  const { t } = useTranslation('listing')
   const sorted = [...sectionListings].sort((a, b) => a.pricePerSeat - b.pricePerSeat)
   if (sorted.length === 0) return null
 
@@ -45,16 +47,17 @@ export function PriceStatsChart({ sectionListings, listing }: PriceStatsChartPro
 
   return (
     <div>
-      <p className="text-sm text-muted">
-        See how this listing's price per seat compares to other listings in the same section.
-        Prices exclude transfer and platform fees.
-      </p>
+      <p className="text-sm text-muted">{t('stats.intro')}</p>
 
       <svg
         viewBox={`0 0 ${CHART.width} ${CHART.height}`}
         className="mt-4 h-40 w-full"
         role="img"
-        aria-label={`This listing is cheaper than ${sorted.length - cheaperCount - 1} of ${sorted.length - 1} other listings in section ${listing.section}`}
+        aria-label={t('stats.chartLabel', {
+          cheaperThan: sorted.length - cheaperCount - 1,
+          peers: sorted.length - 1,
+          section: listing.section,
+        })}
       >
         {sorted.map((item, index) => {
           const isHighlight = index === highlightIndex
@@ -117,19 +120,29 @@ export function PriceStatsChart({ sectionListings, listing }: PriceStatsChartPro
 
       <p className="mt-1 text-xs text-muted">
         {sorted.length === 1 ? (
-          <>Only listing in section {listing.section}.</>
+          t('stats.onlyListing', { section: listing.section })
         ) : (
-          <>
-            Cheaper than{' '}
-            <span className="font-medium text-ink">
-              {sorted.length - cheaperCount - 1} of {sorted.length - 1}
-            </span>{' '}
-            other listings in section {listing.section} · section average{' '}
-            <span className="font-medium text-ink tabular-nums">
-              {formatCurrency(listing.sectionAveragePerSeat)}
-            </span>
-            /seat
-          </>
+          /*
+           * `<Trans>` with NAMED components rather than three `t()` calls glued
+           * together. The two emphasised runs sit in different places in
+           * different languages — Japanese puts the count after the noun it
+           * counts — and a split sentence would force every translator to keep
+           * our clause order. Named tags rather than indexed `<0>` for the same
+           * reason: reordering the clause must not reorder the markup.
+           */
+          <Trans
+            i18nKey="listing:stats.comparison"
+            values={{
+              cheaperThan: sorted.length - cheaperCount - 1,
+              peers: sorted.length - 1,
+              section: listing.section,
+              average: formatCurrency(listing.sectionAveragePerSeat),
+            }}
+            components={{
+              rank: <span className="font-medium text-ink" />,
+              average: <span className="font-medium text-ink tabular-nums" />,
+            }}
+          />
         )}
       </p>
     </div>

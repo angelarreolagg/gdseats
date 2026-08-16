@@ -1,5 +1,6 @@
 import { TrendingDown, TrendingUp } from 'lucide-react'
-import { formatCurrency, formatPercent } from '@/shared/utils/formatters'
+import { useTranslation } from 'react-i18next'
+import { formatCurrency, formatListingDate, formatPercent } from '@/shared/utils/formatters'
 import type { PriceHistoryEntry } from '../types/listing.types'
 
 interface PriceHistoryTableProps {
@@ -20,6 +21,7 @@ interface PriceHistoryTableProps {
  * (ΔE 1.2 under deuteranopia in light mode).
  */
 function ChangeBadge({ change }: { change: number }) {
+  const { t } = useTranslation('listing')
   const fell = change < 0
   const Icon = fell ? TrendingDown : TrendingUp
 
@@ -32,7 +34,7 @@ function ChangeBadge({ change }: { change: number }) {
       }`}
     >
       <Icon aria-hidden="true" className="h-3 w-3 shrink-0" strokeWidth={2.5} />
-      <span className="sr-only">{fell ? 'down' : 'up'} </span>
+      <span className="sr-only">{fell ? t('history.fell') : t('history.rose')} </span>
       {/* The arrow carries the sign, so the figure stays unsigned. */}
       {formatPercent(change)}
     </span>
@@ -40,36 +42,37 @@ function ChangeBadge({ change }: { change: number }) {
 }
 
 export function PriceHistoryTable({ history }: PriceHistoryTableProps) {
+  const { t } = useTranslation('listing')
   // Newest first, the way a listing page reads.
   const rows = [...history].reverse()
 
   return (
     <div>
       <table className="w-full text-sm">
-        <caption className="sr-only">Price history for this listing</caption>
+        <caption className="sr-only">{t('history.caption')}</caption>
         <thead>
           <tr className="border-b border-border-hairline text-xs text-muted">
             <th scope="col" className="py-2.5 text-left font-medium">
-              Date
+              {t('history.date')}
             </th>
             <th scope="col" className="py-2.5 text-right font-medium">
-              Total price*
+              {t('history.totalPrice')}
             </th>
             <th scope="col" className="py-2.5 text-right font-medium">
-              Price per seat*
+              {t('history.pricePerSeat')}
             </th>
             <th scope="col" className="py-2.5 text-right font-medium">
-              Change
+              {t('history.change')}
             </th>
           </tr>
         </thead>
         <tbody>
           {rows.map((entry, index) => (
             <tr
-              key={`${entry.date}-${index}`}
+              key={`${entry.dateMs}-${index}`}
               className="border-b border-border-hairline/60 last:border-0"
             >
-              <td className="py-2.5 text-ink">{entry.date}</td>
+              <td className="py-2.5 text-ink">{formatListingDate(entry.dateMs)}</td>
               <td className="py-2.5 text-right text-ink tabular-nums">
                 {formatCurrency(entry.totalPrice)}
               </td>
@@ -88,9 +91,7 @@ export function PriceHistoryTable({ history }: PriceHistoryTableProps) {
         </tbody>
       </table>
 
-      <p className="mt-3 text-xs text-muted">
-        *Historic prices do not include transfer or platform fees
-      </p>
+      <p className="mt-3 text-xs text-muted">{t('history.footnote')}</p>
     </div>
   )
 }

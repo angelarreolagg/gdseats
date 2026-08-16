@@ -66,10 +66,12 @@ const BASE: ListingSignals = {
   sectionAverage: 35_000,
   section: 143,
   trend: 'down',
+  // Epoch ms, formatted at render — the panel's bullets show "Mar 25" / "Jul 27"
+  // in English and whatever the locale's short date is elsewhere.
   priceHistory: [
-    { date: 'Mar 25', price: 75_000 },
-    { date: 'Jul 22', price: 44_000 },
-    { date: 'Jul 27', price: 40_000 },
+    { dateMs: Date.UTC(2026, 2, 25), price: 75_000 },
+    { dateMs: Date.UTC(2026, 6, 22), price: 44_000 },
+    { dateMs: Date.UTC(2026, 6, 27), price: 40_000 },
   ],
 }
 
