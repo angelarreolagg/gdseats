@@ -58,6 +58,47 @@ globalThis.ResizeObserver = class {
   disconnect() {}
 }
 
+/**
+ * jsdom has no `IntersectionObserver` at all, and `Reveal` — every landing
+ * section — animates on `whileInView`, which Motion implements with one.
+ *
+ * Left unstubbed the constructor throws. Stubbed as a no-op it is worse than
+ * that: nothing ever reports as intersecting, so every revealed element holds
+ * its `initial` state of `opacity: 0` forever. Content assertions still pass
+ * (the nodes are in the DOM), but `toBeVisible()` fails and the sections look
+ * broken for a reason no test names. So this reports intersection synchronously
+ * the moment something is observed, which is the state the assertions want.
+ *
+ * Note the reduced-motion stub above does NOT cover this. `reducedMotion="user"`
+ * suppresses transforms, not opacity, and it has no opinion about what triggers
+ * an animation in the first place.
+ */
+globalThis.IntersectionObserver = class {
+  readonly root = null
+  readonly rootMargin = ''
+  readonly thresholds: ReadonlyArray<number> = []
+  // A plain field, not a parameter property: `erasableSyntaxOnly` is on, and a
+  // parameter property emits real code rather than erasing to nothing.
+  callback: IntersectionObserverCallback
+
+  constructor(callback: IntersectionObserverCallback) {
+    this.callback = callback
+  }
+
+  observe(target: Element) {
+    this.callback(
+      [{ isIntersecting: true, intersectionRatio: 1, target } as IntersectionObserverEntry],
+      this as unknown as IntersectionObserver,
+    )
+  }
+
+  unobserve() {}
+  disconnect() {}
+  takeRecords(): IntersectionObserverEntry[] {
+    return []
+  }
+} as unknown as typeof IntersectionObserver
+
 afterEach(() => {
   cleanup()
   // Restore the default, or one mobile test silently rewrites the viewport for
