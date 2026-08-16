@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "switchToLight": "Cambiar a modo claro",
+    "switchToDark": "Cambiar a modo oscuro"
+  },
+  "language": {
+    "change": "Cambiar idioma",
+    "listLabel": "Idiomas"
+  },
+  "demo": {
+    "notAvailable": "No disponible — esto es una demo.",
+    "offerInvitation": "Esto es una demo — pero <strong>podemos hacerlo realidad</strong>."
+  }
+}

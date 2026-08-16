@@ -15,25 +15,18 @@ function buildListing(overrides: Partial<Listing> = {}): Listing {
     pricePerSeat: 14_450,
     transferFee: 300,
     platformFee: 2_600,
-    publicationDate: 'Aug 5, 2026',
+    publicationDateMs: Date.UTC(2026, 7, 5),
     estimatedPricePerSeat: 14_450,
     sectionAveragePerSeat: 14_000,
     priceHistory: [
-      { date: 'Aug 5, 2026', totalPrice: 28_900, pricePerSeat: 14_450, changePercent: null },
+      { dateMs: Date.UTC(2026, 7, 5), totalPrice: 28_900, pricePerSeat: 14_450, changePercent: null },
     ],
-    tags: [{ id: 'featured', label: 'Featured', tone: 'accent', iconName: 'featured' }],
+    tags: [{ id: 'featured', labelKey: 'listing:tags.featured', tone: 'accent', iconName: 'featured' }],
     ...overrides,
   }
 }
 
 describe('ListingRow', () => {
-  /**
-   * Validates: the row's verdict is computed from the same service the detail
-   * panel uses.
-   * Why it matters: the badge is what a buyer scans before clicking. If the list
-   * said "Undervalued" and the detail said "Overpriced", the feature would be
-   * worse than not shipping it.
-   */
   it('shows the verdict for an undervalued listing', () => {
     render(
       <ListingRow
@@ -54,12 +47,6 @@ describe('ListingRow', () => {
     expect(screen.getByText('Above market range')).toBeInTheDocument()
   })
 
-  /**
-   * Validates: the badge states its verdict in text, not colour alone.
-   * Why it matters: green and red collapse to CVD ΔE 1.2 under deuteranopia in
-   * light mode. A row scanned by colour would be unreadable for red-green
-   * colourblind users, so the label is the mitigation and must not regress.
-   */
   it('states the verdict in text alongside the colour', () => {
     const { container } = render(
       <ListingRow

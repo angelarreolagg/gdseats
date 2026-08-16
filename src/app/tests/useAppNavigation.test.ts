@@ -7,13 +7,6 @@ describe('useAppNavigation', () => {
     vi.mocked(window.scrollTo).mockClear()
   })
 
-  /**
-   * Validates: changing screens returns the document to the top.
-   * Why it matters: screens swap in place rather than through a router, so the
-   * page keeps the offset the previous one was left at. Picking a team from the
-   * bottom of the grid opened the seat map already scrolled past the stadium —
-   * the buyer landed on a half-cut map and a header they never saw.
-   */
   it('scrolls to the top when the screen changes', () => {
     const { result } = renderHook(() => useAppNavigation())
 
@@ -26,13 +19,6 @@ describe('useAppNavigation', () => {
     expect(window.scrollTo).toHaveBeenCalledWith(0, 0)
   })
 
-  /**
-   * Validates: opening and closing a listing leaves the scroll position alone.
-   * Why it matters: the detail is an overlay over the results, not a page. A
-   * buyer comparing listings opens one, closes it, and must come back to the
-   * row they were reading — resetting there would lose their place in a list of
-   * 170 and make comparison shopping impossible.
-   */
   it('leaves the scroll position alone for the listing overlay', () => {
     const { result } = renderHook(() => useAppNavigation())
 

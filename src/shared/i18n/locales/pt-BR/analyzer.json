@@ -1,0 +1,42 @@
+{
+  "panel": {
+    "heading": "Análise de IA",
+    "beta": "Beta",
+    "analyzing": "Analisando este anúncio"
+  },
+  "metrics": {
+    "estimate": "Estimativa IA",
+    "listing": "Anúncio",
+    "vsMarket": "vs mercado"
+  },
+  "status": {
+    "undervalued": "Valor atrativo",
+    "fair": "Em linha com o mercado",
+    "overpriced": "Acima da faixa do mercado"
+  },
+  "badge": {
+    "vsMarket": "{{diff}} vs mercado"
+  },
+  "recommendation": {
+    "opportunity": "Esta pode ser uma boa oportunidade com base nas tendências recentes",
+    "aligned": "Este anúncio está alinhado com a atividade recente do mercado",
+    "patience": "Você pode encontrar um valor melhor se esperar"
+  },
+  "insights": {
+    "recentMovement": {
+      "down": "Preço ajustado para baixo em {{magnitude}} desde {{date}}",
+      "up": "Preço ajustado para cima em {{magnitude}} desde {{date}}"
+    },
+    "sectionAverage": {
+      "similar": "Assentos comparáveis no setor {{section}} estão em um patamar parecido",
+      "above": "Está {{magnitude}} acima da média do setor {{section}}",
+      "below": "Está {{magnitude}} abaixo da média do setor {{section}}"
+    },
+    "trend": {
+      "down_one": "Ajustado a partir de {{price}} desde {{date}} em {{count}} revisão",
+      "down_other": "Ajustado a partir de {{price}} desde {{date}} em {{count}} revisões",
+      "up": "Aumentos graduais observados desde {{date}}",
+      "flat": "O preço se manteve estável desde {{date}}"
+    }
+  }
+}

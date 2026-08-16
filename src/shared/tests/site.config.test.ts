@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import INDEX_HTML from '../../../index.html?raw'
 import ROBOTS_TXT from '../../../public/robots.txt?raw'
 import SITEMAP_XML from '../../../public/sitemap.xml?raw'
+import EN_META from '../i18n/locales/en/meta.json'
+import { LOCALE_CODES } from '../i18n/locales'
 import {
   DEFAULT_DESCRIPTION,
   DEFAULT_TITLE,
@@ -44,25 +46,12 @@ function metaContent(attribute: string, name: string): string {
 }
 
 describe('site config against index.html', () => {
-  /**
-   * Validates: the title in the markup is the one the app restores.
-   * Why it matters: `useDocumentMeta` rewrites the title per screen and puts
-   * `DEFAULT_TITLE` back on the way home. Let the two drift and the tab silently
-   * changes wording the moment a visitor navigates — the same page, two names.
-   */
   it('ships the same title the app falls back to', () => {
     expect(decode(INDEX.match(/<title>([^<]+)<\/title>/)![1])).toBe(DEFAULT_TITLE)
     expect(metaContent('property', 'og:title')).toBe(DEFAULT_TITLE)
     expect(metaContent('name', 'twitter:title')).toBe(DEFAULT_TITLE)
   })
 
-  /**
-   * Validates: one description, stated identically in all three places.
-   * Why it matters: `description`, `og:description` and `twitter:description` are
-   * three answers to one question. A visitor never sees them, so a stale one can
-   * sit in the markup for months and only show up in a search result or a shared
-   * link — the two places that matter most and are checked least.
-   */
   it('ships one description everywhere it appears', () => {
     for (const [attribute, name] of [
       ['name', 'description'],
@@ -73,24 +62,10 @@ describe('site config against index.html', () => {
     }
   })
 
-  /**
-   * Validates: the description survives a search snippet whole.
-   * Why it matters: Google truncates around 160 characters. Past that it is cut
-   * mid-clause, which reads as a broken page rather than a long one.
-   */
   it('keeps the description within snippet length', () => {
     expect(DEFAULT_DESCRIPTION.length).toBeLessThanOrEqual(160)
   })
 
-  /**
-   * Validates: every absolute URL in the markup is built on SITE_URL, and the
-   * social image is absolute.
-   * Why it matters: moving to a custom domain means editing six places. Miss one
-   * and the failure is invisible locally — a canonical pointing at the old host
-   * tells Google the live page is a duplicate of a domain nobody is on. And Open
-   * Graph requires an absolute `og:image`: a relative one yields no preview card
-   * at all on most scrapers, which is the entire point of the link.
-   */
   it('builds every absolute URL on SITE_URL', () => {
     expect(INDEX.match(/rel="canonical"[\s\S]{0,40}?href="([^"]+)"/)![1]).toBe(`${SITE_URL}/`)
     expect(metaContent('property', 'og:url')).toBe(`${SITE_URL}/`)
@@ -110,14 +85,18 @@ describe('site config against index.html', () => {
     expect([...origins]).toEqual([SITE_URL])
   })
 
-  /**
-   * Validates: robots.txt and sitemap.xml name the same host.
-   * Why it matters: they are the two files a crawler reads before anything else.
-   * A sitemap on the wrong origin is not merely ignored — it is a set of URLs the
-   * crawler cannot verify we own.
-   */
   it('points robots.txt and the sitemap at the same host', () => {
     expect(ROBOTS_TXT).toContain(`Sitemap: ${SITE_URL}/sitemap.xml`)
     expect(SITEMAP_XML).toContain(`<loc>${SITE_URL}/</loc>`)
+  })
+
+  it('lists the same locales in the pre-paint script as the app supports', () => {
+    const declared = INDEX.match(/var supported = (\[[^\]]+\])/)![1]
+    expect(JSON.parse(declared.replace(/'/g, '"'))).toEqual([...LOCALE_CODES])
+  })
+
+  it('states the same default title and description in the en bundle', () => {
+    expect(EN_META.default.title).toBe(DEFAULT_TITLE)
+    expect(EN_META.default.description).toBe(DEFAULT_DESCRIPTION)
   })
 })

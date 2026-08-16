@@ -5,34 +5,40 @@ import { TrendChip } from '../components/TrendChip'
 import { getMarketTrend } from '../services/marketTrend.service'
 import { getTrendExplanation } from '../components/trendPresentation'
 import { TEAMS, getTeamById } from '../data/teams'
-import { formatSignedPercent } from '@/shared/utils/formatters'
+import { formatPercent, formatSignedPercent } from '@/shared/utils/formatters'
+import i18n from '@/shared/i18n'
 
 const NOW = new Date('2026-08-07')
 const TREND = getMarketTrend(getTeamById('dal')!, NOW)
 
+/** The label the chip renders, resolved the way the component resolves it. */
+const label = (trend = TREND) => i18n.t(trend.labelKey)
+
+/**
+ * The explanation as the chip renders it.
+ *
+ * `getTrendExplanation` returns keys plus the counted horizon now, so a test
+ * that wants to find the sentence on screen has to resolve it the same way —
+ * including passing `count`, which is what selects the plural form.
+ */
+function explain(trend = TREND) {
+  const { forecastKey, implicationKey, months, momentum } = getTrendExplanation(trend)
+  return {
+    forecast: i18n.t(forecastKey, { count: months, magnitude: formatPercent(momentum) }),
+    implication: i18n.t(implicationKey),
+  }
+}
+
 describe('TrendChip', () => {
-  /**
-   * Validates: direction and magnitude are visible text, not tooltip-only.
-   * Why it matters: hover never fires on touch. If the label or the percentage
-   * lived only in the tooltip, the chip would be meaningless on a phone.
-   */
   it('renders the label and the momentum without hovering', () => {
     render(<TrendChip trend={TREND} />)
 
-    expect(screen.getByText(TREND.label)).toBeInTheDocument()
+    expect(screen.getByText(label())).toBeInTheDocument()
     expect(screen.getByText(formatSignedPercent(TREND.momentum))).toBeInTheDocument()
   })
 
-  /**
-   * Validates: on a touch device the reasoning opens on tap, and a second tap
-   * closes it.
-   * Why it matters: the forecast sentence is the one thing in this feature that
-   * lives *only* in the tooltip, and a hover tooltip never fires on touch — so on
-   * a phone the Popularity Insight was a chip with no explanation behind it. The
-   * second tap matters as much as the first: Radix closes a tooltip on the
-   * trigger's `pointerdown`, which lands before the `click` that toggles it, so
-   * the obvious implementation opens on every tap and can never be dismissed.
-   */
+  // The second tap matters: Radix closes on the trigger's pointerdown, which
+  // lands before the click that toggles it.
   it('opens the explanation on tap where there is no hover', async () => {
     setViewport('mobile')
     const { container } = render(<TrendChip trend={TREND} />)
@@ -40,8 +46,8 @@ describe('TrendChip', () => {
     // Scoped to the container because the open panel repeats the label in its own
     // header — and it renders through a portal, outside this node. `screen` would
     // find both and throw on the second tap.
-    const chip = () => within(container).getByText(TREND.label)
-    const { forecast } = getTrendExplanation(TREND)
+    const chip = () => within(container).getByText(label())
+    const { forecast } = explain()
 
     expect(screen.queryByText(forecast)).not.toBeInTheDocument()
 
@@ -52,13 +58,6 @@ describe('TrendChip', () => {
     expect(screen.queryByText(forecast)).not.toBeInTheDocument()
   })
 
-  /**
-   * Validates: tapping the chip does not activate whatever contains it.
-   * Why it matters: `TeamCard` is a `<button>` and the chip sits inside it. A tap
-   * that both opens the tooltip and navigates to the franchise means the buyer
-   * never gets to read the sentence they tapped for — they are on another screen
-   * before it renders. This is the actual regression risk of the whole change.
-   */
   it('does not activate its container when tapped', async () => {
     setViewport('mobile')
     const onSelect = vi.fn()
@@ -68,20 +67,15 @@ describe('TrendChip', () => {
       </button>,
     )
 
-    await userEvent.click(screen.getByText(TREND.label))
+    await userEvent.click(screen.getByText(label()))
 
-    expect(await screen.findByText(getTrendExplanation(TREND).forecast)).toBeInTheDocument()
+    expect(await screen.findByText(explain().forecast)).toBeInTheDocument()
     expect(onSelect).not.toHaveBeenCalled()
   })
 
-  /**
-   * Validates: the explanation is reachable by keyboard when the chip opts in.
-   * Why it matters: a hover-only tooltip is invisible to keyboard users. The
-   * toolbar variant is the one place the reasoning must be reachable that way.
-   */
   it('opens the explanation on keyboard focus when focusable', async () => {
     render(<TrendChip trend={TREND} focusable />)
-    const { forecast, implication } = getTrendExplanation(TREND)
+    const { forecast, implication } = explain()
 
     await userEvent.tab()
     const tooltip = await screen.findByRole('tooltip')
@@ -90,28 +84,16 @@ describe('TrendChip', () => {
     expect(tooltip).toHaveTextContent(implication)
   })
 
-  /**
-   * Validates: the tooltip is a titled panel, not a run of text.
-   * Why it matters: it can open some distance from its trigger — on the team grid
-   * it floats over neighbouring cards — so it has to say what it is about. The
-   * header repeats the direction the chip states.
-   */
   it('titles the tooltip with the direction it explains', async () => {
     render(<TrendChip trend={TREND} focusable />)
 
     await userEvent.tab()
     const tooltip = await screen.findByRole('tooltip')
 
-    expect(tooltip).toHaveTextContent(TREND.label)
+    expect(tooltip).toHaveTextContent(label())
     expect(tooltip).toHaveTextContent(formatSignedPercent(TREND.momentum))
   })
 
-  /**
-   * Validates: the default variant takes no tab stop.
-   * Why it matters: this is the variant used inside `TeamCard`, which is itself a
-   * `<button>`. A focusable element nested in a button is invalid markup, and
-   * eight cards would mean eight extra stops between one team and the next.
-   */
   it('takes no tab stop by default', async () => {
     render(
       <>
@@ -127,12 +109,6 @@ describe('TrendChip', () => {
     expect(screen.getByText('after')).toHaveFocus()
   })
 
-  /**
-   * Validates: a steady market shows no percentage.
-   * Why it matters: steady rounds to "0%", which reads as missing data rather
-   * than as a measurement — and "no movement" is exactly what the label already
-   * says. The figure stays in the tooltip for anyone who wants it.
-   */
   it('omits the figure when the market is steady', () => {
     const steady = TEAMS.map((team) => getMarketTrend(team, NOW)).find(
       (trend) => trend.direction === 'steady',
@@ -140,20 +116,15 @@ describe('TrendChip', () => {
 
     render(<TrendChip trend={steady} />)
 
-    expect(screen.getByText(steady.label)).toBeInTheDocument()
+    expect(screen.getByText(label(steady))).toBeInTheDocument()
     expect(screen.queryByText('0%')).not.toBeInTheDocument()
-    expect(getTrendExplanation(steady).forecast).toMatch(/projected to hold/i)
+    expect(explain(steady).forecast).toMatch(/projected to hold/i)
   })
 
-  /**
-   * Validates: direction never rides on colour alone.
-   * Why it matters: green vs amber measure CVD ΔE 7.0 under deuteranopia. The
-   * icon and the written label are the mitigation, as everywhere else here.
-   */
   it('pairs the colour with an icon and a written label', () => {
     const { container } = render(<TrendChip trend={TREND} />)
 
     expect(container.querySelector('svg')).toBeInTheDocument()
-    expect(screen.getByText(TREND.label)).toBeInTheDocument()
+    expect(screen.getByText(label())).toBeInTheDocument()
   })
 })

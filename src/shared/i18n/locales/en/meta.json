@@ -1,0 +1,14 @@
+{
+  "default": {
+    "title": "G&D Seats — AI-priced NFL personal seat licenses",
+    "description": "Browse NFL personal seat licenses on an interactive seat map and see an AI valuation on every listing before you offer. Frontend demo, mock data."
+  },
+  "team": {
+    "title": "{{team}} PSLs — {{venue}} | {{site}}",
+    "description": "Personal seat licenses for sale at {{venue}}, home of the {{team}}. Compare every asking price against an AI valuation on an interactive seat map."
+  },
+  "listing": {
+    "title": "Section {{section}}, Row {{row}} — {{team}} PSL | {{site}}",
+    "description": "{{seatCount}} personal seat licenses in section {{section}}, row {{row}} at {{venue}}, with an AI read on how the asking price compares to the section."
+  }
+}

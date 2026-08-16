@@ -13,8 +13,8 @@ export type Trend = 'up' | 'down' | 'flat'
 export type InsightTone = 'positive' | 'neutral' | 'caution'
 
 export interface PriceHistoryPoint {
-  /** Display label, e.g. "Jul 27". */
-  date: string
+  /** Epoch ms. The component formats it; the analyzer only orders by it. */
+  dateMs: number
   price: number
 }
 
@@ -25,9 +25,16 @@ export interface DealVerdict {
   recommendation: Recommendation
 }
 
+/**
+ * A bullet expressed as a key, not a sentence — same rule the icons follow.
+ * `params` carries raw numbers and epoch ms, never formatted strings, so the
+ * component formats at render and the service stays free of the formatters.
+ */
 export interface Insight {
   id: string
-  text: string
+  /** e.g. `analyzer:insights.sectionAverage.above`. */
+  key: string
+  params: Record<string, string | number>
   tone: InsightTone
   /** Absolute magnitude of the underlying signal; used to rank. */
   weight: number

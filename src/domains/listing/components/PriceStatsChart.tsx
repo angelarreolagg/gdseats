@@ -1,3 +1,4 @@
+import { Trans, useTranslation } from 'react-i18next'
 import { formatCompactCurrency, formatCurrency } from '@/shared/utils/formatters'
 import type { Listing } from '../types/listing.types'
 
@@ -12,16 +13,12 @@ const MAX_BAR_WIDTH = 24
 const GAP = 2
 
 /**
- * Where this listing's price per seat sits among its section.
- *
- * An EMPHASIS chart, not a categorical one: the reader's question is "where does
- * mine land", so the listing in question takes the accent and every other bar
- * recedes to the muted token. Colour carries one distinction, not eight.
- *
- * The price history table directly above is the table-view twin, so no value here
- * is reachable only by reading a bar.
+ * Where this listing sits among its section. An EMPHASIS chart: the listing
+ * takes the accent and every peer recedes, because the question is "where does
+ * mine land". The history table above is the table-view twin.
  */
 export function PriceStatsChart({ sectionListings, listing }: PriceStatsChartProps) {
+  const { t } = useTranslation('listing')
   const sorted = [...sectionListings].sort((a, b) => a.pricePerSeat - b.pricePerSeat)
   if (sorted.length === 0) return null
 
@@ -34,8 +31,8 @@ export function PriceStatsChart({ sectionListings, listing }: PriceStatsChartPro
   const slot = CHART.width / sorted.length
   const barWidth = Math.min(MAX_BAR_WIDTH, Math.max(4, slot - GAP))
 
-  // Scale from zero would flatten a section whose prices cluster; anchor a little
-  // below the cheapest instead so the spread stays readable.
+  // Anchored below the cheapest rather than at zero, or a section whose prices
+  // cluster would flatten.
   const floor = Math.max(0, min - (max - min) * 0.35 - 1)
   const scale = (value: number) =>
     max === floor ? plotHeight : ((value - floor) / (max - floor)) * plotHeight
@@ -45,16 +42,17 @@ export function PriceStatsChart({ sectionListings, listing }: PriceStatsChartPro
 
   return (
     <div>
-      <p className="text-sm text-muted">
-        See how this listing's price per seat compares to other listings in the same section.
-        Prices exclude transfer and platform fees.
-      </p>
+      <p className="text-sm text-muted">{t('stats.intro')}</p>
 
       <svg
         viewBox={`0 0 ${CHART.width} ${CHART.height}`}
         className="mt-4 h-40 w-full"
         role="img"
-        aria-label={`This listing is cheaper than ${sorted.length - cheaperCount - 1} of ${sorted.length - 1} other listings in section ${listing.section}`}
+        aria-label={t('stats.chartLabel', {
+          cheaperThan: sorted.length - cheaperCount - 1,
+          peers: sorted.length - 1,
+          section: listing.section,
+        })}
       >
         {sorted.map((item, index) => {
           const isHighlight = index === highlightIndex
@@ -117,19 +115,23 @@ export function PriceStatsChart({ sectionListings, listing }: PriceStatsChartPro
 
       <p className="mt-1 text-xs text-muted">
         {sorted.length === 1 ? (
-          <>Only listing in section {listing.section}.</>
+          t('stats.onlyListing', { section: listing.section })
         ) : (
-          <>
-            Cheaper than{' '}
-            <span className="font-medium text-ink">
-              {sorted.length - cheaperCount - 1} of {sorted.length - 1}
-            </span>{' '}
-            other listings in section {listing.section} · section average{' '}
-            <span className="font-medium text-ink tabular-nums">
-              {formatCurrency(listing.sectionAveragePerSeat)}
-            </span>
-            /seat
-          </>
+          /* `<Trans>` with NAMED components: the emphasised runs sit in different places
+                       in different languages, and indexed tags would reorder the markup. */
+          <Trans
+            i18nKey="listing:stats.comparison"
+            values={{
+              cheaperThan: sorted.length - cheaperCount - 1,
+              peers: sorted.length - 1,
+              section: listing.section,
+              average: formatCurrency(listing.sectionAveragePerSeat),
+            }}
+            components={{
+              rank: <span className="font-medium text-ink" />,
+              average: <span className="font-medium text-ink tabular-nums" />,
+            }}
+          />
         )}
       </p>
     </div>

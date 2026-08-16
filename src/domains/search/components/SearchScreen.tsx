@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Team } from '@/domains/teams/types/team.types'
 import type { Listing } from '@/domains/listing/types/listing.types'
 import { SeatMap } from '@/domains/listing/components/SeatMap'
@@ -13,6 +14,7 @@ interface SearchScreenProps {
 }
 
 export function SearchScreen({ team, listings, onOpenListing }: SearchScreenProps) {
+  const { t } = useTranslation('search')
   const search = useListingSearch(listings)
 
   return (
@@ -44,13 +46,13 @@ export function SearchScreen({ team, listings, onOpenListing }: SearchScreenProp
             ))
           ) : (
             <p className="px-5 py-16 text-center text-sm text-muted">
-              No listings in section {search.selectedSection}.{' '}
+              {t('empty.noListings', { section: search.selectedSection })}{' '}
               <button
                 type="button"
                 onClick={search.clearAll}
                 className="font-medium text-accent-ink underline underline-offset-4"
               >
-                Clear the filter
+                {t('empty.clearFilter')}
               </button>
             </p>
           )}

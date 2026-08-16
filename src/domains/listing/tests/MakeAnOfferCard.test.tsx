@@ -64,7 +64,7 @@ const LISTING: Listing = {
   pricePerSeat: 11_775,
   transferFee: 225,
   platformFee: 2_350,
-  publicationDate: 'Aug 3, 2026',
+  publicationDateMs: Date.UTC(2026, 7, 3),
   estimatedPricePerSeat: 14_500,
   sectionAveragePerSeat: 13_000,
   priceHistory: [],

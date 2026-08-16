@@ -1,35 +1,46 @@
-import { DEFAULT_DESCRIPTION, DEFAULT_TITLE, SITE_NAME } from '@/shared/config/site'
+import i18n from '@/shared/i18n'
+import { SITE_NAME } from '@/shared/config/site'
 import type { DocumentMeta } from '@/shared/hooks/useDocumentMeta'
 import type { Team } from '@/domains/teams/types/team.types'
 import type { Listing } from '@/domains/listing/types/listing.types'
 
 /**
- * The tab title and page description for whatever is currently on screen.
+ * Tab title and description for the current screen.
  *
- * Lives in `app/` rather than in `shared/` because it reads `Team` and `Listing`.
- * `shared` is imported by every domain, so a `shared → domains` edge would invert
- * the dependency graph and could close a cycle. The composition root already
- * depends on both domains, which makes this the one place the two can meet.
+ * Lives in `app/` because it reads `Team` and `Listing`; a `shared → domains`
+ * edge would invert the graph. Resolves copy through the singleton rather than
+ * returning keys, so `useDocumentMeta` keeps its plain-string contract — the
+ * same escape hatch `demoNotice.tsx` uses, and legitimate for the same reason.
  *
- * `useDocumentMeta` therefore takes plain strings and knows nothing about seats.
+ * `App` subscribes via `useTranslation` so a switch re-runs this.
  */
 export function getDocumentMeta(team?: Team, listing?: Listing): DocumentMeta {
+  const t = i18n.getFixedT(null, 'meta')
+
   if (team && listing) {
     return {
-      // Detail first, brand last. By the third screen the visitor knows what site
-      // they are on, and a tab that opens with "G&D Seats —" on all three is
-      // unreadable the moment two of them are open at once.
-      title: `Section ${listing.section}, Row ${listing.row} — ${team.name} PSL | ${SITE_NAME}`,
-      description: `${listing.seatCount} personal seat licenses in section ${listing.section}, row ${listing.row} at ${team.venue}, with an AI read on how the asking price compares to the section.`,
+      // Detail first, brand last: by the third screen the visitor knows the site.
+      title: t('listing.title', {
+        section: listing.section,
+        row: listing.row,
+        team: team.name,
+        site: SITE_NAME,
+      }),
+      description: t('listing.description', {
+        seatCount: listing.seatCount,
+        section: listing.section,
+        row: listing.row,
+        venue: team.venue,
+      }),
     }
   }
 
   if (team) {
     return {
-      title: `${team.name} PSLs — ${team.venue} | ${SITE_NAME}`,
-      description: `Personal seat licenses for sale at ${team.venue}, home of the ${team.name}. Compare every asking price against an AI valuation on an interactive seat map.`,
+      title: t('team.title', { team: team.name, venue: team.venue, site: SITE_NAME }),
+      description: t('team.description', { venue: team.venue, team: team.name }),
     }
   }
 
-  return { title: DEFAULT_TITLE, description: DEFAULT_DESCRIPTION }
+  return { title: t('default.title'), description: t('default.description') }
 }

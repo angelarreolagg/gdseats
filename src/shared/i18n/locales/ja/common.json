@@ -1,0 +1,14 @@
+{
+  "theme": {
+    "switchToLight": "ライトモードに切り替える",
+    "switchToDark": "ダークモードに切り替える"
+  },
+  "language": {
+    "change": "言語を変更",
+    "listLabel": "言語"
+  },
+  "demo": {
+    "notAvailable": "利用できません — これはデモです。",
+    "offerInvitation": "これはデモです — でも<strong>実現できます</strong>。"
+  }
+}

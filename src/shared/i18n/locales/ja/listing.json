@@ -1,0 +1,85 @@
+{
+  "detail": {
+    "dialogLabel": "出品 {{id}}、セクション {{section}}",
+    "backToSearch": "検索に戻る",
+    "share": "共有",
+    "location": "座席の位置",
+    "priceHistory": "価格の推移",
+    "priceStats": "価格の統計",
+    "makeAnOffer": "オファーを送る"
+  },
+  "summary": {
+    "id": "ID",
+    "section": "セクション",
+    "row": "列",
+    "seats_other": "{{count}} 席",
+    "publicationDate": "掲載日",
+    "totalCost": "総額",
+    "totalInclFees": "{{amount}}（手数料込み）",
+    "priceBreakdown": "価格の内訳",
+    "licensePrice": "ライセンス価格",
+    "transferFee": "譲渡手数料",
+    "platformFee": "プラットフォーム手数料",
+    "total": "合計"
+  },
+  "offer": {
+    "heading": "オファーを送る",
+    "amountLabel": "オファー金額",
+    "transferFee": "譲渡手数料",
+    "platformFee": "プラットフォーム手数料",
+    "totalCost": "総額 · 手数料をすべて含む",
+    "messageLabel": "メッセージを追加",
+    "submit": "{{amount}} でオファーを送る",
+    "close": "オファーフォームを閉じる"
+  },
+  "history": {
+    "caption": "この出品の価格推移",
+    "date": "日付",
+    "totalPrice": "総額*",
+    "pricePerSeat": "1 席あたりの価格*",
+    "change": "変動",
+    "fell": "下落",
+    "rose": "上昇",
+    "footnote": "*過去の価格には譲渡手数料およびプラットフォーム手数料は含まれません"
+  },
+  "stats": {
+    "intro": "この出品の 1 席あたりの価格が、同じセクションの他の出品とどう比べられるかをご覧ください。価格に譲渡手数料とプラットフォーム手数料は含まれません。",
+    "chartLabel": "この出品はセクション {{section}} の他の {{peers}} 件のうち {{cheaperThan}} 件より安い価格です",
+    "onlyListing": "セクション {{section}} で唯一の出品です。",
+    "comparison": "セクション {{section}} の他の出品のうち <rank>{{peers}} 件中 {{cheaperThan}} 件</rank>より安い価格 · セクション平均 <average>{{average}}</average>／席"
+  },
+  "map": {
+    "readOnlyLabel": "座席表、セクション {{section}} をハイライト表示",
+    "readOnlyLabelUnselected": "座席表、ハイライト表示中のセクションはありません",
+    "interactiveLabel": "スタジアムの座席表 — セクションを選ぶと出品を絞り込めます",
+    "sectionListings_other": "セクション {{section}}、{{count}} 件の出品",
+    "zoomIn": "拡大",
+    "zoomOut": "縮小",
+    "resetView": "表示をリセット"
+  },
+  "tags": {
+    "featured": "注目",
+    "thisWeek": "今週",
+    "parking": "駐車場",
+    "aisle": "通路側",
+    "covered": "屋根あり",
+    "accessible": "バリアフリー",
+    "financing": "分割払い",
+    "priceDrop": "{{percent}}% 値下げ"
+  },
+  "tagTooltips": {
+    "featured": "出品者によるおすすめ",
+    "thisWeek": "過去 7 日以内に掲載",
+    "parking": "駐車パス付き",
+    "aisle": "通路側の座席",
+    "covered": "天候から守られた席",
+    "accessible": "車椅子でご利用いただけます",
+    "financing": "分割払いのオプションあり",
+    "priceDrop": "希望価格が下がりました"
+  },
+  "rings": {
+    "lower": "ロワー",
+    "club": "クラブ",
+    "upper": "アッパー"
+  }
+}

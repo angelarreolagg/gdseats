@@ -1,0 +1,39 @@
+{
+  "gdWay": {
+    "heading": "<brand>G&D Seats</brand> のやり方",
+    "subheading": "パーソナルシートライセンスの売買に G&D Seats が最適な理由をご紹介します。",
+    "pillars": {
+      "secure": {
+        "title": "安心",
+        "body": "信頼できる認証済みのライセンスと出品者が見つかります。エスクローサービスが買い手と売り手の双方を守ります。"
+      },
+      "easy": {
+        "title": "使いやすい",
+        "body": "手続きはできるかぎりシンプルに。書類や譲渡ルールの心配は不要です。すべて当社がお引き受けします。"
+      },
+      "transparent": {
+        "title": "透明",
+        "body": "隠れた手数料や不意の出費はありません。取引が成立しなかった場合は全額返金します。"
+      }
+    }
+  },
+  "concierge": {
+    "eyebrow": "AI 音声コンシェルジュ",
+    "heading": "Scout にご要望をお聞かせください",
+    "body": "AI コンシェルジュの Scout をご紹介します。ご希望のセクション、ご予算、優先事項をお伝えいただければ、当社の PSL チームが最適な選択肢をお探しします。",
+    "assurances": {
+      "quick": "所要 1 分",
+      "always": "24 時間 365 日対応",
+      "noSignup": "登録不要"
+    },
+    "available": "Scout はただいま対応可能です",
+    "callAria": "{{phone}} に電話して Scout に相談する",
+    "human": "人と話したいですか？<phone>{{number}}</phone> までお電話ください"
+  },
+  "sell": {
+    "heading": "PSL を売却しませんか？",
+    "subheading": "まとめての売却にも対応しています",
+    "cta": "売却を始める",
+    "email": "メールでのご相談は <email>{{address}}</email> まで"
+  }
+}

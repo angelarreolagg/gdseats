@@ -1,0 +1,27 @@
+{
+  "toolbar": {
+    "sectionFilter": "Section {{section}}",
+    "clearSectionFilter": "Clear section filter",
+    "clearAll": "Clear all",
+    "listingCount_one": "{{formatted}} listing",
+    "listingCount_other": "{{formatted}} listings",
+    "orderBy": "Order by"
+  },
+  "sort": {
+    "bestDeal": "Best deal",
+    "priceAsc": "Price: low to high",
+    "priceDesc": "Price: high to low",
+    "section": "Section"
+  },
+  "empty": {
+    "noListings": "No listings in section {{section}}.",
+    "clearFilter": "Clear the filter"
+  },
+  "row": {
+    "location": "Section {{section}}, Row {{row}}, {{seatRange}}",
+    "pricePerSeat": "{{price}}/seat",
+    "identity_one": "ID: {{id}} · {{count}} seat",
+    "identity_other": "ID: {{id}} · {{count}} seats",
+    "totalInclFees": "{{total}} total, incl. fees"
+  }
+}

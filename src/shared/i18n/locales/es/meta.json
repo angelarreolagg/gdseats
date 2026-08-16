@@ -1,0 +1,14 @@
+{
+  "default": {
+    "title": "G&D Seats — licencias de asiento de la NFL con precio de IA",
+    "description": "Explora licencias de asiento personal de la NFL en un mapa de asientos interactivo y consulta una valuación de IA en cada anuncio antes de ofertar. Demo frontend, datos simulados."
+  },
+  "team": {
+    "title": "PSL de {{team}} — {{venue}} | {{site}}",
+    "description": "Licencias de asiento personal en venta en {{venue}}, casa de {{team}}. Compara cada precio de venta con una valuación de IA en un mapa de asientos interactivo."
+  },
+  "listing": {
+    "title": "Sección {{section}}, Fila {{row}} — PSL de {{team}} | {{site}}",
+    "description": "{{seatCount}} licencias de asiento personal en la sección {{section}}, fila {{row}} de {{venue}}, con una lectura de IA sobre cómo se compara el precio de venta con el de la sección."
+  }
+}

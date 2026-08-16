@@ -1,43 +1,37 @@
+import { Trans } from 'react-i18next'
 import { toast } from 'react-toastify'
+import i18n from '@/shared/i18n'
 
 const LINKEDIN_URL = 'https://www.linkedin.com/in/angelarreola'
 
 /**
- * The single answer for every control that exists as chrome but leads nowhere.
+ * The one answer for every control that is chrome but leads nowhere. `toastId`
+ * collapses repeats.
  *
- * A footer link or a Share button that silently does nothing reads as a bug; one
- * that says why reads as a demo. Routed through here so the wording — and the
- * fact that there is exactly one wording — can't drift as more dead chrome is
- * added.
- *
- * `toastId` collapses repeats: a user clicking three policy links in a row gets
- * one toast, not a stack of identical ones.
- *
- * This file is `.tsx` because the offer notice carries a link. That is a UI
- * concern, not the React-free rule domain services live under — those emit icon
- * names so the component layer can resolve them; this *is* the component layer.
+ * `.tsx` for the link below — this is the component layer, which is also why it
+ * may reach `i18n.t()` directly rather than emitting a key.
  */
 export function showDemoNotice() {
-  toast.info('Not available — this is a demo.', { toastId: 'demo-only' })
+  toast.info(i18n.t('common:demo.notAvailable'), { toastId: 'demo-only' })
 }
 
 /**
- * The offer button gets its own answer, because it is the one dead control a
- * visitor reaches on purpose.
+ * The offer button is the one dead control a visitor reaches on purpose, at the
+ * end of the whole flow — so it answers with an invitation, not an apology.
  *
- * Every other piece of chrome here is furniture. Submitting an offer is the end
- * of the whole flow — pick a team, read the verdict, make the call — so the
- * person who presses it has understood the product and is worth talking to. The
- * demo answers with an invitation rather than an apology.
- *
- * `closeOnClick` is off and `autoClose` is long, because the container closes a
- * toast on any click: with the defaults the toast would dismiss itself out from
- * under the pointer before the link resolved.
+ * `closeOnClick` off and a long `autoClose`, or the container dismisses the
+ * toast out from under the pointer before the link resolves.
  */
 export function showOfferNotice() {
   toast.info(
     <span>
-      This is a demo — but <strong className="font-semibold">we can make it true</strong>.
+      {/* `<Trans>` rather than two `t()` calls around the `<strong>`: the
+          emphasis falls on different words in different languages, and splitting
+          the sentence would force every translator to keep our clause order. */}
+      <Trans
+        i18nKey="common:demo.offerInvitation"
+        components={{ strong: <strong className="font-semibold" /> }}
+      />
       <br />
       <a
         href={LINKEDIN_URL}

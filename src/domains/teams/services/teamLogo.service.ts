@@ -9,14 +9,9 @@ export interface EspnLogo {
 }
 
 /**
- * Picks a logo out of ESPN's `logos[]`.
- *
- * `rel` is a set, not a position: `["full","dark"]` and `["dark","full"]` mean
- * the same thing, and `logos[0]` is not reliably the default. Match by
- * membership, most specific first, and never by index.
- *
- * Exported for the sync script and its tests — the app itself reads the
- * pre-resolved map, so this only runs offline.
+ * `rel` is an unordered SET: match with `includes`, never by index, and never
+ * assume `logos[0]` is the default. `["full","dark"]` means "for dark grounds" —
+ * it carries a light keyline so black marks survive #040811.
  */
 export function selectLogoHref(logos: EspnLogo[], variant: 'light' | 'dark'): string | null {
   const wanted = variant === 'dark' ? 'dark' : 'default'

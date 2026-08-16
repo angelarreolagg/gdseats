@@ -1,7 +1,8 @@
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Tag } from '@/shared/components/Tag'
 import { Tooltip } from '@/shared/components/Tooltip'
-import { formatCurrency } from '@/shared/utils/formatters'
+import { formatCurrency, formatListingDate } from '@/shared/utils/formatters'
 import { TeamLogo } from '@/domains/teams/components/TeamLogo'
 import type { Team } from '@/domains/teams/types/team.types'
 import type { Listing } from '../types/listing.types'
@@ -42,22 +43,25 @@ function BreakdownRow({ label, value, total = false }: {
 }
 
 /**
- * The cost breakdown is a hover/focus tooltip, so it never fires on touch. That is
- * acceptable only because every figure in it also appears as a visible row in
- * MakeAnOfferCard directly below — the tooltip is a shortcut, not the sole path.
+ * The breakdown is a tooltip, so it never fires on touch. Acceptable only
+ * because every figure also appears as a visible row in `MakeAnOfferCard`.
  */
 function TotalCostValue({ listing }: { listing: Listing }) {
+  const { t } = useTranslation('listing')
+
   return (
     <Tooltip
       side="bottom"
       variant="panel"
       content={
         <div className="w-52">
-          <p className="mb-1.5 text-center text-xs font-semibold text-ink">Price breakdown</p>
-          <BreakdownRow label="License price" value={getTotalPrice(listing)} />
-          <BreakdownRow label="Transfer fee" value={listing.transferFee} />
-          <BreakdownRow label="Platform fee" value={listing.platformFee} />
-          <BreakdownRow label="Total" value={getTotalCost(listing)} total />
+          <p className="mb-1.5 text-center text-xs font-semibold text-ink">
+            {t('summary.priceBreakdown')}
+          </p>
+          <BreakdownRow label={t('summary.licensePrice')} value={getTotalPrice(listing)} />
+          <BreakdownRow label={t('summary.transferFee')} value={listing.transferFee} />
+          <BreakdownRow label={t('summary.platformFee')} value={listing.platformFee} />
+          <BreakdownRow label={t('summary.total')} value={getTotalCost(listing)} total />
         </div>
       }
     >
@@ -65,13 +69,15 @@ function TotalCostValue({ listing }: { listing: Listing }) {
         type="button"
         className="rounded underline decoration-border-hairline underline-offset-4 transition-colors hover:decoration-accent-ink"
       >
-        {formatCurrency(getTotalCost(listing))} incl. fees
+        {t('summary.totalInclFees', { amount: formatCurrency(getTotalCost(listing)) })}
       </button>
     </Tooltip>
   )
 }
 
 export function ListingSummaryCard({ listing, team }: ListingSummaryCardProps) {
+  const { t } = useTranslation('listing')
+
   return (
     <section className="overflow-hidden rounded-xl border border-border-hairline bg-surface shadow-card">
       <header className="flex items-center gap-3 px-4 py-4">
@@ -85,21 +91,24 @@ export function ListingSummaryCard({ listing, team }: ListingSummaryCardProps) {
       </header>
 
       <dl>
-        <Row label="ID" value={listing.id} />
-        <Row label="Section" value={listing.section} />
-        <Row label="Row" value={listing.row} />
-        <Row label={`${listing.seatCount} seats`} value={listing.seatRange} />
-        <Row label="Publication date" value={listing.publicationDate} />
-        <Row label="Total cost" value={<TotalCostValue listing={listing} />} />
+        <Row label={t('summary.id')} value={listing.id} />
+        <Row label={t('summary.section')} value={listing.section} />
+        <Row label={t('summary.row')} value={listing.row} />
+        <Row label={t('summary.seats', { count: listing.seatCount })} value={listing.seatRange} />
+        <Row
+          label={t('summary.publicationDate')}
+          value={formatListingDate(listing.publicationDateMs)}
+        />
+        <Row label={t('summary.totalCost')} value={<TotalCostValue listing={listing} />} />
       </dl>
 
       {listing.tags.length > 0 ? (
         <div className="flex flex-wrap gap-1.5 border-t border-border-hairline px-4 py-3">
           {listing.tags.map((tag) => {
-            const { Icon, tooltip } = TAG_PRESENTATION[tag.iconName]
+            const { Icon, tooltipKey } = TAG_PRESENTATION[tag.iconName]
             return (
-              <Tag key={tag.id} tone={tag.tone} icon={Icon} tooltip={tooltip} focusable>
-                {tag.label}
+              <Tag key={tag.id} tone={tag.tone} icon={Icon} tooltip={t(tooltipKey)} focusable>
+                {t(tag.labelKey, tag.labelParams)}
               </Tag>
             )
           })}

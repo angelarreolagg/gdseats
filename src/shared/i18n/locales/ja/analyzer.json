@@ -1,0 +1,41 @@
+{
+  "panel": {
+    "heading": "AI インサイト",
+    "beta": "ベータ",
+    "analyzing": "この出品を分析しています"
+  },
+  "metrics": {
+    "estimate": "AI 推定",
+    "listing": "出品価格",
+    "vsMarket": "市場比"
+  },
+  "status": {
+    "undervalued": "魅力的な価格",
+    "fair": "市場水準どおり",
+    "overpriced": "市場レンジより上"
+  },
+  "badge": {
+    "vsMarket": "市場比 {{diff}}"
+  },
+  "recommendation": {
+    "opportunity": "最近の傾向から見て、有力な機会になりうる出品です",
+    "aligned": "この出品は最近の市場の動きに沿っています",
+    "patience": "待つことでより良い価値が見つかるかもしれません"
+  },
+  "insights": {
+    "recentMovement": {
+      "down": "{{date}} 以降、価格が {{magnitude}} 下方に調整されています",
+      "up": "{{date}} 以降、価格が {{magnitude}} 上方に調整されています"
+    },
+    "sectionAverage": {
+      "similar": "セクション {{section}} の同等の座席も同じような水準です",
+      "above": "セクション {{section}} の平均を {{magnitude}} 上回っています",
+      "below": "セクション {{section}} の平均を {{magnitude}} 下回っています"
+    },
+    "trend": {
+      "down_other": "{{date}} の {{price}} から {{count}} 回にわたり調整されています",
+      "up": "{{date}} 以降、緩やかな上昇が見られます",
+      "flat": "{{date}} 以降、価格は横ばいで推移しています"
+    }
+  }
+}

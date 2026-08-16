@@ -1,5 +1,6 @@
 import { useId, useMemo, useState } from 'react'
 import { ChevronsUpDown, Search } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import type { Team } from '../types/team.types'
 import { TeamLogo } from './TeamLogo'
 
@@ -37,6 +38,7 @@ export function TeamSearchCombobox({
   disabled = false,
   className = '',
 }: TeamSearchComboboxProps) {
+  const { t } = useTranslation('teams')
   const listboxId = useId()
   const [query, setQuery] = useState('')
   const [open, setOpen] = useState(false)
@@ -87,7 +89,7 @@ export function TeamSearchCombobox({
       <input
         type="text"
         role="combobox"
-        aria-label="Select a team"
+        aria-label={t('search.label')}
         aria-expanded={open}
         aria-controls={listboxId}
         aria-autocomplete="list"
@@ -95,7 +97,7 @@ export function TeamSearchCombobox({
         autoComplete="off"
         disabled={disabled}
         value={query}
-        placeholder={disabled ? 'MLB coming soon' : 'Select a team'}
+        placeholder={disabled ? t('search.disabledPlaceholder') : t('search.placeholder')}
         onChange={(event) => {
           setQuery(event.target.value)
           setActiveIndex(0)
@@ -115,11 +117,13 @@ export function TeamSearchCombobox({
         <ul
           id={listboxId}
           role="listbox"
-          aria-label="Teams"
+          aria-label={t('search.listboxLabel')}
           className="absolute z-20 mt-2 max-h-72 w-full overflow-y-auto rounded-xl border border-border-hairline bg-surface py-1 shadow-lg sm:w-80"
         >
           {matches.length === 0 ? (
-            <li className="px-3.5 py-3 text-sm text-muted">No teams match “{query.trim()}”</li>
+            <li className="px-3.5 py-3 text-sm text-muted">
+              {t('search.noMatches', { query: query.trim() })}
+            </li>
           ) : (
             matches.map((team, index) => (
               <li

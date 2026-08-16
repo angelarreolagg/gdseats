@@ -1,18 +1,14 @@
+import { useTranslation } from 'react-i18next'
 import { Tooltip } from '@/shared/components/Tooltip'
-import { formatSignedPercent } from '@/shared/utils/formatters'
+import { formatPercent, formatSignedPercent } from '@/shared/utils/formatters'
 import type { MarketTrend, TrendTone } from '../types/team.types'
 import { TREND_ICON, getTrendExplanation } from './trendPresentation'
 
 interface TrendChipProps {
   trend: MarketTrend
   /**
-   * Give the chip its own tab stop.
-   *
-   * Off inside `TeamCard` — the card is itself a `<button>`, and a focusable
-   * element nested in a button is invalid markup and would add a second tab stop
-   * to every card in the grid. `SearchToolbar` turns it on, so the explanation is
-   * keyboard-reachable somewhere. Same split `Tag` uses between `ListingRow` and
-   * `ListingSummaryCard`.
+   * Off inside `TeamCard` — the card is a `<button>`, and a focusable element
+   * nested in one is invalid. `SearchToolbar` turns it on.
    */
   focusable?: boolean
 }
@@ -29,31 +25,21 @@ const TONE_INK: Record<TrendTone, string> = {
   neutral: 'text-muted',
 }
 
-/**
- * Direction, magnitude and — on hover — the reasoning.
- *
- * The icon and label are the visible signal, so nothing depends on the tooltip:
- * hover never fires on touch, and the card carries the buyer implication as text
- * regardless.
- */
+/** Icon and label are the visible signal; nothing depends on the tooltip. */
 export function TrendChip({ trend, focusable = false }: TrendChipProps) {
+  const { t } = useTranslation('teams')
   const Icon = TREND_ICON[trend.iconName]
+  const label = t(trend.labelKey)
 
-  /*
-   * `holo-chip` — the same rotating border DealBadge wears, and for the same
-   * reason: both chips are a machine's read on a market, and the iridescence is
-   * how this product says so. It sits on the 1px border only, so the tone fill
-   * and ink still carry the direction; the rainbow never touches the meaning.
-   *
-   * Cheap here in a way it is not on `ListingRow`: eight cards a page plus the
-   * toolbar, against ~170 rows — no `content-visibility` guard needed.
-   */
+  /* `holo-chip`: the same iridescence DealBadge wears, on the border only so the
+       tone fill still carries the direction. Cheap here — eight cards a page,
+       against ~170 listing rows. */
   const chip = (
     <span
       className={`holo-chip inline-flex items-center gap-1 rounded-full px-2 py-1 text-[10px] font-semibold tracking-wide whitespace-nowrap uppercase ${TONE_CHIP[trend.tone]}`}
     >
       <Icon aria-hidden="true" className="h-3 w-3 shrink-0" strokeWidth={2.5} />
-      {trend.label}
+      {label}
       {/* A steady market rounds to "0%", which reads as missing data rather than
           as a measurement — and the label already says the number isn't moving.
           The tooltip still carries the figure for anyone who wants it. */}
@@ -63,17 +49,19 @@ export function TrendChip({ trend, focusable = false }: TrendChipProps) {
     </span>
   )
 
-  const { forecast, implication } = getTrendExplanation(trend)
+  // The service hands back keys and a counted horizon; formatting and plural
+  // selection happen here, where the locale is.
+  const explanation = getTrendExplanation(trend)
+  const forecast = t(explanation.forecastKey, {
+    count: explanation.months,
+    magnitude: formatPercent(explanation.momentum),
+  })
+  const implication = t(explanation.implicationKey)
   const momentum = formatSignedPercent(trend.momentum)
 
-  /*
-   * A titled panel rather than a run of text. As one string this ran to a single
-   * ~750px line that spanned three cards; split into a header, the observation
-   * and what it implies, it is scannable at a glance.
-   *
-   * The header repeats the chip's own icon and label on purpose — the tooltip can
-   * open some distance from its trigger, and it should say what it is about.
-   */
+  /* A titled panel: as one string this ran to a ~750px line spanning three cards.
+       The header repeats the chip's icon and label, since the tooltip can open
+       some distance from its trigger. */
   const panel = (
     <div className="w-60">
       <div className="mb-2 flex items-center gap-1.5 border-b border-border-hairline pb-2">
@@ -82,7 +70,7 @@ export function TrendChip({ trend, focusable = false }: TrendChipProps) {
           className={`h-3.5 w-3.5 shrink-0 ${TONE_INK[trend.tone]}`}
           strokeWidth={2.5}
         />
-        <span className="text-xs font-semibold text-ink">{trend.label}</span>
+        <span className="text-xs font-semibold text-ink">{label}</span>
         {trend.direction === 'steady' ? null : (
           <span className={`ml-auto text-xs font-semibold tabular-nums ${TONE_INK[trend.tone]}`}>
             {momentum}

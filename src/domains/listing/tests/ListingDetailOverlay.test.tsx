@@ -23,11 +23,6 @@ function renderOverlay(onClose = vi.fn()) {
 }
 
 describe('ListingDetailOverlay', () => {
-  /**
-   * Validates: Escape dismisses the dialog.
-   * Why it matters: the overlay covers the whole search page and locks body
-   * scroll. Without a keyboard exit a keyboard-only user is trapped on it.
-   */
   it('closes on Escape', async () => {
     const onClose = renderOverlay()
     await userEvent.keyboard('{Escape}')
@@ -40,11 +35,6 @@ describe('ListingDetailOverlay', () => {
     expect(onClose).toHaveBeenCalled()
   })
 
-  /**
-   * Validates: the overlay describes the listing it was opened with.
-   * Why it matters: the row, the map highlight, and the offer box all have to
-   * agree on which seats are being bought.
-   */
   it('shows the opened listing’s section, row, and id', () => {
     renderOverlay()
 
@@ -55,11 +45,6 @@ describe('ListingDetailOverlay', () => {
     expect(screen.getByText(String(LISTING.row))).toBeInTheDocument()
   })
 
-  /**
-   * Validates: the AI panel is present and agrees with the row's own maths.
-   * Why it matters: this is the whole reason the flow exists — the verdict has to
-   * survive the trip from the list into the detail.
-   */
   it('renders the AI verdict alongside the offer box', () => {
     renderOverlay()
 
@@ -74,13 +59,6 @@ describe('ListingDetailOverlay', () => {
     expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true')
   })
 
-  /**
-   * Validates: the offer form is inline, and there is no sticky bar.
-   * Why it matters: this is the other half of the compact branch below. A test
-   * that only checks the mobile side would still pass if the component rendered
-   * the sheet at every width, which would bury the form behind a tap on the
-   * layout that has room to just show it.
-   */
   it('keeps the offer form inline when there is room for the aside', () => {
     renderOverlay()
 
@@ -92,15 +70,6 @@ describe('ListingDetailOverlay', () => {
 const offerCta = () => screen.getByRole('button', { name: /^make an offer$/i })
 
 describe('ListingDetailOverlay on a compact viewport', () => {
-  /**
-   * Validates: the offer form is not in the document until the sheet is opened.
-   * Why it matters: this is the whole reason the breakpoint is a render-time
-   * branch instead of a `lg:hidden` pair. Two copies of the form would put two
-   * elements with `id="offer-amount"` in one document, announce two identical
-   * forms to a screen reader, and leave the hidden one in the tab order — a
-   * keyboard user tabbing off the seat map would land in an invisible currency
-   * field. CSS hiding looks identical in a screenshot and fixes none of that.
-   */
   it('withholds the offer form until the sheet is opened', () => {
     setViewport('mobile')
     renderOverlay()
@@ -109,14 +78,6 @@ describe('ListingDetailOverlay on a compact viewport', () => {
     expect(offerCta()).toBeInTheDocument()
   })
 
-  /**
-   * Validates: the sticky call to action opens the sheet and the form arrives
-   * with it.
-   * Why it matters: submitting an offer is the end of the entire flow. Before
-   * this the form stacked dead last on mobile — after the seat map, the AI panel,
-   * the price history and the price stats — so the conversion target sat four
-   * screens below the fold with nothing on screen suggesting it existed.
-   */
   it('opens the offer sheet from the sticky call to action', async () => {
     setViewport('mobile')
     renderOverlay()
@@ -127,15 +88,6 @@ describe('ListingDetailOverlay on a compact viewport', () => {
     expect(screen.getByRole('button', { name: /submit offer/i })).toBeInTheDocument()
   })
 
-  /**
-   * Validates: Escape closes the sheet and leaves the listing open. A second
-   * Escape then closes the listing.
-   * Why it matters: two dialogs listen for the same key and the inner one has to
-   * win. Without the precedence, dismissing the offer sheet also throws the buyer
-   * back to the results and loses their position in ~170 rows — an outsized
-   * penalty for a keystroke that should have cost nothing. Nothing else in the
-   * suite pins the ordering, and it reads as correct either way in the source.
-   */
   it('lets Escape close the sheet before the listing', async () => {
     setViewport('mobile')
     const onClose = renderOverlay()
@@ -158,13 +110,6 @@ describe('ListingDetailOverlay on a compact viewport', () => {
     expect(onClose).toHaveBeenCalled()
   })
 
-  /**
-   * Validates: the sheet is a dialog in its own right, and the close button is
-   * reachable without a gesture.
-   * Why it matters: the grab handle is the affordance a thumb reaches for, but
-   * drag has no keyboard equivalent and no accessible name. If it were the only
-   * way out, everyone not using a touchscreen would be stuck in the sheet.
-   */
   it('names the sheet and offers a non-gesture way out', async () => {
     setViewport('mobile')
     renderOverlay()

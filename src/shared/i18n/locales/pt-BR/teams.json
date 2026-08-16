@@ -1,0 +1,53 @@
+{
+  "league": {
+    "groupLabel": "Liga",
+    "nfl": "Times da NFL",
+    "mlb": "Times da MLB",
+    "soon": "Em breve"
+  },
+  "search": {
+    "label": "Selecione um time",
+    "placeholder": "Buscar time",
+    "disabledPlaceholder": "MLB em breve",
+    "listboxLabel": "Times",
+    "noMatches": "Nenhum time corresponde a “{{query}}”"
+  },
+  "pagination": {
+    "previous": "Página anterior",
+    "next": "Próxima página",
+    "position": "{{page}} de {{pageCount}}",
+    "goToPage": "Ir para a página {{page}}"
+  },
+  "grid": {
+    "mlbEmpty": "Os anúncios da MLB ainda não fazem parte desta demonstração."
+  },
+  "card": {
+    "listingCount_one": "{{formatted}} anúncio",
+    "listingCount_other": "{{formatted}} anúncios"
+  },
+  "trend": {
+    "label": {
+      "heating": "Aquecendo",
+      "steady": "Estável",
+      "cooling": "Esfriando"
+    },
+    "buyerImplication": {
+      "heating": "Custo de entrada subindo",
+      "steady": "Preços estáveis",
+      "cooling": "Mercado do comprador"
+    },
+    "forecast": {
+      "heating_one": "A demanda deve subir {{magnitude}} no próximo mês.",
+      "heating_other": "A demanda deve subir {{magnitude}} nos próximos {{count}} meses.",
+      "steady_one": "A demanda deve se manter no próximo mês.",
+      "steady_other": "A demanda deve se manter nos próximos {{count}} meses.",
+      "cooling_one": "A demanda deve cair {{magnitude}} no próximo mês.",
+      "cooling_other": "A demanda deve cair {{magnitude}} nos próximos {{count}} meses."
+    },
+    "implication": {
+      "heating": "Em mercados em alta, o custo de entrada costuma acompanhar.",
+      "steady": "Os preços aqui têm se mantido estáveis.",
+      "cooling": "Mercados em queda costumam ceder, então esperar pode melhorar seu preço de entrada."
+    }
+  }
+}

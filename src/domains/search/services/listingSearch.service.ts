@@ -4,11 +4,12 @@ import { getEstimatedTotal, getTotalPrice } from '@/domains/listing/types/listin
 
 export type SortKey = 'best-deal' | 'price-asc' | 'price-desc' | 'section'
 
-export const SORT_OPTIONS: Array<{ value: SortKey; label: string }> = [
-  { value: 'best-deal', label: 'Best deal' },
-  { value: 'price-asc', label: 'Price: low to high' },
-  { value: 'price-desc', label: 'Price: high to low' },
-  { value: 'section', label: 'Section' },
+/** Owns the values and their order; only the words moved to the bundle. */
+export const SORT_OPTIONS: Array<{ value: SortKey; labelKey: string }> = [
+  { value: 'best-deal', labelKey: 'search:sort.bestDeal' },
+  { value: 'price-asc', labelKey: 'search:sort.priceAsc' },
+  { value: 'price-desc', labelKey: 'search:sort.priceDesc' },
+  { value: 'section', labelKey: 'search:sort.section' },
 ]
 
 /** How far under fair value a listing sits. Negative is a bargain. */
@@ -26,8 +27,8 @@ export function sortListings(listings: Listing[], sort: SortKey): Listing[] {
 
   switch (sort) {
     case 'best-deal':
-      // Ascending: the most deeply undervalued listing leads. This is the payoff
-      // of computing the verdict for every row rather than only on the detail.
+      // Ascending, so the most undervalued listing leads — the payoff of computing
+      // the verdict for every row.
       return sorted.sort((a, b) => getListingDiff(a) - getListingDiff(b))
     case 'price-asc':
       return sorted.sort((a, b) => a.pricePerSeat - b.pricePerSeat)

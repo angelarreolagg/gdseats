@@ -1,0 +1,53 @@
+{
+  "league": {
+    "groupLabel": "League",
+    "nfl": "NFL Teams",
+    "mlb": "MLB Teams",
+    "soon": "Soon"
+  },
+  "search": {
+    "label": "Select a team",
+    "placeholder": "Select a team",
+    "disabledPlaceholder": "MLB coming soon",
+    "listboxLabel": "Teams",
+    "noMatches": "No teams match “{{query}}”"
+  },
+  "pagination": {
+    "previous": "Previous page",
+    "next": "Next page",
+    "position": "{{page}} of {{pageCount}}",
+    "goToPage": "Go to page {{page}}"
+  },
+  "grid": {
+    "mlbEmpty": "MLB listings aren't part of this demo yet."
+  },
+  "card": {
+    "listingCount_one": "{{formatted}} listing",
+    "listingCount_other": "{{formatted}} listings"
+  },
+  "trend": {
+    "label": {
+      "heating": "Heating up",
+      "steady": "Steady",
+      "cooling": "Cooling off"
+    },
+    "buyerImplication": {
+      "heating": "Entry cost rising",
+      "steady": "Prices holding",
+      "cooling": "Buyer's market"
+    },
+    "forecast": {
+      "heating_one": "Demand is projected to rise {{magnitude}} over the next month.",
+      "heating_other": "Demand is projected to rise {{magnitude}} over the next {{count}} months.",
+      "steady_one": "Demand is projected to hold over the next month.",
+      "steady_other": "Demand is projected to hold over the next {{count}} months.",
+      "cooling_one": "Demand is projected to fall {{magnitude}} over the next month.",
+      "cooling_other": "Demand is projected to fall {{magnitude}} over the next {{count}} months."
+    },
+    "implication": {
+      "heating": "Entry costs in heating markets tend to follow.",
+      "steady": "Pricing here has been stable.",
+      "cooling": "Cooling markets tend to soften, so waiting may improve your entry price."
+    }
+  }
+}

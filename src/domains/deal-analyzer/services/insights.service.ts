@@ -1,5 +1,10 @@
 import type { Insight, ListingSignals, PriceHistoryPoint } from '../types/deal.types'
-import { formatCurrency, formatPercent } from '@/shared/utils/formatters'
+
+/**
+ * Names its bullets; `InsightsList` turns them into sentences. Every `params`
+ * value is a raw number or epoch ms, so an insight renders correctly in whatever
+ * language is active when it is read — and this file stays pure arithmetic.
+ */
 
 /** The panel has room for three bullets and no more. */
 const MAX_INSIGHTS = 3
@@ -25,8 +30,11 @@ function recentMovement(history: PriceHistoryPoint[]): Insight | null {
     id: 'recent-movement',
     // A falling ask is leverage for the buyer; a rising one is pressure.
     tone: dropped ? 'positive' : 'caution',
-    // Observational, not evaluative: "adjusted" reports, "dropped/rose" judges.
-    text: `Price adjusted ${dropped ? 'down' : 'up'} ${formatPercent(change)} since ${previous.date}`,
+
+    key: dropped
+      ? 'analyzer:insights.recentMovement.down'
+      : 'analyzer:insights.recentMovement.up',
+    params: { change, dateMs: previous.dateMs },
     weight: Math.abs(change),
   }
 }
@@ -38,7 +46,8 @@ function versusSectionAverage(signals: ListingSignals): Insight | null {
     return {
       id: 'section-average',
       tone: 'neutral',
-      text: `Comparable seats in section ${signals.section} sit at a similar level`,
+      key: 'analyzer:insights.sectionAverage.similar',
+      params: { section: signals.section },
       weight: 0,
     }
   }
@@ -47,11 +56,13 @@ function versusSectionAverage(signals: ListingSignals): Insight | null {
   return {
     id: 'section-average',
     tone: above ? 'caution' : 'positive',
-    // The listing stays the subject on purpose. Phrasing it as "comparables trend
-    // x% lower" would attach a figure measured against the section average to a
-    // sentence about the comparables — off by the ratio between the two. "Sits"
-    // keeps it observational without moving the reference point.
-    text: `Sits ${formatPercent(change)} ${above ? 'above' : 'below'} the section ${signals.section} average`,
+    // The listing stays the subject: phrasing it around the comparables would
+    // attach a figure measured against the average to a sentence about something
+    // else. Restated in TRANSLATORS.md, since it is invisible in the string.
+    key: above
+      ? 'analyzer:insights.sectionAverage.above'
+      : 'analyzer:insights.sectionAverage.below',
+    params: { change, section: signals.section },
     weight: Math.abs(change),
   }
 }
@@ -65,14 +76,18 @@ function trendDirection(signals: ListingSignals): Insight | null {
   const cuts = priceHistory.filter(
     (point, index) => index > 0 && point.price < priceHistory[index - 1].price,
   ).length
+  const weight = Math.abs(
+    relativeChange(first.price, priceHistory[priceHistory.length - 1].price),
+  )
 
   if (trend === 'down') {
     return {
       id: 'trend',
       tone: 'positive',
       // "revisions" rather than "cuts" — the same fact without the pressure.
-      text: `Adjusted from ${formatCurrency(first.price)} since ${first.date} across ${cuts} revisions`,
-      weight: Math.abs(relativeChange(first.price, priceHistory[priceHistory.length - 1].price)),
+      key: 'analyzer:insights.trend.down',
+      params: { price: first.price, dateMs: first.dateMs, count: cuts },
+      weight,
     }
   }
 
@@ -80,25 +95,22 @@ function trendDirection(signals: ListingSignals): Insight | null {
     return {
       id: 'trend',
       tone: 'caution',
-      text: `Gradual increases observed since ${first.date}`,
-      weight: Math.abs(relativeChange(first.price, priceHistory[priceHistory.length - 1].price)),
+      key: 'analyzer:insights.trend.up',
+      params: { dateMs: first.dateMs },
+      weight,
     }
   }
 
   return {
     id: 'trend',
     tone: 'neutral',
-    text: `Pricing has held steady since ${first.date}`,
+    key: 'analyzer:insights.trend.flat',
+    params: { dateMs: first.dateMs },
     weight: 0,
   }
 }
 
-/**
- * The two or three signals most worth the buyer's attention, strongest first.
- *
- * Ranking by magnitude rather than showing every generator's output is what keeps
- * the panel useful: three bullets that all matter beat five that mostly don't.
- */
+/** The two or three strongest signals. Ranking is the editorial decision. */
 export function generateInsights(signals: ListingSignals): Insight[] {
   const candidates = [
     recentMovement(signals.priceHistory),

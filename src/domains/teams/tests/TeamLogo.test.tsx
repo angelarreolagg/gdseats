@@ -30,11 +30,6 @@ describe('TeamLogo', () => {
     expect(crestIn(container)).not.toBeInTheDocument()
   })
 
-  /**
-   * Validates: a team with no entry falls back rather than rendering a broken img.
-   * Why it matters: one of two independent failure paths. This is the "we never
-   * had a mark" case, which happens when the catalogue grows without a re-sync.
-   */
   it('falls back to the crest for a team with no mark', () => {
     const { container } = render(<TeamLogo team={UNKNOWN} size={40} />)
 
@@ -42,12 +37,6 @@ describe('TeamLogo', () => {
     expect(crestIn(container)).toBeInTheDocument()
   })
 
-  /**
-   * Validates: a failed image swaps to the crest.
-   * Why it matters: the other failure path — the map is fine but the CDN is not
-   * serving. A demo shown on bad conference wifi degrades to the helmet it
-   * shipped with instead of to a row of broken-image icons.
-   */
   it('falls back to the crest when the image fails to load', () => {
     const { container } = render(<TeamLogo team={TEAM} size={40} />)
 
@@ -57,11 +46,6 @@ describe('TeamLogo', () => {
     expect(crestIn(container)).toBeInTheDocument()
   })
 
-  /**
-   * Validates: the mark is decorative to assistive tech.
-   * Why it matters: every call site prints the team name right beside this. An
-   * alt of "Dallas Cowboys" would have a screen reader say it twice.
-   */
   it('is announced by the adjacent name, not by itself', () => {
     const { container } = render(<TeamLogo team={TEAM} size={40} />)
     expect(imgIn(container)).toHaveAttribute('alt', '')

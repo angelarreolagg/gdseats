@@ -1,0 +1,42 @@
+{
+  "panel": {
+    "heading": "AI Insight",
+    "beta": "Beta",
+    "analyzing": "Analyzing this listing"
+  },
+  "metrics": {
+    "estimate": "AI estimate",
+    "listing": "Listing",
+    "vsMarket": "vs market"
+  },
+  "status": {
+    "undervalued": "Attractive value",
+    "fair": "In line with market",
+    "overpriced": "Above market range"
+  },
+  "badge": {
+    "vsMarket": "{{diff}} vs market"
+  },
+  "recommendation": {
+    "opportunity": "This could be a strong opportunity based on recent trends",
+    "aligned": "This listing is aligned with recent market activity",
+    "patience": "You may find better value by waiting"
+  },
+  "insights": {
+    "recentMovement": {
+      "down": "Price adjusted down {{magnitude}} since {{date}}",
+      "up": "Price adjusted up {{magnitude}} since {{date}}"
+    },
+    "sectionAverage": {
+      "similar": "Comparable seats in section {{section}} sit at a similar level",
+      "above": "Sits {{magnitude}} above the section {{section}} average",
+      "below": "Sits {{magnitude}} below the section {{section}} average"
+    },
+    "trend": {
+      "down_one": "Adjusted from {{price}} since {{date}} across {{count}} revision",
+      "down_other": "Adjusted from {{price}} since {{date}} across {{count}} revisions",
+      "up": "Gradual increases observed since {{date}}",
+      "flat": "Pricing has held steady since {{date}}"
+    }
+  }
+}

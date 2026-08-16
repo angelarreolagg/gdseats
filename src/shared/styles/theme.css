@@ -1,15 +1,6 @@
 /*
- * Design tokens.
- *
- * The brand green #a0f700 measures 1.33:1 on white — invisible as text or a thin
- * line in light mode. It is a dark-mode-native accent, so the accent is *stepped
- * per mode along the same hue*: the brand green stays the fill (behind dark ink,
- * 14.33:1), while a darker step of the same hue carries text and chart marks in
- * light mode. Every value below was measured against the surface it renders on.
- *
- * Status colours are never used alone: brand green vs amber measures CVD ΔE 7.0
- * (deuteranopia), so an emoji + text label always accompanies them. See
- * StatusBadge.tsx, which makes that structural.
+ * Dark-mode ratios are measured against the SURFACE (#0e1728), not the page.
+ * Re-measure the whole dark column if that ground moves.
  */
 
 /* Tailwind v4 defaults dark: to a media query; we drive it from a class. */
@@ -33,6 +24,17 @@
   --psl-wordmark-lead: #d3d7db;
   --psl-accent-ink: #4f7d00; /*  4.92 — text, thin lines */
   --psl-accent-mark: #5c8f00; /*  3.90 — chart marks */
+  /*
+   * The travelling highlight in ShinyText, and the ONE token whose light and
+   * dark values move in opposite directions.
+   *
+   * A shine normally means "lighter", and in dark that is what this is. In light
+   * it cannot be: the base is accent-ink at 4.92, and any lighter step lands on
+   * the brand green's 1.33 — the heading would drop below readable every time
+   * the sweep crossed a glyph. So light mode shines DARKER, to 9.13, which reads
+   * as the same sheen and never dips under the base.
+   */
+  --psl-accent-shine: #2e4a00; /*  9.13 — darker sweep, see above */
 
   --psl-good: #4f7d00; /*  4.92 */
   --psl-fair: #b26a00; /*  4.24 */
@@ -83,6 +85,7 @@
   --psl-wordmark-lead: #d3d7db; /* same in both modes — see the light block */
   --psl-accent-ink: #a0f700;
   --psl-accent-mark: #a0f700;
+  --psl-accent-shine: #ffffff; /* 19.03 — lighter sweep; see the light block */
 
   --psl-good: #a0f700; /* 13.48 */
   --psl-fair: #fab219; /*  9.77 */

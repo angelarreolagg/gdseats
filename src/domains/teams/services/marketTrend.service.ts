@@ -10,60 +10,50 @@ import type {
 const HISTORY_MONTHS = 12
 const FORECAST_MONTHS = 3
 
-/**
- * Below this, a move is noise. A card that announces a ±1% shift teaches the
- * reader to stop believing the ones that matter.
- */
+/** Below this a move is noise; a card announcing ±1% teaches readers to ignore it. */
 export const MATERIAL_MOMENTUM = 0.03
 
-const MONTH_NAMES = [
-  'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-]
-
 /**
- * Presentation per direction.
+ * Presentation per direction. The tone is INVERTED against the intuitive
+ * reading: green means good for the buyer, so a cooling market is the green one.
+ * Matches `insights.service.ts`, which scores a falling ask as positive.
  *
- * The tone is deliberately INVERTED against the intuitive reading: green means
- * good for the buyer, not "number went up". A cooling market is where seats get
- * cheaper, so it is the green one. This matches `insights.service.ts`, which
- * already scores a falling ask as positive — without the inversion, the same
- * green would mean "good deal" on a listing and "expensive" on a team card.
+ * Keys, not phrases, so this stays free of copy as well as of React.
  */
 const PRESENTATION: Record<TrendDirection, {
-  label: string
-  buyerImplication: string
+  labelKey: string
+  buyerImplicationKey: string
   tone: TrendTone
   iconName: TrendDirection
 }> = {
   heating: {
-    label: 'Heating up',
-    buyerImplication: 'Entry cost rising',
+    labelKey: 'teams:trend.label.heating',
+    buyerImplicationKey: 'teams:trend.buyerImplication.heating',
     tone: 'fair',
     iconName: 'heating',
   },
   steady: {
-    label: 'Steady',
-    buyerImplication: 'Prices holding',
+    labelKey: 'teams:trend.label.steady',
+    buyerImplicationKey: 'teams:trend.buyerImplication.steady',
     tone: 'neutral',
     iconName: 'steady',
   },
   cooling: {
-    label: 'Cooling off',
-    buyerImplication: "Buyer's market",
+    labelKey: 'teams:trend.label.cooling',
+    buyerImplicationKey: 'teams:trend.buyerImplication.cooling',
     tone: 'good',
     iconName: 'cooling',
   },
 }
 
-function monthLabels(count: number, now: Date): string[] {
-  const labels: string[] = []
+/** Indices, not labels: month names are copy and this layer holds none. */
+function monthIndices(count: number, now: Date): number[] {
+  const indices: number[] = []
   // Start far enough back that the last actual point is the current month.
   for (let offset = HISTORY_MONTHS - 1; offset > HISTORY_MONTHS - 1 - count; offset -= 1) {
-    const date = new Date(now.getFullYear(), now.getMonth() - offset, 1)
-    labels.push(MONTH_NAMES[date.getMonth()])
+    indices.push(new Date(now.getFullYear(), now.getMonth() - offset, 1).getMonth())
   }
-  return labels
+  return indices
 }
 
 /** Exactly ±3% is still steady — only a strictly larger move is a trend. */
@@ -79,23 +69,16 @@ export function getTrendPresentation(direction: TrendDirection) {
 }
 
 /**
- * Where a franchise's market is heading.
- *
- * Seeded on the team id like every other generator here: the sparkline and the
- * percentage printed beside it are two views of one array, so an unseeded walk
- * would let them contradict each other between renders.
- *
- * The series is anchored so the last ACTUAL point lands near `demandIndex × 100`,
- * which keeps this consistent with the inventory size derived from the same field.
+ * Where a franchise's market is heading. Seeded on the team id, or the momentum
+ * and the series would contradict each other between renders. Anchored so the
+ * last actual point lands near `demandIndex × 100`.
  */
 export function getMarketTrend(team: Team, now: Date = new Date()): MarketTrend {
   const random = createRandom(`trend:${team.id}`)
   const anchor = team.demandIndex * 100
 
-  // Monthly drift for this franchise, centred on zero so the catalogue splits
-  // roughly evenly between heating, steady, and cooling rather than skewing one
-  // way. The range is wide enough that the ±3% steady band stays a minority of
-  // the spread — a catalogue where most cards read "Steady" shows nothing.
+  // Centred on zero so the catalogue splits between the three directions rather
+  // than skewing one way, and wide enough that the ±3% band stays a minority.
   const drift = random.float(-0.05, 0.05)
 
   const history: number[] = [anchor]
@@ -105,8 +88,7 @@ export function getMarketTrend(team: Team, now: Date = new Date()): MarketTrend 
     history.unshift(Math.max(4, previous))
   }
 
-  // The forecast continues the trend, damped — a projection that extrapolates a
-  // trend at full strength is how forecasts end up absurd three steps out.
+  // Damped: extrapolating at full strength is how forecasts end up absurd.
   const forecast: number[] = []
   let last = history[history.length - 1]
   for (let index = 0; index < FORECAST_MONTHS; index += 1) {
@@ -114,15 +96,14 @@ export function getMarketTrend(team: Team, now: Date = new Date()): MarketTrend 
     forecast.push(last)
   }
 
-  const labels = monthLabels(HISTORY_MONTHS + FORECAST_MONTHS, now)
+  const months = monthIndices(HISTORY_MONTHS + FORECAST_MONTHS, now)
   const series: TrendPoint[] = [...history, ...forecast].map((value, index) => ({
-    label: labels[index],
+    monthIndex: months[index],
     value: Math.round(value * 10) / 10,
     projected: index >= HISTORY_MONTHS,
   }))
 
-  // Measured across the forecast horizon: the card answers "what is about to
-  // happen", not "what already did".
+  // Measured across the forecast: the card answers what is about to happen.
   const lastActual = history[history.length - 1]
   const lastProjected = forecast[forecast.length - 1]
   const momentum = lastActual > 0 ? (lastProjected - lastActual) / lastActual : 0

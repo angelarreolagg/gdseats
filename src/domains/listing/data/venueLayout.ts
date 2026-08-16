@@ -1,16 +1,12 @@
 /**
- * A generic three-tier bowl, shared by the seat map and the listing generator so
- * the map's section numbers and the list's section numbers are the same set.
- *
- * This is a schematic, not a survey of any real venue: concentric rings of equal
- * sections around a centred field. It carries the information a buyer needs from
- * a seat map — which tier, which side, how far from the field — without pretending
- * to be an accurate floor plan.
+ * A generic three-tier bowl, shared by the seat map and the generator so their
+ * section numbers are the same set. A schematic, not a survey of any venue.
  */
 
 export interface Ring {
   level: 1 | 2 | 3
-  label: string
+  /** Nothing renders the tier name today; kept as a key rather than a half state. */
+  labelKey: string
   /** First section number in the ring; sections run consecutively. */
   start: number
   count: number
@@ -28,9 +24,9 @@ export const CENTER = { x: 300, y: 230 }
 export const FIELD = { x: 222, y: 182, width: 156, height: 96 }
 
 export const RINGS: Ring[] = [
-  { level: 1, label: 'Lower', start: 101, count: 20, radiusX: 118, radiusY: 78, depth: 30, priceMultiplier: 1.35 },
-  { level: 2, label: 'Club', start: 201, count: 24, radiusX: 158, radiusY: 116, depth: 28, priceMultiplier: 1.0 },
-  { level: 3, label: 'Upper', start: 301, count: 28, radiusX: 196, radiusY: 152, depth: 32, priceMultiplier: 0.55 },
+  { level: 1, labelKey: 'listing:rings.lower', start: 101, count: 20, radiusX: 118, radiusY: 78, depth: 30, priceMultiplier: 1.35 },
+  { level: 2, labelKey: 'listing:rings.club', start: 201, count: 24, radiusX: 158, radiusY: 116, depth: 28, priceMultiplier: 1.0 },
+  { level: 3, labelKey: 'listing:rings.upper', start: 301, count: 28, radiusX: 196, radiusY: 152, depth: 32, priceMultiplier: 0.55 },
 ]
 
 export const ALL_SECTIONS: number[] = RINGS.flatMap((ring) =>
@@ -41,11 +37,8 @@ export function getRingForSection(section: number): Ring | undefined {
   return RINGS.find((ring) => section >= ring.start && section < ring.start + ring.count)
 }
 
-/**
- * Sideline premium. Sections are numbered around the bowl starting at the prime
- * sideline, so proximity to it is angular — the first and last sections of a ring
- * are neighbours, and both sit on the 50-yard line.
- */
+/** Proximity to the prime sideline is angular: a ring's first and last sections
+ * are neighbours, and both sit on the 50-yard line. */
 export function getSidelineMultiplier(section: number): number {
   const ring = getRingForSection(section)
   if (!ring) return 1

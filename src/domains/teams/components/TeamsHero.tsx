@@ -1,21 +1,30 @@
-import type { ReactNode } from 'react'
+import {
+  Fragment,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  type ReactNode,
+  type RefObject,
+} from 'react'
 import { motion, useReducedMotion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
 import StrokeText from '@/shared/components/StrokeText'
 import { useMediaQuery } from '@/shared/hooks/useMediaQuery'
+// Imported, not a `public/` path: Vite fingerprints it, which is what makes it
+// eligible for the `immutable` cache `vercel.json` grants `/assets/*`.
+import heroStadiums from '@/assets/hero-stadiums.mp4'
 
 /**
- * The headline, and the two halves it splits into.
- *
- * `WORDMARK` is the accessible name in both layouts, set on the `<h1>` itself
- * rather than left to the concatenation of two `role="img"` children — the
- * spacing between them is not something to leave to chance.
+ * Read from the file's `avcC` box: H.264 High profile, level 4.0. Re-read it on
+ * any re-encode — a browser that cannot decode the advertised codec skips the
+ * `<source>` silently, and with one source that is an empty hero with no error.
  */
-const WORDMARK = 'SOME SEATS MEAN MORE'
-const WORDMARK_LEAD = 'SOME SEATS'
-const WORDMARK_TAIL = 'MEAN MORE'
+const HERO_CODEC = 'video/mp4; codecs="avc1.640028"'
 
-/** Literal values of psl-wordmark-lead and psl-accent. The hero is dark-pinned,
- *  and both are the same in either theme, so there is nothing to resolve. */
+/** Joins the two halves for the `<h1>`'s accessible name. Japanese writes none. */
+const WORDMARK_SEPARATOR = ' '
+
+/** Literal psl-wordmark-lead and psl-accent; the hero is dark-pinned either way. */
 const LEAD_COLOR = '#d3d7db'
 const ACCENT_COLOR = '#a0f700'
 
@@ -36,252 +45,214 @@ const DRAW = {
 } as const
 
 /**
- * The wordmark opts OUT of `--font-sans`, and has to.
- *
- * `system-ui` resolves to SF Pro on macOS, whose heavy glyphs are built from
- * overlapping component contours — the diagonal of an N, the apex of an A, the
- * middle of an M are separate shapes laid over the stems. Filled, nonzero winding
- * merges them and you never see it. StrokeText *strokes* the outline, so every
- * internal edge gets drawn and those diagonals poke out of the stems as loose
- * slivers. Verified by rendering the same string across font stacks: every
- * grotesque with merged outlines is clean, SF Pro is not.
- *
- * `style` reaches the glyphs because StrokeText puts it on the root span and its
- * <text> only sets size/weight/tracking — font-family inherits. So this fixes the
- * artifact without touching the vendored component.
+ * Must keep merged glyph outlines: StrokeText strokes them, so SF Pro's
+ * overlapping contours show as slivers. The CJK faces give the translated
+ * wordmark coverage — fallback is per glyph, so Latin never reaches them.
  */
-const WORDMARK_FONT = { fontFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif" }
+const WORDMARK_FONT = {
+  fontFamily:
+    "'Helvetica Neue', Helvetica, Arial, 'Hiragino Sans', 'Yu Gothic', 'Noto Sans JP', sans-serif",
+}
 
 /**
- * When the drawn headline finishes, in seconds.
- *
- * StrokeText's outline lands at `drawDuration + stagger × (glyphs − 1)`
- * = 1.6 + 0.05 × 19 = 2.55s, and its wipe — scheduled at `drawDuration +
- * fillDelay` and running `max(0.4, drawDuration / 2)` — lands at 2.60s. The copy
- * below waits for the later of the two, so it never competes with the headline
- * for attention while the headline is still drawing itself.
- *
- * Tied to the props below by hand. Re-wording the headline shifts this by a few
- * hundredths per character, which is invisible for a cue this soft.
+ * When the draw finishes, in seconds. Derived, because the glyph count moves
+ * with the language. Takes lines, not the phrase: stacked draws two in parallel.
  */
-const HEADLINE_SETTLES = 2.6
+function headlineSettles(...lines: string[]): number {
+  const glyphs = Math.max(...lines.map((line) => Array.from(line).length))
+  const strokeEnds = DRAW.drawDuration + DRAW.stagger * Math.max(0, glyphs - 1)
+  const wipeEnds = DRAW.drawDuration + DRAW.fillDelay + Math.max(0.4, DRAW.drawDuration / 2)
+  return Math.max(strokeEnds, wipeEnds)
+}
+
+/** StrokeText's viewBox padding, `max(strokeWidth, fontSize × 0.1)` per side. */
+const VIEWBOX_PAD = Math.max(DRAW.strokeWidth, DRAW.fontSize * 0.1)
+
+/**
+ * A line's artwork width, for the stacked layout only. Two full-width lines
+ * render at whatever size their own length dictates, so the shorter comes out
+ * bigger. jsdom has no 2D context and falls back to the glyph count.
+ */
+function measureUnits(text: string): number {
+  const fallback = Array.from(text).length
+  if (typeof document === 'undefined') return fallback
+
+  const context = document.createElement('canvas').getContext('2d')
+  if (!context) return fallback
+
+  context.font = `${DRAW.fontWeight} ${DRAW.fontSize}px ${WORDMARK_FONT.fontFamily}`
+  context.letterSpacing = `${DRAW.letterSpacing}px`
+
+  const width = context.measureText(text).width
+  return width > 0 ? width + VIEWBOX_PAD * 2 : fallback
+}
+
+/** Widths in proportion to viewBox widths render at one glyph size. */
+function stackedShare(units: number, otherUnits: number): string {
+  return `${(units / Math.max(units, otherUnits)) * 100}%`
+}
+
+/**
+ * Tints the lead's glyphs, since StrokeText paints one colour per string.
+ *
+ * Imperative because the alternative — one component per half — gives each its
+ * own GSAP timeline and draws the headline as two texts sweeping in parallel.
+ * Safe against the animation (GSAP writes only dash offsets and opacity) and
+ * against React (tspans are keyed by index and re-render only on a text change).
+ */
+function useWordmarkTint(
+  root: RefObject<HTMLElement | null>,
+  lead: string,
+  tail: string,
+  oneLine: boolean,
+) {
+  useLayoutEffect(() => {
+    const node = root.current
+    if (!node) return
+
+    const leadGlyphs = Array.from(lead).length
+    // `''` rather than the accent, so the rest falls back to the `<text>`
+    // presentation attribute and the accent is stated in one place.
+    node.querySelectorAll<SVGTSpanElement>('[data-stroke-char]').forEach((glyph, index) => {
+      glyph.style.stroke = index < leadGlyphs ? LEAD_COLOR : ''
+    })
+    node.querySelectorAll<SVGTSpanElement>('[data-fill-char]').forEach((glyph, index) => {
+      glyph.style.fill = index < leadGlyphs ? LEAD_COLOR : ''
+    })
+    // `tail` and `oneLine` change which tspans exist; their values are not read.
+  }, [root, lead, tail, oneLine])
+}
 
 interface TeamsHeroProps {
-  /**
-   * The headline slot. Left empty, the hero renders its own copy — a bespoke
-   * title component drops in here without touching the backdrop.
-   */
+  /** Headline slot; empty renders the built-in copy. */
   children?: ReactNode
 }
 
 /**
- * The landing band: stadium footage, the scrim that makes type legible on it,
- * and the brand glow — one component, because those three layers only make
- * sense together.
+ * The landing band: footage, scrim, brand glow.
  *
- * The green radial is the ORIGINAL hero, not decoration bolted on: before the
- * video, layers 2 and 3 *were* the hero. Keeping them means the band reads as
- * this product's while the file streams, and there is no flash of bare video
- * before the scrim lands.
- *
- * Like `AppHeader`, this pins the DARK palette in both themes. Type sits on
- * stadium footage that is dark whatever the user picked, so `text-ink` has to
- * resolve to the light step. The `dark` class is the whole mechanism — the
- * theme is only custom properties scoped to `.dark`, so the slot above needs no
- * special-casing either.
- *
- * `autoPlay` is gated on reduced motion by hand: `MotionConfig` only governs
- * Motion components and the `prefers-reduced-motion` block in globals.css only
- * damps CSS animation. Neither one stops a looping `<video>`.
+ * Pins the DARK palette in both themes — the type sits on footage that is dark
+ * whichever the user picked. `autoPlay` is gated on reduced motion by hand;
+ * neither `MotionConfig` nor the CSS block stops a looping `<video>`.
  */
 export function TeamsHero({ children }: TeamsHeroProps) {
+  const { t, i18n } = useTranslation('hero')
   const reduceMotion = useReducedMotion()
   const oneLine = useMediaQuery(ONE_LINE_QUERY)
 
+  const lead = t('wordmark.lead')
+  const tail = t('wordmark.tail')
+  const wordmark = `${lead}${WORDMARK_SEPARATOR}${tail}`
+  const settles = oneLine ? headlineSettles(wordmark) : headlineSettles(lead, tail)
+  const leadUnits = useMemo(() => measureUnits(lead), [lead])
+  const tailUnits = useMemo(() => measureUnits(tail), [tail])
+
+  const headingRef = useRef<HTMLHeadingElement>(null)
+  useWordmarkTint(headingRef, lead, tail, oneLine)
+
   return (
     <section className="dark relative isolate flex min-h-[clamp(300px,40svh,520px)] overflow-hidden">
+      {/* `<source>`, so a browser can reject a codec before spending a request
+          and further encodes drop in above this line. `preload="auto"` because
+          `autoPlay` overrides `preload` anyway. */}
       <video
-        src="/nflstadiums.mp4"
         autoPlay={!reduceMotion}
         muted
         loop
         playsInline
-        preload="metadata"
+        preload="auto"
         aria-hidden="true"
         className="absolute inset-0 h-full w-full object-cover"
-      />
+      >
+        <source src={heroStadiums} type={HERO_CODEC} />
+      </video>
 
-      {/* The scrim. Everything above this point is footage; everything below is type. */}
+      {/* Scrim, brand glow, then a fade to `--psl-page` — the same #040811 the
+          page paints below, which is why the band needs no bottom border. */}
       <div className="absolute inset-0 bg-page/65" />
       <div className="absolute inset-0 bg-[radial-gradient(120%_140%_at_50%_-20%,color-mix(in_oklab,var(--psl-accent)_22%,transparent),transparent_60%)]" />
-      {/*
-       * Fades to `--psl-page`, which inside this dark-pinned subtree is the same
-       * #040811 the page paints below — so in dark the band has no seam at all,
-       * which is why there is no bottom border to draw one back in.
-       */}
       <div className="absolute inset-0 bg-gradient-to-b from-transparent to-page" />
 
-      {/*
-       * `py` is the only lever left on a short screen — the content is the real
-       * floor, since the wordmark's SVG box is a fixed multiple of its font size.
-       * Mobile takes the tighter value so the first row of team cards clears the
-       * fold, which is the whole reason the height is a clamp and not a number.
-       */}
+      {/* `py` is the only lever on a short screen — the wordmark's SVG box is a
+          fixed multiple of its font size, so the content is the real floor. */}
       <div className="relative z-10 mx-auto flex w-full max-w-7xl flex-col items-center justify-center px-5 py-8 text-center sm:px-8 sm:py-16">
         {children ?? (
-          <>
-            {/*
-             * One line from `sm` up, two stacked below it — a render branch, not
-             * a CSS one, because StrokeText scales its artwork to the width it is
-             * given. Two half-length lines in a 1216px column would each render
-             * at roughly twice the glyph height of the single line and swallow
-             * the hero; at 350px they are the only way the wordmark is legible at
-             * all, instead of a 32px ribbon adrift in a 166px box.
-             *
-             * The accessible name is set here rather than left to the two
-             * `role="img"` children, so it reads identically in both layouts.
-             */}
-            {/*
-             * `wordmark-draw` is on BOTH branches, where `hero-wordmark` is on
-             * one: it holds the fill at opacity 0 until GSAP takes it over, so
-             * the headline cannot paint solid in the frames before StrokeText's
-             * clipPath exists. See globals.css.
-             */}
-            <h1
-              aria-label={WORDMARK}
-              className={oneLine ? 'hero-wordmark wordmark-draw w-full' : 'wordmark-draw w-full'}
-            >
+          /* Keyed on the language: StrokeText animates on mount and caches its
+             measured viewBox, so a remount is what replays the draw and
+             re-measures for the new copy. */
+          <Fragment key={i18n.language}>
+            {/* `wordmark-draw` holds the fill at opacity 0 until GSAP takes over,
+                so the headline cannot paint solid before the measurement lands. */}
+            <h1 ref={headingRef} aria-label={wordmark} className="wordmark-draw w-full">
               {oneLine ? (
-                /* One string, so the two-tone split has to come from CSS:
-                   `hero-wordmark` retints the first 10 glyphs — see globals.css. */
+                /* ONE component, and it must stay one: one component is one GSAP
+                   timeline, which is what makes the draw a single sweep. Both
+                   colours are the accent; `useWordmarkTint` repaints the lead. */
                 <StrokeText
                   {...DRAW}
                   style={WORDMARK_FONT}
-                  text={WORDMARK}
+                  text={wordmark}
                   strokeColor={ACCENT_COLOR}
                   fillColor={ACCENT_COLOR}
                 />
               ) : (
-                /*
-                 * Split into two components, so each carries its own colour and
-                 * the `nth-child(-n + 10)` rule is not involved at all — the
-                 * fragile coupling between that count and the copy simply does
-                 * not exist on this branch.
-                 *
-                 * `!h-auto` overrides StrokeText's inline `fontSize × 1.3` box.
-                 * Left alone each line is letterboxed inside that band and the
-                 * pair stands twice as tall as its own artwork.
-                 *
-                 * THE TWO SIZE LEVERS HERE ARE NOT THE ONES YOU EXPECT.
-                 *
-                 * `fontSize` does nothing to the rendered size on this branch. The
-                 * svg is `w-full` with an auto height, so it fills whatever width
-                 * it is given and its height follows the viewBox aspect — and the
-                 * aspect is unchanged by `fontSize`, because the glyph box and the
-                 * padding around it (`max(strokeWidth, fontSize × 0.1)`) scale
-                 * together. `fontSize` is the internal coordinate system, not a
-                 * size. **Width is the only size control.** `w-[85%]` is what makes
-                 * the wordmark 15% smaller.
-                 *
-                 * The gap between the lines is not a gap either — it is that same
-                 * 10%-of-fontSize padding baked into each svg's viewBox, top and
-                 * bottom, so roughly a fifth of a line box sits empty between them
-                 * and no `gap` utility can reach it. `-mt-2` on the second line
-                 * pulls back most of it. Do not push it much past this: the
-                 * padding is also what keeps the stroke from being clipped at the
-                 * viewBox edge.
-                 */
+                /* Two lines, the one place two components are correct — separate
+                   rows, so the parallel timelines do not read as one line.
+                   `!h-auto` overrides StrokeText's fixed `fontSize × 1.3` box;
+                   width is then the only size control, hence `w-[85%]` and the
+                   per-line share. Both go on StrokeText's own root, since
+                   `[&>span>svg]` matches one level down and a wrapper escapes it. */
                 <span className="mx-auto block w-[85%] [&>span>svg]:!h-auto">
                   <StrokeText
                     {...DRAW}
-                    style={WORDMARK_FONT}
-                    text={WORDMARK_LEAD}
+                    className="mx-auto"
+                    style={{ ...WORDMARK_FONT, width: stackedShare(leadUnits, tailUnits) }}
+                    text={lead}
                     strokeColor={LEAD_COLOR}
                     fillColor={LEAD_COLOR}
                   />
-                  {/* The margin goes on StrokeText's own root, not on a wrapper:
-                      the `[&>span>svg]` above matches one level down, and a
-                      wrapper would push this svg out of its reach and leave the
-                      second line letterboxed in its 1.3× box. */}
+                  {/* `-mt-2` pulls back the viewBox padding baked into each svg,
+                      which no `gap` can reach. Don't push it much further: that
+                      padding also keeps the stroke off the viewBox edge. */}
                   <StrokeText
                     {...DRAW}
-                    className="-mt-2"
-                    style={WORDMARK_FONT}
-                    text={WORDMARK_TAIL}
+                    className="mx-auto -mt-2"
+                    style={{ ...WORDMARK_FONT, width: stackedShare(tailUnits, leadUnits) }}
+                    text={tail}
                     strokeColor={ACCENT_COLOR}
                     fillColor={ACCENT_COLOR}
                   />
                 </span>
               )}
             </h1>
-            {/*
-             * The copy holds until the headline has finished drawing, then rises
-             * in. Three beats rather than one so the lines arrive in reading
-             * order: disclosure, then promise, then detail.
-             *
-             * Under reduced motion StrokeText jumps straight to its end state, so
-             * the delay has to collapse too — otherwise the value proposition
-             * would sit invisible for 2.6s waiting on an animation that already
-             * finished. `MotionConfig reducedMotion="user"` drops the transform
-             * on its own, but it has no opinion about delays.
-             */}
-            {/*
-             * The demo disclosure, stated rather than tucked into a tooltip.
-             *
-             * `AppHeader` already carries a `DemoMarker`, and this is deliberately
-             * NOT a second copy of it: that one is a solid accent pill because it
-             * has to survive a dense bar, and two of those on one screen would
-             * read as a warning banner. Here the accent is a 6px dot and the words
-             * take the muted ink the second line already uses — the same
-             * information at a tenth of the volume.
-             *
-             * It also says the thing outright, where the header's version hides
-             * the detail behind hover. A hero is where a visitor decides whether
-             * to trust the numbers below it, and "these numbers are invented" is
-             * not something to make them hover to discover — nor something a
-             * touch device could discover at all.
-             *
-             * Not a button, not a link. It does nothing, so it is text.
-             */}
+            {/* Held until the draw lands, then two beats 0.14s apart so the lines
+                arrive in reading order. The delay collapses under reduced motion,
+                where StrokeText has already jumped to its end state. */}
             <motion.p
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
-                delay: reduceMotion ? 0 : HEADLINE_SETTLES,
+                delay: reduceMotion ? 0 : settles,
                 duration: 0.7,
                 ease: [0.22, 1, 0.36, 1],
               }}
-              className="mt-5 inline-flex items-center gap-2 rounded-full border border-ink/15 bg-page/50 px-3 py-1.5 text-[11px] font-medium tracking-wide text-muted backdrop-blur-sm sm:mt-6 sm:px-3.5 sm:text-xs"
+              className="mt-5 text-2xl font-semibold tracking-tight text-balance text-ink sm:mt-6 sm:text-3xl"
             >
-              <span aria-hidden="true" className="size-1.5 shrink-0 rounded-full bg-accent" />
-              Demo version · all data is mocked
+              {t('headline')}
             </motion.p>
             <motion.p
               initial={{ opacity: 0, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{
-                delay: reduceMotion ? 0 : HEADLINE_SETTLES + 0.14,
-                duration: 0.7,
-                ease: [0.22, 1, 0.36, 1],
-              }}
-              className="mt-4 text-2xl font-semibold tracking-tight text-balance text-ink sm:mt-5 sm:text-3xl"
-            >
-              Find your team's PSL &amp; Tickets
-            </motion.p>
-            <motion.p
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{
-                delay: reduceMotion ? 0 : HEADLINE_SETTLES + 0.28,
+                delay: reduceMotion ? 0 : settles + 0.14,
                 duration: 0.7,
                 ease: [0.22, 1, 0.36, 1],
               }}
               className="mt-3 max-w-xl text-sm text-pretty text-muted sm:text-base"
             >
-              The easy, transparent, and secure way to buy and sell personal seat licenses
-              and season tickets — with an AI read on every price.
+              {t('valueProposition')}
             </motion.p>
-          </>
+          </Fragment>
         )}
       </div>
     </section>

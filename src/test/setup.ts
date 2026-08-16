@@ -1,16 +1,20 @@
 import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach, vi } from 'vitest'
+import i18n from '@/shared/i18n'
+import { DEFAULT_LOCALE } from '@/shared/i18n/locales'
 
 /**
- * jsdom has no layout, so the suite has to *pick* a viewport rather than measure
- * one. Desktop is the default because it renders the most complete DOM — the
- * listing overlay keeps its offer form inline instead of moving it into a bottom
- * sheet, so every test that predates the mobile split still describes what it
- * always described.
- *
- * Flip a single test with `setViewport('mobile')` from `@/test/utils`, BEFORE
- * rendering. See the note there about why mid-test changes do not propagate.
+ * The suite runs in English: every assertion on copy is asserting on the `en`
+ * bundle, which is byte-identical to the literals it replaced. Pinned rather
+ * than resolved, since `resolveInitialLocale()` reads `navigator.language`.
+ */
+void i18n.changeLanguage(DEFAULT_LOCALE)
+
+/**
+ * jsdom has no layout, so the suite picks a viewport. Desktop renders the most
+ * complete DOM. Flip one test with `setViewport('mobile')` BEFORE rendering —
+ * see the note in `@/test/utils`.
  */
 export const DESKTOP_WIDTH_MATCHES = true
 
@@ -19,17 +23,12 @@ export function stubMatchMedia(widthQueriesMatch: boolean) {
     'matchMedia',
     vi.fn((query: string) => ({
       // Reduced motion is always on: animations can hold content out of the
-      // accessibility tree mid-flight, and reporting it makes Motion settle
-      // immediately so assertions see the final state.
+      // accessibility tree mid-flight.
       matches: query.includes('prefers-reduced-motion')
         ? true
         : /min-width/.test(query)
           ? widthQueriesMatch
-          : // `(hover: none)` is tied to the width, so `setViewport('mobile')`
-            // means a phone in full — narrow *and* touch — rather than a narrow
-            // desktop window that no real user has. Tooltips behave differently
-            // on the two, and testing one while claiming the other is worse than
-            // not testing it.
+          : // `(hover: none)` tracks the width, so 'mobile' means narrow AND touch.
             /hover:\s*none/.test(query)
             ? !widthQueriesMatch
             : false,
@@ -46,9 +45,8 @@ export function stubMatchMedia(widthQueriesMatch: boolean) {
 
 stubMatchMedia(DESKTOP_WIDTH_MATCHES)
 
-// jsdom has no layout, so `scrollTo` is a stub that logs "not implemented" to the
-// virtual console. `useAppNavigation` calls it on every screen change, so left
-// alone every navigation test would print an error it isn't reporting.
+// `useAppNavigation` calls it on every screen change; unstubbed, jsdom logs
+// "not implemented" for each one.
 vi.stubGlobal('scrollTo', vi.fn())
 
 // Recharts' ResponsiveContainer measures its parent, which jsdom reports as 0.
@@ -58,9 +56,40 @@ globalThis.ResizeObserver = class {
   disconnect() {}
 }
 
+/**
+ * jsdom has no `IntersectionObserver`, and a no-op stub is worse than none:
+ * nothing reports as intersecting, so every `Reveal` holds `opacity: 0` and the
+ * landing sections render blank while content assertions still pass. This one
+ * reports intersection synchronously.
+ */
+globalThis.IntersectionObserver = class {
+  readonly root = null
+  readonly rootMargin = ''
+  readonly thresholds: ReadonlyArray<number> = []
+  // A plain field, not a parameter property: `erasableSyntaxOnly` is on.
+  callback: IntersectionObserverCallback
+
+  constructor(callback: IntersectionObserverCallback) {
+    this.callback = callback
+  }
+
+  observe(target: Element) {
+    this.callback(
+      [{ isIntersecting: true, intersectionRatio: 1, target } as IntersectionObserverEntry],
+      this as unknown as IntersectionObserver,
+    )
+  }
+
+  unobserve() {}
+  disconnect() {}
+  takeRecords(): IntersectionObserverEntry[] {
+    return []
+  }
+} as unknown as typeof IntersectionObserver
+
 afterEach(() => {
   cleanup()
-  // Restore the default, or one mobile test silently rewrites the viewport for
-  // every test that runs after it in the same file.
+  // Restore the defaults, or one test silently rewrites them for the rest.
   stubMatchMedia(DESKTOP_WIDTH_MATCHES)
+  void i18n.changeLanguage(DEFAULT_LOCALE)
 })

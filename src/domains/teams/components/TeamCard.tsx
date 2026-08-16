@@ -1,5 +1,7 @@
 import { useMemo } from 'react'
 import { motion } from 'motion/react'
+import { useTranslation } from 'react-i18next'
+import { formatCount } from '@/shared/utils/formatters'
 import { getListingCountForTeam } from '../data/teams'
 import { getMarketTrend } from '../services/marketTrend.service'
 import type { Team } from '../types/team.types'
@@ -13,7 +15,9 @@ interface TeamCardProps {
 }
 
 export function TeamCard({ team, onSelect }: TeamCardProps) {
+  const { t } = useTranslation('teams')
   const trend = useMemo(() => getMarketTrend(team), [team])
+  const listingCount = getListingCountForTeam(team)
 
   return (
     <motion.button
@@ -43,14 +47,24 @@ export function TeamCard({ team, onSelect }: TeamCardProps) {
 
         <span className="mt-2.5 flex flex-wrap items-center gap-1.5 sm:mt-3">
           <span className="inline-flex rounded-full bg-info/15 px-2 py-1 text-[10px] font-semibold tracking-wide text-info uppercase tabular-nums">
-            {getListingCountForTeam(team).toLocaleString('en-US')} listings
+            {/*
+             * `count` selects the plural form, `formatted` is what is rendered.
+             * Two params for one number because the two jobs are different: the
+             * grouping separator is the app's locale (never a bare
+             * `toLocaleString()`, which reads the browser's), while the plural
+             * category is the language's grammar — and ja has only one.
+             */}
+            {t('card.listingCount', {
+              count: listingCount,
+              formatted: formatCount(listingCount),
+            })}
           </span>
           {/* Hover-only here: the card is a button, so the chip must not take a
               tab stop of its own. SearchToolbar renders the focusable variant. */}
           <TrendChip trend={trend} />
         </span>
 
-        <span className="mt-1.5 text-[11px] text-muted">{trend.buyerImplication}</span>
+        <span className="mt-1.5 text-[11px] text-muted">{t(trend.buyerImplicationKey)}</span>
       </span>
     </motion.button>
   )

@@ -1,4 +1,5 @@
 import { Moon, Sun } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 import { IconButton } from './IconButton'
 import { useTheme } from '../hooks/useTheme'
 
@@ -9,12 +10,13 @@ interface ThemeToggleProps {
 }
 
 export function ThemeToggle({ className = 'rounded-xl', size = 'md' }: ThemeToggleProps) {
+  const { t } = useTranslation('common')
   const { theme, toggleTheme } = useTheme()
   const isDark = theme === 'dark'
 
   return (
     <IconButton
-      label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
+      label={isDark ? t('theme.switchToLight') : t('theme.switchToDark')}
       onClick={toggleTheme}
       size={size}
       className={className}

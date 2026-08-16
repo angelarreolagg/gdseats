@@ -20,20 +20,11 @@
   }
 
   /*
-   * Tailwind v3's preflight shipped `button, [role="button"] { cursor: pointer }`
-   * and v4 dropped it to match the browser default, which for a <button> is an
-   * arrow. Restoring it here fixes every control at once — and every control
-   * added later — instead of scattering `cursor-pointer` across components.
-   *
-   * `:not(:disabled)` keeps disabled controls from claiming to be clickable, and
-   * leaves Button's `disabled:cursor-not-allowed` unopposed rather than fighting
-   * this rule.
-   *
-   * Deliberately narrow: `label`, `summary` and `[tabindex]` are excluded. Labels
-   * wrap text inputs where the I-beam is right, and chips like FEATURED or the
-   * Demo version badge are focusable only to expose a tooltip — they are not
-   * clickable, so they keep the arrow. The hand means "this does something".
-   */
+     * Tailwind v4 dropped v3's `button { cursor: pointer }` preflight. Restoring
+     * it here fixes every control at once. Deliberately narrow: `label`,
+     * `summary` and `[tabindex]` are excluded — chips are focusable only to
+     * expose a tooltip, and the hand means "this does something".
+     */
   button:not(:disabled),
   [role='button'],
   select:not(:disabled) {
@@ -52,14 +43,9 @@
 }
 
 /*
- * Holographic ring.
- *
- * The ONLY colour in this app that is purely decorative and encodes nothing — so
- * it is deliberately exempt from the measured palette. Don't try to validate it,
- * and don't reuse these hues for anything that carries meaning.
- *
- * The gradient is masked to the border box, so the content sits on a solid
- * surface and every contrast ratio measured for the panel's text still holds.
+ * Holographic ring. Purely decorative and encodes nothing, so it is exempt from
+ * the measured palette — don't validate these hues or reuse them for meaning.
+ * Masked to the border box, so the content surface stays solid.
  */
 @property --holo-angle {
   syntax: '<angle>';
@@ -123,10 +109,8 @@
 }
 
 /*
- * Chip-scale ring. Same rotating iridescence, but only the border: the chip's
- * fill keeps the verdict tint (teal / blue / amber) and its text keeps the
- * verdict ink, so the rainbow never washes out the hue that carries the meaning.
- * No corner bloom — at 20px tall it would swallow the label.
+ * Chip-scale ring: border only, so the fill keeps the verdict tint and the text
+ * the verdict ink. No corner bloom — at 20px it would swallow the label.
  */
 .holo-chip {
   position: relative;
@@ -162,13 +146,9 @@
 }
 
 /*
- * Gradient stroke for the AI mark.
- *
- * The ring above is masked to a border box, so it cannot paint an icon. Lucide
- * strokes with `currentColor`, so pointing `stroke` at an SVG gradient is the way
- * in. The trailing `currentColor` is the SVG paint fallback: if the gradient id
- * ever fails to resolve, the icon renders in the inherited colour instead of
- * vanishing.
+ * Gradient stroke for the AI mark: the ring above is masked to a border box and
+ * cannot paint an icon. The trailing `currentColor` is the SVG paint fallback —
+ * if the gradient id fails to resolve, the icon inherits rather than vanishing.
  */
 .holo-icon {
   stroke: url(#psl-holo-stroke) currentColor;
@@ -203,18 +183,9 @@
   }
 }
 
-/*
- * Toasts, remapped onto the design system.
- *
- * react-toastify ships its own palette; left alone, a notice arrives in colours
- * that belong to no other surface here. Its variables are all it needs to speak
- * in our tokens instead — the `theme` prop on `ToastContainer` picks the light
- * or dark class, and these values follow the same custom properties everything
- * else does, so a toast is correct in both modes without a `dark:` rule.
- *
- * The accent is `--psl-accent-mark` (3.90 on white), not the raw brand green:
- * the info icon is a small mark on the toast surface, and #a0f700 is 1.33 there.
- */
+/* react-toastify remapped onto our tokens, so a toast is correct in both modes
+ * with no `dark:` rule. The info accent is `--psl-accent-mark`, not the raw
+ * brand green, which is 1.33:1 on the toast surface. */
 :root {
   --toastify-font-family: var(--font-sans);
   --toastify-toast-bd-radius: 0.75rem;
@@ -231,42 +202,20 @@
 }
 
 /*
- * Two-tone hero wordmark.
+ * `.hero-wordmark` used to live here: it retinted the first ten `<tspan>`s to
+ * make the two-tone headline, with the count hard-coded to "SOME SEATS". CSS
+ * cannot read the copy, so it could not survive translation — `TeamsHero` now
+ * applies the tint in a layout effect keyed on the lead string.
  *
- * StrokeText paints one `strokeColor` and one `fillColor` for the whole string,
- * so the split is made from outside: it renders one <tspan> per character, in
- * order, in both the stroke copy and the fill copy. The first N take the lead
- * colour; everything after keeps the accent the component was given.
- *
- * The tspans inherit `stroke`/`fill` from their <text> as presentation
- * attributes, and a CSS declaration outranks an inherited attribute — so this
- * wins without `!important` and without touching the vendored component.
- *
- * THE COUNT IS TIED TO THE COPY: 10 is "SOME SEATS" in "SOME SEATS MEAN MORE".
- * Rewrite the headline and this number moves with it — TeamsHero.test.tsx fails
- * loudly if the two drift apart.
+ * The tidier alternative is a trap: one `StrokeText` per half makes the tint a
+ * prop and draws the headline as two texts sweeping side by side.
  */
-.hero-wordmark [data-stroke-char]:nth-child(-n + 10) {
-  stroke: var(--psl-wordmark-lead);
-}
-
-.hero-wordmark [data-fill-char]:nth-child(-n + 10) {
-  fill: var(--psl-wordmark-lead);
-}
 
 /*
- * The drawn wordmark's fill starts hidden, and GSAP is what reveals it.
- *
- * In `wipe` mode StrokeText leaves the fill <text> at full opacity and leans
- * entirely on a <clipPath> to conceal it — and that clipPath is only rendered
- * once getBBox() has landed. Until then the headline paints solid, and the
- * stroke draws invisibly underneath it because TeamsHero passes the same colour
- * as both strokeColor and fillColor.
- *
- * GSAP writes `opacity` inline on every tspan the moment it arms the timeline —
- * 1 for the wipe, and 1 again on the reduced-motion end state — and an inline
- * style outranks this rule. So this covers the frames before that and nothing
- * after. It has to sit on both wordmark branches, unlike the tint above.
+ * Holds the fill hidden until GSAP takes over. StrokeText leaves it at full
+ * opacity until its measurement lands, and TeamsHero paints stroke and fill the
+ * same colour — so without this the headline lands solid and the draw is
+ * invisible. GSAP writes opacity inline, which outranks this and ends it.
  */
 .wordmark-draw [data-fill-char] {
   opacity: 0;

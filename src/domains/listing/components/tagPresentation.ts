@@ -12,19 +12,25 @@ import {
 import type { TagIconName } from '../types/listing.types'
 
 /**
- * Resolves a tag's semantic name into an icon and its hover copy.
+ * Resolves a tag's semantic name into an icon and the key for its hover copy.
  *
  * Lives in `components/` rather than in the service so the generator stays free
- * of React. The tooltip is supplementary — the chip's own uppercase label already
- * names the amenity, so nothing is lost on touch, where hover never fires.
+ * of React — and it holds a `tooltipKey` rather than the sentence for the same
+ * reason `ListingTag` holds a `labelKey`: this file chooses the icon, the locale
+ * bundle owns the words.
+ *
+ * The tooltip stays supplementary in every language. The chip's own label names
+ * the amenity, so nothing is lost on touch, where hover never fires — which is
+ * also why `TRANSLATORS.md` says the label must stand alone and the tooltip may
+ * not be where the meaning lives.
  */
-export const TAG_PRESENTATION: Record<TagIconName, { Icon: LucideIcon; tooltip: string }> = {
-  featured: { Icon: Star, tooltip: 'Promoted by the seller' },
-  'this-week': { Icon: CalendarClock, tooltip: 'Listed within the last 7 days' },
-  parking: { Icon: CircleParking, tooltip: 'Parking pass included' },
-  aisle: { Icon: Armchair, tooltip: 'Aisle seat' },
-  covered: { Icon: Umbrella, tooltip: 'Covered from the weather' },
-  accessible: { Icon: Accessibility, tooltip: 'Wheelchair accessible' },
-  financing: { Icon: CircleDollarSign, tooltip: 'Financing options available' },
-  'price-drop': { Icon: TrendingDown, tooltip: 'Asking price has come down' },
+export const TAG_PRESENTATION: Record<TagIconName, { Icon: LucideIcon; tooltipKey: string }> = {
+  featured: { Icon: Star, tooltipKey: 'listing:tagTooltips.featured' },
+  'this-week': { Icon: CalendarClock, tooltipKey: 'listing:tagTooltips.thisWeek' },
+  parking: { Icon: CircleParking, tooltipKey: 'listing:tagTooltips.parking' },
+  aisle: { Icon: Armchair, tooltipKey: 'listing:tagTooltips.aisle' },
+  covered: { Icon: Umbrella, tooltipKey: 'listing:tagTooltips.covered' },
+  accessible: { Icon: Accessibility, tooltipKey: 'listing:tagTooltips.accessible' },
+  financing: { Icon: CircleDollarSign, tooltipKey: 'listing:tagTooltips.financing' },
+  'price-drop': { Icon: TrendingDown, tooltipKey: 'listing:tagTooltips.priceDrop' },
 }

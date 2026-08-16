@@ -1,0 +1,25 @@
+{
+  "toolbar": {
+    "sectionFilter": "セクション {{section}}",
+    "clearSectionFilter": "セクションの絞り込みを解除",
+    "clearAll": "すべて解除",
+    "listingCount_other": "{{formatted}} 件の出品",
+    "orderBy": "並び替え"
+  },
+  "sort": {
+    "bestDeal": "お買い得順",
+    "priceAsc": "価格：安い順",
+    "priceDesc": "価格：高い順",
+    "section": "セクション"
+  },
+  "empty": {
+    "noListings": "セクション {{section}} に出品はありません。",
+    "clearFilter": "絞り込みを解除"
+  },
+  "row": {
+    "location": "セクション {{section}}、{{row}} 列、{{seatRange}}",
+    "pricePerSeat": "{{price}}／席",
+    "identity_other": "ID: {{id}} · {{count}} 席",
+    "totalInclFees": "合計 {{total}}（手数料込み）"
+  }
+}
