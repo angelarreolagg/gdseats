@@ -1,0 +1,87 @@
+{
+  "detail": {
+    "dialogLabel": "Anúncio {{id}}, setor {{section}}",
+    "backToSearch": "Voltar à busca",
+    "share": "Compartilhar",
+    "location": "Localização",
+    "priceHistory": "Histórico de preços",
+    "priceStats": "Estatísticas de preço",
+    "makeAnOffer": "Fazer uma oferta"
+  },
+  "summary": {
+    "id": "ID",
+    "section": "Setor",
+    "row": "Fila",
+    "seats_one": "{{count}} assento",
+    "seats_other": "{{count}} assentos",
+    "publicationDate": "Data de publicação",
+    "totalCost": "Custo total",
+    "totalInclFees": "{{amount}} com taxas",
+    "priceBreakdown": "Detalhamento do preço",
+    "licensePrice": "Preço da licença",
+    "transferFee": "Taxa de transferência",
+    "platformFee": "Taxa da plataforma",
+    "total": "Total"
+  },
+  "offer": {
+    "heading": "Fazer uma oferta",
+    "amountLabel": "Valor da oferta",
+    "transferFee": "Taxa de transferência",
+    "platformFee": "Taxa da plataforma",
+    "totalCost": "Custo total · Inclui todas as taxas",
+    "messageLabel": "Adicionar uma mensagem",
+    "submit": "Enviar oferta de {{amount}}",
+    "close": "Fechar o formulário de oferta"
+  },
+  "history": {
+    "caption": "Histórico de preços deste anúncio",
+    "date": "Data",
+    "totalPrice": "Preço total*",
+    "pricePerSeat": "Preço por assento*",
+    "change": "Variação",
+    "fell": "queda",
+    "rose": "alta",
+    "footnote": "*Os preços históricos não incluem taxas de transferência nem da plataforma"
+  },
+  "stats": {
+    "intro": "Veja como o preço por assento deste anúncio se compara ao de outros anúncios do mesmo setor. Os preços não incluem as taxas de transferência e da plataforma.",
+    "chartLabel": "Este anúncio é mais barato que {{cheaperThan}} de {{peers}} outros anúncios no setor {{section}}",
+    "onlyListing": "Único anúncio no setor {{section}}.",
+    "comparison": "Mais barato que <rank>{{cheaperThan}} de {{peers}}</rank> outros anúncios no setor {{section}} · média do setor <average>{{average}}</average>/assento"
+  },
+  "map": {
+    "readOnlyLabel": "Mapa de assentos, setor {{section}} destacado",
+    "readOnlyLabelUnselected": "Mapa de assentos, nenhum setor destacado",
+    "interactiveLabel": "Mapa de assentos do estádio — selecione um setor para filtrar os anúncios",
+    "sectionListings_one": "Setor {{section}}, {{count}} anúncio",
+    "sectionListings_other": "Setor {{section}}, {{count}} anúncios",
+    "zoomIn": "Aproximar",
+    "zoomOut": "Afastar",
+    "resetView": "Redefinir a visualização"
+  },
+  "tags": {
+    "featured": "Destaque",
+    "thisWeek": "Esta semana",
+    "parking": "Estacionamento",
+    "aisle": "Corredor",
+    "covered": "Coberto",
+    "accessible": "Acessível",
+    "financing": "Financiamento",
+    "priceDrop": "{{percent}}% off"
+  },
+  "tagTooltips": {
+    "featured": "Promovido pelo vendedor",
+    "thisWeek": "Publicado nos últimos 7 dias",
+    "parking": "Passe de estacionamento incluso",
+    "aisle": "Assento de corredor",
+    "covered": "Protegido do tempo",
+    "accessible": "Acessível para cadeira de rodas",
+    "financing": "Há opções de financiamento",
+    "priceDrop": "O preço pedido caiu"
+  },
+  "rings": {
+    "lower": "Inferior",
+    "club": "Club",
+    "upper": "Superior"
+  }
+}

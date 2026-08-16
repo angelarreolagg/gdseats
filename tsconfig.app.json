@@ -6,6 +6,8 @@
     "module": "esnext",
     "types": ["vite/client", "vitest/globals", "@testing-library/jest-dom"],
     "allowArbitraryExtensions": true,
+    /* The locale bundles are JSON, imported directly by `shared/i18n/resources.ts`. */
+    "resolveJsonModule": true,
     "skipLibCheck": true,
 
     /* Bundler mode */

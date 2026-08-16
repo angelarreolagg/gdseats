@@ -1,0 +1,44 @@
+{
+  "heading": "Preguntas frecuentes",
+  "subheading": "Todo lo que necesitas saber sobre comprar y vender licencias de asiento (PSL) en G&D Seats.",
+  "filterLabel": "Filtrar preguntas por categoría",
+  "categories": {
+    "basics": "Básicos",
+    "buying": "Comprar",
+    "selling": "Vender"
+  },
+  "items": {
+    "whatIsAPsl": {
+      "question": "¿Qué es una licencia de asiento personal (PSL)?",
+      "answer": "Una licencia de asiento personal (PSL) es una licencia de pago que da a su titular el derecho de comprar abonos de temporada para un asiento específico del estadio. Las PSL suelen emitirse cuando se construye o se remodela un estadio, y pueden transferirse o revenderse."
+    },
+    "howItWorks": {
+      "question": "¿Cómo funciona G&D Seats?",
+      "answer": "G&D Seats es una plataforma que conecta a compradores y vendedores de licencias de asiento personal (PSL) de equipos de la NFL. Nos encargamos de todo el proceso de la transacción y del papeleo con los equipos, protegiendo tanto al comprador como al vendedor."
+    },
+    "isItSafe": {
+      "question": "¿G&D Seats es seguro?",
+      "answer": "Sí, G&D Seats es una plataforma segura y protegida. Protegemos tanto al comprador como al vendedor mediante nuestro servicio de custodia. Verificamos la autenticidad de la PSL, la ubicación del asiento y la identidad de las partes involucradas. Todas las transacciones son totalmente reembolsables si por cualquier motivo la operación no se concreta."
+    },
+    "howToBuy": {
+      "question": "¿Cómo compro una licencia de asiento?",
+      "answer": "Explora los anuncios disponibles seleccionando tu equipo, compara precios y ubicaciones de asiento, y haz una oferta directamente en nuestra plataforma. Después nuestro equipo te guiará para completar la transacción de forma rápida y segura."
+    },
+    "howToSell": {
+      "question": "¿Cómo vendo mi licencia de asiento?",
+      "answer": "Escríbenos a {{sellEmail}} y te guiaremos durante todo el proceso."
+    },
+    "worth": {
+      "question": "¿Cuánto vale mi PSL?",
+      "answer": "El valor de una PSL varía según el equipo, el estadio, la ubicación del asiento y la demanda actual del mercado. G&D Seats ofrece análisis para ayudarte a encontrar el precio correcto para tu licencia."
+    },
+    "transfer": {
+      "question": "¿Puedo transferir mi PSL a otra persona?",
+      "answer": "Sí, las PSL son transferibles. Sin embargo, existe un proceso de transferencia específico que depende de las políticas del equipo y del estadio. G&D Seats está aquí para que ese proceso sea simple y transparente para ti."
+    },
+    "seasonTickets": {
+      "question": "¿Todavía tengo que comprar abonos de temporada después de adquirir una PSL?",
+      "answer": "Sí. Una PSL te da el derecho de comprar abonos de temporada para ese asiento cada año, pero los abonos son un costo aparte y estás obligado a comprarlos para conservar tu licencia. También podemos ayudarte a comprar tus abonos de temporada para que no tengas que gastar más dinero de tu bolsillo; escríbenos a {{ticketsEmail}}."
+    }
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "default": {
+    "title": "G&D Seats — AI が価格を読む NFL パーソナルシートライセンス",
+    "description": "NFL のパーソナルシートライセンスをインタラクティブな座席表で探し、オファーの前にすべての出品で AI の査定を確認できます。フロントエンドのデモ、データは架空です。"
+  },
+  "team": {
+    "title": "{{team}} の PSL — {{venue}} | {{site}}",
+    "description": "{{team}} の本拠地 {{venue}} で売り出し中のパーソナルシートライセンス。インタラクティブな座席表で、すべての希望価格を AI の査定と比べられます。"
+  },
+  "listing": {
+    "title": "セクション {{section}}、{{row}} 列 — {{team}} の PSL | {{site}}",
+    "description": "{{venue}} のセクション {{section}}、{{row}} 列にあるパーソナルシートライセンス {{seatCount}} 席。希望価格がセクション内でどの位置にあるかを AI が読み解きます。"
+  }
+}

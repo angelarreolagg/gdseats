@@ -1,0 +1,87 @@
+{
+  "detail": {
+    "dialogLabel": "Anuncio {{id}}, sección {{section}}",
+    "backToSearch": "Volver a la búsqueda",
+    "share": "Compartir",
+    "location": "Ubicación",
+    "priceHistory": "Historial de precios",
+    "priceStats": "Estadísticas de precio",
+    "makeAnOffer": "Hacer una oferta"
+  },
+  "summary": {
+    "id": "ID",
+    "section": "Sección",
+    "row": "Fila",
+    "seats_one": "{{count}} asiento",
+    "seats_other": "{{count}} asientos",
+    "publicationDate": "Fecha de publicación",
+    "totalCost": "Costo total",
+    "totalInclFees": "{{amount}} con comisiones",
+    "priceBreakdown": "Desglose del precio",
+    "licensePrice": "Precio de la licencia",
+    "transferFee": "Comisión de transferencia",
+    "platformFee": "Comisión de plataforma",
+    "total": "Total"
+  },
+  "offer": {
+    "heading": "Hacer una oferta",
+    "amountLabel": "Monto de la oferta",
+    "transferFee": "Comisión de transferencia",
+    "platformFee": "Comisión de plataforma",
+    "totalCost": "Costo total · Incluye todas las comisiones",
+    "messageLabel": "Agregar un mensaje",
+    "submit": "Enviar oferta por {{amount}}",
+    "close": "Cerrar el formulario de oferta"
+  },
+  "history": {
+    "caption": "Historial de precios de este anuncio",
+    "date": "Fecha",
+    "totalPrice": "Precio total*",
+    "pricePerSeat": "Precio por asiento*",
+    "change": "Cambio",
+    "fell": "baja",
+    "rose": "alza",
+    "footnote": "*Los precios históricos no incluyen comisiones de transferencia ni de plataforma"
+  },
+  "stats": {
+    "intro": "Mira cómo se compara el precio por asiento de este anuncio con el de otros anuncios de la misma sección. Los precios excluyen las comisiones de transferencia y de plataforma.",
+    "chartLabel": "Este anuncio es más barato que {{cheaperThan}} de {{peers}} anuncios en la sección {{section}}",
+    "onlyListing": "Único anuncio en la sección {{section}}.",
+    "comparison": "Más barato que <rank>{{cheaperThan}} de {{peers}}</rank> anuncios en la sección {{section}} · promedio de la sección <average>{{average}}</average>/asiento"
+  },
+  "map": {
+    "readOnlyLabel": "Mapa de asientos, sección {{section}} resaltada",
+    "readOnlyLabelUnselected": "Mapa de asientos, ninguna sección resaltada",
+    "interactiveLabel": "Mapa de asientos del estadio — selecciona una sección para filtrar los anuncios",
+    "sectionListings_one": "Sección {{section}}, {{count}} anuncio",
+    "sectionListings_other": "Sección {{section}}, {{count}} anuncios",
+    "zoomIn": "Acercar",
+    "zoomOut": "Alejar",
+    "resetView": "Restablecer la vista"
+  },
+  "tags": {
+    "featured": "Destacado",
+    "thisWeek": "Esta semana",
+    "parking": "Estacionamiento",
+    "aisle": "Pasillo",
+    "covered": "Techado",
+    "accessible": "Accesible",
+    "financing": "Financiamiento",
+    "priceDrop": "{{percent}}% menos"
+  },
+  "tagTooltips": {
+    "featured": "Promocionado por el vendedor",
+    "thisWeek": "Publicado en los últimos 7 días",
+    "parking": "Incluye pase de estacionamiento",
+    "aisle": "Asiento de pasillo",
+    "covered": "Protegido del clima",
+    "accessible": "Accesible para silla de ruedas",
+    "financing": "Hay opciones de financiamiento",
+    "priceDrop": "El precio de venta ha bajado"
+  },
+  "rings": {
+    "lower": "Nivel bajo",
+    "club": "Club",
+    "upper": "Nivel alto"
+  }
+}

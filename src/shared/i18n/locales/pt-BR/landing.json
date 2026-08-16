@@ -1,0 +1,39 @@
+{
+  "gdWay": {
+    "heading": "O jeito <brand>G&D Seats</brand>",
+    "subheading": "Descubra por que a G&D Seats é a melhor plataforma para comprar e vender licenças de assento.",
+    "pillars": {
+      "secure": {
+        "title": "Seguro",
+        "body": "Encontre licenças e vendedores verificados em quem você pode confiar, e nosso serviço de custódia protege tanto o comprador quanto o vendedor."
+      },
+      "easy": {
+        "title": "Fácil de usar",
+        "body": "Nosso objetivo é deixar o processo o mais simples possível. Não se preocupe com a papelada nem com as regras de transferência: cuidamos de tudo para você."
+      },
+      "transparent": {
+        "title": "Transparente",
+        "body": "Sem taxas ocultas nem surpresas. 100% reembolsável se a transação não for concluída."
+      }
+    }
+  },
+  "concierge": {
+    "eyebrow": "Concierge de voz com IA",
+    "heading": "Conte ao Scout o que você precisa",
+    "body": "Conheça o Scout, nosso concierge de IA. Compartilhe o setor de sua preferência, seu orçamento e suas prioridades, e nosso time de PSL encontrará as melhores opções disponíveis para você.",
+    "assurances": {
+      "quick": "Leva 1 minuto",
+      "always": "Disponível 24/7",
+      "noSignup": "Sem cadastro"
+    },
+    "available": "O Scout está disponível agora",
+    "callAria": "Ligar para o Scout no {{phone}}",
+    "human": "Prefere falar com uma pessoa? Ligue para <phone>{{number}}</phone>"
+  },
+  "sell": {
+    "heading": "Pronto para vender seu PSL?",
+    "subheading": "Também cuidamos de vendas em volume",
+    "cta": "Começar a vender",
+    "email": "Ou escreva para <email>{{address}}</email>"
+  }
+}

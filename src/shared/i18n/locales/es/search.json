@@ -1,0 +1,27 @@
+{
+  "toolbar": {
+    "sectionFilter": "Sección {{section}}",
+    "clearSectionFilter": "Quitar el filtro de sección",
+    "clearAll": "Limpiar todo",
+    "listingCount_one": "{{formatted}} anuncio",
+    "listingCount_other": "{{formatted}} anuncios",
+    "orderBy": "Ordenar por"
+  },
+  "sort": {
+    "bestDeal": "Mejor oportunidad",
+    "priceAsc": "Precio: de menor a mayor",
+    "priceDesc": "Precio: de mayor a menor",
+    "section": "Sección"
+  },
+  "empty": {
+    "noListings": "No hay anuncios en la sección {{section}}.",
+    "clearFilter": "Quitar el filtro"
+  },
+  "row": {
+    "location": "Sección {{section}}, Fila {{row}}, {{seatRange}}",
+    "pricePerSeat": "{{price}}/asiento",
+    "identity_one": "ID: {{id}} · {{count}} asiento",
+    "identity_other": "ID: {{id}} · {{count}} asientos",
+    "totalInclFees": "{{total}} en total, con comisiones"
+  }
+}

@@ -1,0 +1,44 @@
+{
+  "heading": "Frequently Asked Questions",
+  "subheading": "Everything you need to know about buying and selling Personal Seat Licenses in G&D Seats.",
+  "filterLabel": "Filter questions by category",
+  "categories": {
+    "basics": "Basics",
+    "buying": "Buying",
+    "selling": "Selling"
+  },
+  "items": {
+    "whatIsAPsl": {
+      "question": "What is a Personal Seat License (PSL)?",
+      "answer": "A Personal Seat License (PSL) is a paid license that gives the holder the right to buy season tickets for a specific seat in a stadium. PSLs are typically issued when a new stadium is built or renovated, and they can be transferred or resold."
+    },
+    "howItWorks": {
+      "question": "How does G&D Seats work?",
+      "answer": "G&D Seats is a platform that connects buyers and sellers of Personal Seat Licenses (PSLs) for NFL teams. We handle the entire transaction process and paperwork with the teams, while protecting both the buyer and seller."
+    },
+    "isItSafe": {
+      "question": "Is G&D Seats safe?",
+      "answer": "Yes, G&D Seats is a safe and secure platform. We protect both the buyer and seller through our escrow service. We verify the authenticity of the PSL, the seat location, and the identity of the parties involved. All transactions are fully refundable if for any reason the transaction does not go through."
+    },
+    "howToBuy": {
+      "question": "How do I buy a seat license?",
+      "answer": "Browse available listings by selecting your team, compare prices and seat locations, and make an offer directly through our platform. Then our team will guide you to complete the transaction in a fast and secure way."
+    },
+    "howToSell": {
+      "question": "How do I sell my seat license?",
+      "answer": "Email us at {{sellEmail}} and we will guide you through the process."
+    },
+    "worth": {
+      "question": "How much is my PSL worth?",
+      "answer": "PSL values vary based on the team, stadium, seat location, and current market demand. G&D Seats provides insights to help you find the right price for your license."
+    },
+    "transfer": {
+      "question": "Can I transfer my PSL to someone else?",
+      "answer": "Yes, PSLs are transferable. However, there is a specific transfer process that depends on the team and stadium policies. G&D Seats is here to make the process simple and transparent for you."
+    },
+    "seasonTickets": {
+      "question": "Do I still need to buy season tickets after purchasing a PSL?",
+      "answer": "Yes. A PSL gives you the right to purchase season tickets for that seat each year, but the season tickets themselves are a separate cost and you are required to buy them to keep your license. We can also help you buy your season tickets so you don't have to spend more money out of pocket, email us at {{ticketsEmail}}."
+    }
+  }
+}

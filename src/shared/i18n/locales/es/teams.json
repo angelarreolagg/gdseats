@@ -1,0 +1,53 @@
+{
+  "league": {
+    "groupLabel": "Liga",
+    "nfl": "Equipos NFL",
+    "mlb": "Equipos MLB",
+    "soon": "Pronto"
+  },
+  "search": {
+    "label": "Selecciona un equipo",
+    "placeholder": "Elige equipo",
+    "disabledPlaceholder": "MLB pronto",
+    "listboxLabel": "Equipos",
+    "noMatches": "Ningún equipo coincide con “{{query}}”"
+  },
+  "pagination": {
+    "previous": "Página anterior",
+    "next": "Página siguiente",
+    "position": "{{page}} de {{pageCount}}",
+    "goToPage": "Ir a la página {{page}}"
+  },
+  "grid": {
+    "mlbEmpty": "Los anuncios de MLB todavía no forman parte de esta demo."
+  },
+  "card": {
+    "listingCount_one": "{{formatted}} anuncio",
+    "listingCount_other": "{{formatted}} anuncios"
+  },
+  "trend": {
+    "label": {
+      "heating": "Calentándose",
+      "steady": "Estable",
+      "cooling": "Enfriándose"
+    },
+    "buyerImplication": {
+      "heating": "Costo de entrada al alza",
+      "steady": "Precios sin cambios",
+      "cooling": "Mercado del comprador"
+    },
+    "forecast": {
+      "heating_one": "Se proyecta que la demanda suba {{magnitude}} durante el próximo mes.",
+      "heating_other": "Se proyecta que la demanda suba {{magnitude}} durante los próximos {{count}} meses.",
+      "steady_one": "Se proyecta que la demanda se mantenga durante el próximo mes.",
+      "steady_other": "Se proyecta que la demanda se mantenga durante los próximos {{count}} meses.",
+      "cooling_one": "Se proyecta que la demanda baje {{magnitude}} durante el próximo mes.",
+      "cooling_other": "Se proyecta que la demanda baje {{magnitude}} durante los próximos {{count}} meses."
+    },
+    "implication": {
+      "heating": "En mercados al alza, el costo de entrada suele seguir el mismo camino.",
+      "steady": "Los precios aquí se han mantenido estables.",
+      "cooling": "Los mercados a la baja suelen relajarse, así que esperar podría mejorar tu precio de entrada."
+    }
+  }
+}

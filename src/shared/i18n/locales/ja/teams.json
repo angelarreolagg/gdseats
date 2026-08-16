@@ -1,0 +1,49 @@
+{
+  "league": {
+    "groupLabel": "リーグ",
+    "nfl": "NFL チーム",
+    "mlb": "MLB チーム",
+    "soon": "近日"
+  },
+  "search": {
+    "label": "チームを選択",
+    "placeholder": "チームを選択",
+    "disabledPlaceholder": "MLB は近日公開",
+    "listboxLabel": "チーム",
+    "noMatches": "「{{query}}」に一致するチームはありません"
+  },
+  "pagination": {
+    "previous": "前のページ",
+    "next": "次のページ",
+    "position": "{{page}} / {{pageCount}}",
+    "goToPage": "{{page}} ページ目へ"
+  },
+  "grid": {
+    "mlbEmpty": "MLB の出品はこのデモにはまだ含まれていません。"
+  },
+  "card": {
+    "listingCount_other": "{{formatted}} 件の出品"
+  },
+  "trend": {
+    "label": {
+      "heating": "上昇中",
+      "steady": "横ばい",
+      "cooling": "下降中"
+    },
+    "buyerImplication": {
+      "heating": "取得コストが上昇",
+      "steady": "価格は安定",
+      "cooling": "買い手市場"
+    },
+    "forecast": {
+      "heating_other": "今後 {{count}} か月で需要は {{magnitude}} 上昇する見込みです。",
+      "steady_other": "今後 {{count}} か月は需要が横ばいで推移する見込みです。",
+      "cooling_other": "今後 {{count}} か月で需要は {{magnitude}} 低下する見込みです。"
+    },
+    "implication": {
+      "heating": "需要が高まる市場では、取得コストもそれに続く傾向があります。",
+      "steady": "この市場の価格は安定して推移しています。",
+      "cooling": "需要が落ち着く市場は緩みやすく、待つことで購入価格が有利になる可能性があります。"
+    }
+  }
+}

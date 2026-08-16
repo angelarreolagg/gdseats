@@ -1,0 +1,39 @@
+{
+  "gdWay": {
+    "heading": "The <brand>G&D Seats</brand> way",
+    "subheading": "Find out why G&D Seats is the best platform to buy and sell personal seat licenses.",
+    "pillars": {
+      "secure": {
+        "title": "Secure",
+        "body": "Find verified licenses and sellers that you can trust, plus our escrow service protects both the buyer and seller."
+      },
+      "easy": {
+        "title": "Easy to use",
+        "body": "Our goal is to make the process as easy as possible. Don't worry about the paperwork and transfer rules, we handle it all for you."
+      },
+      "transparent": {
+        "title": "Transparent",
+        "body": "No hidden fees or surprises. 100% refundable if the transaction does not go through."
+      }
+    }
+  },
+  "concierge": {
+    "eyebrow": "AI voice concierge",
+    "heading": "Tell Scout what you need",
+    "body": "Meet Scout, our AI concierge. Share your preferred section, budget, and priorities, and our PSL team will find the best available options for you.",
+    "assurances": {
+      "quick": "Takes 1 minute",
+      "always": "Available 24/7",
+      "noSignup": "No signup required"
+    },
+    "available": "Scout is available now",
+    "callAria": "Call Scout at {{phone}}",
+    "human": "Prefer human touch? Call us at <phone>{{number}}</phone>"
+  },
+  "sell": {
+    "heading": "Ready to sell your PSL?",
+    "subheading": "We handle bulk sales as well",
+    "cta": "Start selling",
+    "email": "Or email us at <email>{{address}}</email>"
+  }
+}

@@ -1,0 +1,87 @@
+{
+  "detail": {
+    "dialogLabel": "Listing {{id}}, section {{section}}",
+    "backToSearch": "Back to search",
+    "share": "Share",
+    "location": "Location",
+    "priceHistory": "Price history",
+    "priceStats": "Price stats",
+    "makeAnOffer": "Make an offer"
+  },
+  "summary": {
+    "id": "ID",
+    "section": "Section",
+    "row": "Row",
+    "seats_one": "{{count}} seat",
+    "seats_other": "{{count}} seats",
+    "publicationDate": "Publication date",
+    "totalCost": "Total cost",
+    "totalInclFees": "{{amount}} incl. fees",
+    "priceBreakdown": "Price breakdown",
+    "licensePrice": "License price",
+    "transferFee": "Transfer fee",
+    "platformFee": "Platform fee",
+    "total": "Total"
+  },
+  "offer": {
+    "heading": "Make an offer",
+    "amountLabel": "Offer amount",
+    "transferFee": "Transfer fee",
+    "platformFee": "Platform fee",
+    "totalCost": "Total cost · Includes all fees",
+    "messageLabel": "Add a message",
+    "submit": "Submit offer for {{amount}}",
+    "close": "Close offer form"
+  },
+  "history": {
+    "caption": "Price history for this listing",
+    "date": "Date",
+    "totalPrice": "Total price*",
+    "pricePerSeat": "Price per seat*",
+    "change": "Change",
+    "fell": "down",
+    "rose": "up",
+    "footnote": "*Historic prices do not include transfer or platform fees"
+  },
+  "stats": {
+    "intro": "See how this listing's price per seat compares to other listings in the same section. Prices exclude transfer and platform fees.",
+    "chartLabel": "This listing is cheaper than {{cheaperThan}} of {{peers}} other listings in section {{section}}",
+    "onlyListing": "Only listing in section {{section}}.",
+    "comparison": "Cheaper than <rank>{{cheaperThan}} of {{peers}}</rank> other listings in section {{section}} · section average <average>{{average}}</average>/seat"
+  },
+  "map": {
+    "readOnlyLabel": "Seat map, section {{section}} highlighted",
+    "readOnlyLabelUnselected": "Seat map, section not selected highlighted",
+    "interactiveLabel": "Stadium seat map — select a section to filter listings",
+    "sectionListings_one": "Section {{section}}, {{count}} listing",
+    "sectionListings_other": "Section {{section}}, {{count}} listings",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "resetView": "Reset view"
+  },
+  "tags": {
+    "featured": "Featured",
+    "thisWeek": "This week",
+    "parking": "Parking",
+    "aisle": "Aisle",
+    "covered": "Covered",
+    "accessible": "Accessible",
+    "financing": "Financing",
+    "priceDrop": "{{percent}}% off"
+  },
+  "tagTooltips": {
+    "featured": "Promoted by the seller",
+    "thisWeek": "Listed within the last 7 days",
+    "parking": "Parking pass included",
+    "aisle": "Aisle seat",
+    "covered": "Covered from the weather",
+    "accessible": "Wheelchair accessible",
+    "financing": "Financing options available",
+    "priceDrop": "Asking price has come down"
+  },
+  "rings": {
+    "lower": "Lower",
+    "club": "Club",
+    "upper": "Upper"
+  }
+}
