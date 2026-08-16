@@ -45,19 +45,36 @@ export function AppHeader({ onHome }: AppHeaderProps) {
   return (
     <header className="dark sticky top-0 z-30 border-b border-border-hairline bg-page/90 backdrop-blur">
       {/*
-       * Same container as every other band in the shell — `mx-auto max-w-7xl`
-       * with `px-5 sm:px-8`, matching `AppFooter` and `TeamsHero`. The bar used
-       * to be full-bleed on its own `px-4 sm:px-6`, which read as cramped against
-       * the screen edge on a phone and, on a wide window, drifted out of line
-       * with the content below it: the page settles into a centred 80rem column
-       * and the header did not, so the logo and the controls hugged the viewport
-       * while everything under them stopped short.
+       * FULL-BLEED, and the one band in the shell that is. Every other — the
+       * hero, the landing sections, the footer — settles into a centred
+       * `max-w-7xl` column; this bar spans the viewport so the brand sits against
+       * the left edge and the controls against the right.
+       *
+       * That is a deliberate trade, not an oversight. The header held the shared
+       * container for a while, and on a wide window it looked like a gap rather
+       * than a bar: at 1920px an 80rem column leaves ~320px of dead space at each
+       * end, so the logo floated a third of the way in and the two ends of the row
+       * had nothing to push against. A navigation bar reads as the frame of the
+       * page, which means it belongs to the window, not to the text column.
+       *
+       * The cost, worth knowing before "fixing" it: the wordmark no longer lines
+       * up vertically with the hero headline or the footer's first column. That is
+       * the normal arrangement for a full-bleed bar over centred content, and the
+       * reference site does the same.
+       *
+       * **Padding is unchanged, and that is what keeps phones identical.** Below
+       * 80rem the old `max-w-7xl` never constrained anything, so mobile rendered
+       * full-bleed already; keeping `px-7 sm:px-8` means this change is invisible
+       * there and applies only where the column used to bite. The earlier
+       * full-bleed attempt failed because it *also* dropped to `px-4 sm:px-6`,
+       * which read as cramped against the screen edge — that was the padding's
+       * fault, not the width's.
        *
        * `justify-between` states the two-end layout outright. It replaced an
        * `ml-auto` on the control group, which achieved the same thing as a side
        * effect of a margin and left the row's intent readable only from a child.
        */}
-      <div className="mx-auto flex max-w-7xl items-center justify-between gap-3 px-7 py-2.5 sm:gap-6 sm:px-8 sm:py-3">
+      <div className="flex items-center justify-between gap-3 px-7 py-2.5 sm:gap-6 sm:px-8 sm:py-3">
         <Tooltip content="Gridiron &amp; Diamond Seats" side="bottom">
           <button
             type="button"

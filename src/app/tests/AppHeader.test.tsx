@@ -101,6 +101,26 @@ describe('AppHeader', () => {
   })
 
   /**
+   * Validates: the bar spans the viewport instead of sitting in the shell's
+   * centred column.
+   * Why it matters: every other band here settles into `max-w-7xl`, so restoring
+   * that container on the header is the obvious "consistency" edit — and at 1920px
+   * it leaves ~320px of dead space at each end, floating the logo a third of the
+   * way in and giving `justify-between` nothing to push against. The bar is the
+   * frame of the page, so it belongs to the window rather than the text column.
+   * Below 80rem the container never bit, which is why phones are unaffected either
+   * way and nothing here would catch the regression by eye.
+   */
+  it('spans the viewport rather than the shell column', () => {
+    const { container } = render(<AppHeader onHome={vi.fn()} />)
+
+    const row = container.querySelector('header > div')
+    expect(row).not.toHaveClass('max-w-7xl')
+    // The padding is what keeps the phone rendering identical — see the header.
+    expect(row).toHaveClass('px-7')
+  })
+
+  /**
    * Validates: the demo marker stays on one line, and the brand is what gives way
    * when the bar runs out of room.
    * Why it matters: on a phone "Demo version" was breaking over two lines inside a
