@@ -26,6 +26,9 @@ export const CONTACT_EMAIL_HREF = 'mailto:help@gdseats.com'
 export const SELL_EMAIL = 'sell@gdseats.com'
 export const SELL_EMAIL_HREF = 'mailto:sell@gdseats.com'
 
+/** Season-ticket help, quoted in the FAQ. Third inbox, same reasoning as above. */
+export const TICKETS_EMAIL = 'tickets@gdseats.com'
+
 /**
  * The concierge's own line, deliberately NOT the number above.
  *

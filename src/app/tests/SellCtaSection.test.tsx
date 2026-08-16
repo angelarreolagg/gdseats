@@ -1,7 +1,7 @@
 import userEvent from '@testing-library/user-event'
 import { render, screen } from '@/test/utils'
 import { describe, expect, it } from 'vitest'
-import { CONTACT_EMAIL, CONTACT_EMAIL_HREF } from '@/shared/config/contact'
+import { SELL_EMAIL, SELL_EMAIL_HREF } from '@/shared/config/contact'
 import { SellCtaSection } from '../components/landing/SellCtaSection'
 
 describe('SellCtaSection', () => {
@@ -24,33 +24,36 @@ describe('SellCtaSection', () => {
   })
 
   /**
-   * Validates: the email fallback is a genuine `mailto:` anchor.
+   * Validates: the email fallback is a genuine `mailto:` anchor, pointed at the
+   * sell-side address rather than general support.
    * Why it matters: with the CTA deliberately inert, this is the only control in
    * the band that actually does something — `mailto:` needs no backend. Demoting
-   * it to a button alongside the others would leave a seller with no way to make
-   * contact at all.
+   * it to a button would leave a seller with no way to make contact at all, and
+   * pointing it at the support inbox is how a "we handle bulk sales" promise turns
+   * into a week of silence.
    */
-  it('keeps the email a working mailto: link', () => {
+  it('keeps the email a working mailto: link to the sell inbox', () => {
     render(<SellCtaSection />)
 
-    expect(screen.getByRole('link', { name: CONTACT_EMAIL })).toHaveAttribute(
+    expect(screen.getByRole('link', { name: SELL_EMAIL })).toHaveAttribute(
       'href',
-      CONTACT_EMAIL_HREF,
+      SELL_EMAIL_HREF,
     )
   })
 
   /**
-   * Validates: the band pins the dark palette regardless of the active theme.
-   * Why it matters: this is one of three surfaces in the app that opts out of the
-   * theme, and the class is the entire mechanism — the palette is nothing but
-   * custom properties scoped to `.dark`, so removing it does not merely lighten
-   * the band, it re-resolves every token inside and leaves near-white text on a
-   * near-white ground. It looks like a stray class during a cleanup, which is
-   * exactly why it is pinned.
+   * Validates: the band follows the active theme instead of pinning a palette.
+   * Why it matters: it shipped carrying the `dark` class, and in light mode that
+   * rendered a near-black slab dropped into a near-white document — read as a
+   * rendering fault rather than as emphasis. The two surfaces that legitimately
+   * pin dark have reasons this one lacks: `AppHeader`'s bright-green mark would
+   * be swallowed by a light bar, and `TeamsHero`'s type sits on dark footage.
+   * Re-adding the class here is a one-word change that looks harmless and breaks
+   * light mode outright, so it is worth a test of its own.
    */
-  it('holds the dark palette in both themes', () => {
+  it('follows the theme rather than pinning a palette', () => {
     const { container } = render(<SellCtaSection />)
 
-    expect(container.querySelector('section')).toHaveClass('dark')
+    expect(container.querySelector('section')).not.toHaveClass('dark')
   })
 })

@@ -33,6 +33,17 @@
   --psl-wordmark-lead: #d3d7db;
   --psl-accent-ink: #4f7d00; /*  4.92 — text, thin lines */
   --psl-accent-mark: #5c8f00; /*  3.90 — chart marks */
+  /*
+   * The travelling highlight in ShinyText, and the ONE token whose light and
+   * dark values move in opposite directions.
+   *
+   * A shine normally means "lighter", and in dark that is what this is. In light
+   * it cannot be: the base is accent-ink at 4.92, and any lighter step lands on
+   * the brand green's 1.33 — the heading would drop below readable every time
+   * the sweep crossed a glyph. So light mode shines DARKER, to 9.13, which reads
+   * as the same sheen and never dips under the base.
+   */
+  --psl-accent-shine: #2e4a00; /*  9.13 — darker sweep, see above */
 
   --psl-good: #4f7d00; /*  4.92 */
   --psl-fair: #b26a00; /*  4.24 */
@@ -83,6 +94,7 @@
   --psl-wordmark-lead: #d3d7db; /* same in both modes — see the light block */
   --psl-accent-ink: #a0f700;
   --psl-accent-mark: #a0f700;
+  --psl-accent-shine: #ffffff; /* 19.03 — lighter sweep; see the light block */
 
   --psl-good: #a0f700; /* 13.48 */
   --psl-fair: #fab219; /*  9.77 */

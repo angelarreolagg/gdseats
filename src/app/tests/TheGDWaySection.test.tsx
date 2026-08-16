@@ -3,6 +3,23 @@ import { describe, expect, it } from 'vitest'
 import { TheGDWaySection } from '../components/landing/TheGDWaySection'
 
 describe('TheGDWaySection', () => {
+  /**
+   * Validates: the heading announces as one sentence, brand words included.
+   * Why it matters: "G&D Seats" is rendered by `ShinyText`, which wraps it in its
+   * own `inline-block` span and paints it with a clipped gradient. That is a
+   * colouring technique, not a picture — so unlike the hero's `StrokeText` it must
+   * need no `aria-label` and must not fragment the name. If this section's only
+   * heading ever announced as "The way", the brand would have vanished from the
+   * page's outline while looking perfect on screen.
+   */
+  it('announces the heading as one sentence', () => {
+    render(<TheGDWaySection />)
+
+    expect(
+      screen.getByRole('heading', { level: 2, name: 'The G&D Seats way' }),
+    ).toBeInTheDocument()
+  })
+
   it('states all three pillars', () => {
     render(<TheGDWaySection />)
 

@@ -71,8 +71,8 @@ describe('ConciergeSection', () => {
   /**
    * Validates: the equaliser is hidden from assistive technology.
    * Why it matters: it animates forever and encodes nothing — "Scout is available
-   * now" is already stated in text beside it. Exposed, it would be an unlabelled
-   * node in the middle of the card's reading order for no gain.
+   * now" is already stated in text beside it. Exposed, it would be nine unlabelled
+   * nodes in the middle of the card's reading order for no gain.
    */
   it('hides the voice equaliser from assistive technology', () => {
     render(<ConciergeSection />)
