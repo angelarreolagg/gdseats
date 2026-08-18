@@ -10,5 +10,10 @@
   "demo": {
     "notAvailable": "Indisponível — isto é uma demonstração.",
     "offerInvitation": "Isto é uma demonstração — mas <strong>podemos torná-la real</strong>."
+  },
+  "notFound": {
+    "heading": "Time não encontrado",
+    "body": "Não encontramos esse time. Ele pode ter sido removido, ou o link está desatualizado.",
+    "cta": "Voltar para os times"
   }
 }

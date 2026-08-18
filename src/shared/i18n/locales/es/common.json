@@ -10,5 +10,10 @@
   "demo": {
     "notAvailable": "No disponible — esto es una demo.",
     "offerInvitation": "Esto es una demo — pero <strong>podemos hacerlo realidad</strong>."
+  },
+  "notFound": {
+    "heading": "Equipo no encontrado",
+    "body": "No pudimos encontrar ese equipo. Puede que se haya eliminado o que el enlace esté desactualizado.",
+    "cta": "Volver a equipos"
   }
 }
