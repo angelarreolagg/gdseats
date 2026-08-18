@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { formatCount } from '@/shared/utils/formatters'
@@ -18,11 +18,17 @@ export function TeamCard({ team, onSelect }: TeamCardProps) {
   const { t } = useTranslation('teams')
   const trend = useMemo(() => getMarketTrend(team), [team])
   const listingCount = getListingCountForTeam(team)
+  // Drives the helmet tilt and the logo's step-back together. `onHoverStart`/
+  // `onHoverEnd` are Motion's own gesture handlers — mouse-only like the
+  // existing `whileHover` lift, so a tap on touch never fires this either.
+  const [isHovered, setIsHovered] = useState(false)
 
   return (
     <motion.button
       type="button"
       onClick={() => onSelect(team.id)}
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
       whileHover={{ y: -3 }}
       whileTap={{ scale: 0.99 }}
       transition={{ type: 'spring', stiffness: 380, damping: 28 }}
@@ -35,10 +41,19 @@ export function TeamCard({ team, onSelect }: TeamCardProps) {
           plate over a name that wraps to two lines pushes the second row of the
           grid out of the fold. */}
       <span className="relative block h-24 sm:h-28">
-        <TeamBanner team={team} className="h-full w-full" />
-        <span className="absolute inset-0 flex items-center justify-center">
+        <TeamBanner team={team} isHovered={isHovered} className="h-full w-full" />
+        {/* Steps back on hover so the tilting helmet behind it reads as the
+            thing that moved, rather than the logo simply covering it. Tilts
+            the same direction and by the same degree as the helmet's own
+            `rotate` in `TeamBanner`, so the two read as one coordinated
+            gesture rather than two unrelated hover effects. */}
+        <motion.span
+          className="absolute inset-0 flex items-center justify-center"
+          animate={{ y: isHovered ? -6 : 0, scale: isHovered ? 0.8 : 1, rotate: isHovered ? -8 : 0 }}
+          transition={{ type: 'spring', stiffness: 300, damping: 22 }}
+        >
           <TeamLogo team={team} size={72} className="h-14 w-14 drop-shadow-lg sm:h-16 sm:w-16" />
-        </span>
+        </motion.span>
       </span>
 
       <span className="flex flex-1 flex-col gap-1 p-3 sm:p-3.5">
