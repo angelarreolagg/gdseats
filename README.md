@@ -14,7 +14,7 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-6-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)](https://vite.dev)
 [![Tailwind](https://img.shields.io/badge/Tailwind-4-38bdf8?logo=tailwindcss&logoColor=white)](https://tailwindcss.com)
-[![Vitest](https://img.shields.io/badge/Vitest-177%20tests-6da944?logo=vitest&logoColor=white)](https://vitest.dev)
+[![Vitest](https://img.shields.io/badge/Vitest-307%20tests-6da944?logo=vitest&logoColor=white)](https://vitest.dev)
 
 **English** · [Español](#espanol)
 
@@ -161,7 +161,7 @@ pnpm dev
 |---|---|
 | `pnpm dev` | Vite dev server |
 | `pnpm build` | Typecheck (`tsc -b`) then build |
-| `pnpm test` | Vitest, 177 tests, ~4s |
+| `pnpm test` | Vitest, 307 tests, ~7s |
 | `pnpm test:watch` | Vitest in watch mode |
 | `pnpm typecheck` | `tsc -b` alone |
 | `pnpm lint` | ESLint |
@@ -225,7 +225,7 @@ The same principle covers the team marks. Real franchise logos come from ESPN, b
 
 ## Testing
 
-177 tests across 26 files, running in about 4 seconds.
+307 tests across 38 files, running in about 7 seconds.
 
 Each test carries a comment stating what it validates **and why it matters commercially** — not what the code does, but what breaks for a real buyer or seller if it stops being true.
 
@@ -264,7 +264,7 @@ It exists because a testing standard that lives in a document gets read once. Th
 
 ## Stack
 
-React 19 · TypeScript 6 · Vite 8 · Tailwind CSS 4 · Motion · Vitest + React Testing Library · Radix Tooltip · lucide-react · GSAP (one component) · react-toastify
+React 19 · TypeScript 6 · Vite 8 · Tailwind CSS 4 · Motion · Vitest + React Testing Library · Radix Tooltip · lucide-react · GSAP (one component) · react-toastify · i18next + react-i18next · country-flag-icons
 
 No chart library — the price statistics chart is inline SVG. No router. No state manager.
 
@@ -434,7 +434,7 @@ pnpm dev
 |---|---|
 | `pnpm dev` | Servidor de desarrollo de Vite |
 | `pnpm build` | Typecheck (`tsc -b`) y luego build |
-| `pnpm test` | Vitest, 177 tests, ~4s |
+| `pnpm test` | Vitest, 307 tests, ~7s |
 | `pnpm test:watch` | Vitest en modo watch |
 | `pnpm typecheck` | Solo `tsc -b` |
 | `pnpm lint` | ESLint |
@@ -496,7 +496,7 @@ El mismo principio cubre los escudos. Los logos reales vienen de ESPN, pero la a
 
 ## Testing
 
-177 tests en 26 archivos, corriendo en unos 4 segundos.
+307 tests en 38 archivos, corriendo en unos 7 segundos.
 
 Cada test lleva un comentario que dice qué valida **y por qué importa comercialmente** — no qué hace el código, sino qué se rompe para un comprador o un vendedor real si deja de ser cierto.
 
@@ -535,7 +535,7 @@ Existe porque un estándar de testing que vive en un documento se lee una vez. E
 
 ## Stack
 
-React 19 · TypeScript 6 · Vite 8 · Tailwind CSS 4 · Motion · Vitest + React Testing Library · Radix Tooltip · lucide-react · GSAP (un solo componente) · react-toastify
+React 19 · TypeScript 6 · Vite 8 · Tailwind CSS 4 · Motion · Vitest + React Testing Library · Radix Tooltip · lucide-react · GSAP (un solo componente) · react-toastify · i18next + react-i18next · country-flag-icons
 
 Sin librería de gráficas — la gráfica de estadísticas de precio es SVG inline. Sin router. Sin gestor de estado.
 
