@@ -117,6 +117,24 @@ describe('LanguageSwitch', () => {
     expect(trigger()).toHaveFocus()
   })
 
+  /**
+   * Validates: every option renders its flag alongside the endonym.
+   * Why it matters: four rows that only differ by the label itself are slower
+   * to scan than four with a distinct glyph, especially in a script the
+   * reader doesn't associate with a two-letter code at a glance.
+   */
+  it('renders a flag next to every option', async () => {
+    render(<LanguageSwitch />)
+    await userEvent.click(trigger())
+
+    for (const locale of LOCALES) {
+      const option = screen.getByRole('option', { name: new RegExp(locale.endonym) })
+      // Decorative and aria-hidden, so there is no accessible query to reach it by —
+      // the same exception the lucide icon in AIInsightPanel.test.tsx relies on.
+      expect(option.querySelector('svg')).toBeInTheDocument()
+    }
+  })
+
   it('marks the active locale in the list', async () => {
     render(<LanguageSwitch />)
     await userEvent.click(trigger())

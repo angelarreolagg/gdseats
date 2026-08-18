@@ -1,3 +1,4 @@
+import { motion } from 'motion/react'
 import type { Team } from '../types/team.types'
 import { TeamHelmet } from './TeamHelmet'
 
@@ -14,6 +15,8 @@ const STADIUM_PLATE = '/teams-bg.jpg'
 interface TeamBannerProps {
   team: Team
   className?: string
+  /** Drives the helmet's hover wiggle. */
+  isHovered?: boolean
 }
 
 /**
@@ -32,7 +35,7 @@ interface TeamBannerProps {
  * does) — a mid grey, so `multiply` resolves to roughly the same tint either way
  * instead of flashing a black box.
  */
-export function TeamBanner({ team, className = '' }: TeamBannerProps) {
+export function TeamBanner({ team, className = '', isHovered = false }: TeamBannerProps) {
   return (
     <span className={`relative isolate block overflow-hidden bg-[#8b9095] ${className}`}>
       <img
@@ -61,6 +64,14 @@ export function TeamBanner({ team, className = '' }: TeamBannerProps) {
        * Above the tints and outside them: the helmet is the franchise's mark, not
        * part of the plate, so blending it would stain it with its own colours.
        * The real logo lands on top of this — same stack as before the stadium.
+       *
+       * A plain 2D wiggle, deliberately: two earlier attempts at a 3D turn (a
+       * `rotate` faked in SVG, then a real `rotateY` with perspective) both
+       * looked wrong on a flat, solid-colour silhouette — there's no shading to
+       * sell depth with, so a "turn" just warps the shape. A small `rotate` +
+       * `scale` bounce plays to what a flat shape actually does well instead of
+       * fighting it. `originX`/`originY: 0.5` rotate around this group's own
+       * measured centre rather than the frame's, so it tilts in place.
        */}
       <svg
         viewBox="0 0 320 140"
@@ -68,7 +79,13 @@ export function TeamBanner({ team, className = '' }: TeamBannerProps) {
         aria-hidden="true"
         className="absolute inset-0 h-full w-full"
       >
-        <TeamHelmet primary={team.primary} secondary={team.secondary} />
+        <motion.g
+          animate={{ rotate: isHovered ? -8 : 0, scale: isHovered ? 1.02 : 1 }}
+          transition={{ type: 'spring', stiffness: 320, damping: 10 }}
+          style={{ originX: 0.5, originY: 0.5 }}
+        >
+          <TeamHelmet primary={team.primary} secondary={team.secondary} />
+        </motion.g>
       </svg>
     </span>
   )

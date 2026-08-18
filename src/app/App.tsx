@@ -10,6 +10,7 @@ import { useDocumentMeta } from '@/shared/hooks/useDocumentMeta'
 import { AppFooter } from './components/AppFooter'
 import { AppHeader } from './components/AppHeader'
 import { LandingSections } from './components/landing/LandingSections'
+import { NotFoundScreen } from './components/NotFoundScreen'
 import { getDocumentMeta } from './documentMeta'
 import { useAppNavigation } from './useAppNavigation'
 
@@ -19,6 +20,8 @@ export function App() {
   useTranslation('meta')
   const nav = useAppNavigation()
   const team = nav.screen.name === 'search' ? getTeamById(nav.screen.teamId) : undefined
+  // A stale or hand-typed team id: `search` without a resolvable team.
+  const teamNotFound = nav.screen.name === 'search' && !team
 
   // Generated at the shell so the list and the overlay resolve the same set.
   const listings = useMemo(() => (team ? generateListingsForTeam(team) : []), [team])
@@ -38,7 +41,9 @@ export function App() {
     <div className="min-h-dvh bg-page">
       <AppHeader onHome={nav.backToTeams} />
 
-      {nav.screen.name === 'teams' || !team ? (
+      {teamNotFound ? (
+        <NotFoundScreen onBackToTeams={nav.backToTeams} />
+      ) : nav.screen.name === 'teams' || !team ? (
         // Inside this branch, not beside the pair: an FAQ under a franchise's listings
         // would push the pagination off the page.
         <>

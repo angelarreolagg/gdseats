@@ -1,8 +1,9 @@
 import { useEffect, useId, useRef, useState } from 'react'
-import { Check, Globe } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { useLanguage } from '../hooks/useLanguage'
 import { LOCALES, type Locale } from '../i18n/locales'
+import { LOCALE_FLAG } from './localeFlagPresentation'
 
 interface LanguageSwitchProps {
   className?: string
@@ -13,8 +14,10 @@ interface LanguageSwitchProps {
  * only Radix package here is the tooltip.
  *
  * Declares no height: `AppHeader`'s row owns it, as it does for every control
- * there. Shows the two-letter code, never the endonym — the full names would
- * spend the slack the wordmark's `truncate` needs at 350px.
+ * there. The trigger shows a flag plus the two-letter code, never the endonym —
+ * the full names would spend the slack the wordmark's `truncate` needs at 350px.
+ * The flag mirrors `ThemeToggle`'s pattern of the glyph reflecting current state,
+ * rather than a generic globe that says nothing about which language is active.
  *
  * The panel renders inside the header's `dark` subtree, so it resolves dark
  * tokens on a light page. That is intentional, and it uses the same tokens as
@@ -36,6 +39,7 @@ export function LanguageSwitch({ className = '' }: LanguageSwitchProps) {
 
   const active = LOCALES[activeIndex]
   const current = LOCALES.find((entry) => entry.code === locale) ?? LOCALES[0]
+  const CurrentFlag = LOCALE_FLAG[current.code]
 
   // A document listener rather than `onBlur`: focus moves into the list on
   // keyboard use, and a blur handler would close it the moment it was navigated.
@@ -98,7 +102,10 @@ export function LanguageSwitch({ className = '' }: LanguageSwitchProps) {
         }}
         className="inline-flex h-full shrink-0 items-center gap-1.5 rounded-xl border border-border-hairline bg-surface px-2.5 text-xs font-semibold whitespace-nowrap text-ink transition-colors hover:bg-track sm:text-sm"
       >
-        <Globe aria-hidden="true" className="h-4 w-4 shrink-0" />
+        <CurrentFlag
+          aria-hidden="true"
+          className="h-3 w-4 shrink-0 rounded-[2px] border border-border-hairline/60"
+        />
         {current.short}
       </button>
 
@@ -109,31 +116,39 @@ export function LanguageSwitch({ className = '' }: LanguageSwitchProps) {
           aria-label={t('language.listLabel')}
           className="absolute right-0 z-40 mt-2 min-w-40 rounded-xl border border-border-hairline bg-surface py-1 shadow-lg"
         >
-          {LOCALES.map((entry, index) => (
-            <li
-              key={entry.code}
-              role="option"
-              aria-selected={entry.code === locale}
-              /* The classic hand-built-listbox bug: the panel closes on an outside
-                 pointerdown and a click fires pointerdown first. Suppressing the default
-                 keeps focus off the `<li>` so the trigger still holds it when `choose` runs. */
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={() => choose(entry.code)}
-              onMouseEnter={() => setActiveIndex(index)}
-              className={`flex cursor-pointer items-center gap-2 px-3 py-2 text-sm ${
-                index === activeIndex ? 'bg-track text-ink' : 'text-ink'
-              }`}
-            >
-              {/* The check holds its slot either way, so the endonyms keep one left edge. */}
-              <span className="flex h-4 w-4 shrink-0 items-center justify-center">
-                {entry.code === locale ? (
-                  <Check aria-hidden="true" className="h-4 w-4 text-accent-ink" />
-                ) : null}
-              </span>
+          {LOCALES.map((entry, index) => {
+            const Flag = LOCALE_FLAG[entry.code]
+            return (
+              <li
+                key={entry.code}
+                role="option"
+                aria-selected={entry.code === locale}
+                /* The classic hand-built-listbox bug: the panel closes on an outside
+                   pointerdown and a click fires pointerdown first. Suppressing the default
+                   keeps focus off the `<li>` so the trigger still holds it when `choose` runs. */
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => choose(entry.code)}
+                onMouseEnter={() => setActiveIndex(index)}
+                className={`flex cursor-pointer items-center gap-2 px-3 py-2 text-sm ${
+                  index === activeIndex ? 'bg-track text-ink' : 'text-ink'
+                }`}
+              >
+                {/* The check holds its slot either way, so the flags keep one left edge. */}
+                <span className="flex h-4 w-4 shrink-0 items-center justify-center">
+                  {entry.code === locale ? (
+                    <Check aria-hidden="true" className="h-4 w-4 text-accent-ink" />
+                  ) : null}
+                </span>
 
-              <span className="font-medium">{entry.endonym}</span>
-            </li>
-          ))}
+                <Flag
+                  aria-hidden="true"
+                  className="h-3 w-4 shrink-0 rounded-[2px] border border-border-hairline/60"
+                />
+
+                <span className="font-medium">{entry.endonym}</span>
+              </li>
+            )
+          })}
         </ul>
       ) : null}
     </div>
